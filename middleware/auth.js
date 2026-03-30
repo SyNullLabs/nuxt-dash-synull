@@ -1,12 +1,12 @@
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware((to) => {
   // 检查是否在客户端环境
   if (process.client) {
-    const token = localStorage.getItem('jwt')
+    const token = localStorage.getItem("jwt");
     if (!token) {
       return navigateTo({
-        path: '/auth/login',
-        query: { redirect_uri: to.fullPath }
-      })
+        path: "/auth/login",
+        query: { redirect_uri: to.fullPath },
+      });
     }
   }
-})
+});

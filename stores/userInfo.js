@@ -1,49 +1,67 @@
 import { defineStore } from "pinia";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { ref } from 'vue';
+import { useAlertStore } from "~/stores/alert";
 
 export const useUserInfoStore = defineStore("userInfo", () => {
-    const userInfo = ref(null);
-    const loading = ref(true);
+  const userInfo = ref(null);
+  const loading = ref(false);
+  const router = useRouter();
+  const alertStore = useAlertStore();
+  const api = useApiClient();
 
-    const fetchUserInfo = async () => {
-        const router = useRouter();
-        const token = localStorage.getItem("jwt");
-        loading.value = true;
+  const redirectToLogin = () => {
+    clearAuthToken();
+    userInfo.value = null;
+    router.push({
+      path: "/auth/login",
+      query: {
+        redirect_uri: router.currentRoute.value.fullPath,
+      },
+    });
+  };
 
-        try {
-            const { data } = await useFetch("/api/dash/UserInfo", {
-                headers: {
-                    Authorization: token,
-                },
-                lazy: true,
-                server: false,
-            });
+  const fetchUserInfo = async () => {
+    const token = getAuthToken();
 
-            if (!data.value || !data.value.success) {
-                throw new Error(data.value?.message || t("invalidResponseData"));
-            }
+    if (!token) {
+      redirectToLogin();
+      return null;
+    }
 
-            if (data.value.success === false) {
-                const redirectToLogin = (router) => {
-                    router.push({
-                        path: "/auth/login",
-                        query: { redirect_uri: router.currentRoute.value.fullPath },
-                    });
-                };
-            }
+    loading.value = true;
 
-            userInfo.value = {
-                ...data.value.data
-            };
+    try {
+      const response = await api("/dash/user-info", {
+        method: "GET",
+      });
 
-        } catch (error) {
-            console.error(t("fetchUserInfoFailed"), error);
-            redirectToLogin(router);
-        } finally {
-            loading.value = false;
-        }
-    };
+      if (!response?.success) {
+        alertStore.showAlert(response?.message || "获取用户信息失败", "error");
+        redirectToLogin();
+        return null;
+      }
 
-    return { userInfo, loading, fetchUserInfo };
+      userInfo.value = response.data;
+      return response.data;
+    } catch (error) {
+      console.error("获取用户信息时发生错误", error);
+      alertStore.showAlert("获取用户信息失败，请稍后再试", "error");
+      redirectToLogin();
+      return null;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const clearUserInfo = () => {
+    userInfo.value = null;
+  };
+
+  return {
+    userInfo,
+    loading,
+    fetchUserInfo,
+    clearUserInfo,
+  };
 });

@@ -1,5 +1,5 @@
-import Vue from 'vue'
-import { Bar, Line, Doughnut, Pie } from 'vue-chartjs'
+import Vue from "vue";
+import { Bar, Line, Doughnut, Pie } from "vue-chartjs";
 import {
   Chart as ChartJS,
   Title,
@@ -10,8 +10,8 @@ import {
   LinearScale,
   LineElement,
   PointElement,
-  ArcElement
-} from 'chart.js'
+  ArcElement,
+} from "chart.js";
 
 // 注册必要的Chart.js组件
 ChartJS.register(
@@ -24,56 +24,56 @@ ChartJS.register(
   LinearScale,
   LineElement,
   ArcElement
-)
+);
 
 // 添加基础图表混入
 const BaseChart = {
   props: {
     chartData: {
       type: Object,
-      required: true
+      required: true,
     },
     options: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   watch: {
     chartData: {
       handler(newVal) {
-        this.renderChart(newVal, this.options)
+        this.renderChart(newVal, this.options);
       },
-      deep: true
+      deep: true,
     },
     options: {
       handler(newVal) {
-        this.renderChart(this.chartData, newVal)
+        this.renderChart(this.chartData, newVal);
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   mounted() {
-    this.renderChart(this.chartData, this.options)
-  }
-}
+    this.renderChart(this.chartData, this.options);
+  },
+};
 
 // 全局注册图表组件
-Vue.component('line-chart', {
+Vue.component("line-chart", {
   extends: Line,
   mixins: [BaseChart],
-})
+});
 
-Vue.component('doughnut-chart', {
+Vue.component("doughnut-chart", {
   extends: Doughnut,
-  mixins: [BaseChart]
-})
+  mixins: [BaseChart],
+});
 
-Vue.component('bar-chart', {
+Vue.component("bar-chart", {
   extends: Bar,
-  mixins: [BaseChart]
-})
+  mixins: [BaseChart],
+});
 
-Vue.component('pie-chart', {
+Vue.component("pie-chart", {
   extends: Pie,
-  mixins: [BaseChart]
-})
+  mixins: [BaseChart],
+});

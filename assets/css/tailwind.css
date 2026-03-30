@@ -1,6 +1,22 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../../tailwind.config.js";
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --color-synull-100: rgba(177, 116, 209, 0.1);
+  --color-synull-200: rgba(177, 116, 209, 0.2);
+  --color-synull-300: rgba(177, 116, 209, 0.3);
+  --color-synull-400: rgba(177, 116, 209, 0.4);
+  --color-synull-500: rgba(177, 116, 209, 0.5);
+  --color-synull-600: rgba(177, 116, 209, 0.6);
+  --color-synull-700: rgba(177, 116, 209, 0.7);
+  --color-synull-800: rgba(177, 116, 209, 0.8);
+  --color-synull-900: rgba(177, 116, 209, 0.9);
+  --color-synull: #b074d1;
+  --color-synull-light: #d7b9e8;
+  --color-synull-light-2: #f3e5f5;
+  --color-synull-light-3: #fbf5ff;
+}
 
 .w-18 {
   width: 4.5rem;
@@ -43,18 +59,18 @@
 }
 
 :root {
-  --yunyoo-100: rgba(177, 116, 209, 0.1);
-  --yunyoo-200: rgba(177, 116, 209, 0.2);
-  --yunyoo-300: rgba(177, 116, 209, 0.3);
-  --yunyoo-400: rgba(177, 116, 209, 0.4);
-  --yunyoo-500: rgba(177, 116, 209, 0.5);
-  --yunyoo-600: rgba(177, 116, 209, 0.6);
-  --yunyoo-700: rgba(177, 116, 209, 0.7);
-  --yunyoo-800: rgba(177, 116, 209, 0.8);
-  --yunyoo-900: rgba(177, 116, 209, 0.9);
-  --yunyoo: #b074d1;
-  --yunyoo-light: #d7b9e8;
-  --yunyoo-light-2: #f3e5f5;
-  --yunyoo-light-3: #fbf5ff;
-  --p-inputtext-focus-border-color:var(--yunyoo-500);
+  --synull-100: rgba(177, 116, 209, 0.1);
+  --synull-200: rgba(177, 116, 209, 0.2);
+  --synull-300: rgba(177, 116, 209, 0.3);
+  --synull-400: rgba(177, 116, 209, 0.4);
+  --synull-500: rgba(177, 116, 209, 0.5);
+  --synull-600: rgba(177, 116, 209, 0.6);
+  --synull-700: rgba(177, 116, 209, 0.7);
+  --synull-800: rgba(177, 116, 209, 0.8);
+  --synull-900: rgba(177, 116, 209, 0.9);
+  --synull: #b074d1;
+  --synull-light: #d7b9e8;
+  --synull-light-2: #f3e5f5;
+  --synull-light-3: #fbf5ff;
+  --p-inputtext-focus-border-color: var(--synull-500);
 }

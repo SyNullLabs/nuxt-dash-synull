@@ -14,7 +14,6 @@
 - **路由中间件**：使用 `auth` 中间件进行路由保护。
 - **ESLint 配置**：在开发过程中禁用 ESLint 错误和警告。
 - **国际化**：支持中文和英文，默认语言为中文。
-- **Twemoji**：配置 Twemoji 的缓存时间。
 - **Turnstile**：集成 Cloudflare Turnstile 进行人机验证。
 - **运行时配置**：通过环境变量配置公共和私有的运行时变量。
 - **开发工具**：启用开发工具和调试模式。
@@ -28,7 +27,6 @@
 - `BASE_URL`：项目的基础 URL，默认为 `http://localhost:3000`。
 - `NUXT_SESSION_PASSWORD`：Nuxt 会话的密码，默认会自动生成。
 
-
 ## 安装与运行
 
 1. 克隆项目到本地：
@@ -40,31 +38,31 @@
 2. 进入项目目录：
 
    ```bash
-   cd nuxt-yunyoocenter
+   cd nuxt-dash-synull
    ```
 
 3. 安装依赖：
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 4. 运行开发服务器：
 
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 5. 构建项目：
 
    ```bash
-   npm run build
+   pnpm build
    ```
 
 6. 启动生产服务器：
 
    ```bash
-   npm run start
+   pnpm start
    ```
 
 ## 贡献

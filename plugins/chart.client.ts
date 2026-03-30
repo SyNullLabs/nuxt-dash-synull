@@ -1,4 +1,4 @@
-import { Chart } from 'chart.js/auto'
+import { Chart } from "chart.js/auto";
 import {
   CategoryScale,
   LinearScale,
@@ -7,9 +7,9 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
-} from 'chart.js'
-import { defineNuxtPlugin } from 'nuxt/app'
+  Filler,
+} from "chart.js";
+import { defineNuxtPlugin } from "nuxt/app";
 
 // 注册必要的组件
 Chart.register(
@@ -21,12 +21,12 @@ Chart.register(
   Tooltip,
   Legend,
   Filler
-)
+);
 
 export default defineNuxtPlugin(() => {
   return {
     provide: {
-      Chart
-    }
-  }
-})
+      Chart,
+    },
+  };
+});
