@@ -1,0 +1,16 @@
+{
+  "globals": {
+    "NDataTable": true,
+    "NPagination": true,
+    "NSelect": true,
+    "useAffStore": true,
+    "useAlertStore": true,
+    "useAuthStore": true,
+    "useDialog": true,
+    "useLoadingBar": true,
+    "useMessage": true,
+    "useNotification": true,
+    "useSidebarStore": true,
+    "useUserInfoStore": true
+  }
+}
