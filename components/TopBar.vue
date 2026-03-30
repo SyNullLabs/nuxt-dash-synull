@@ -262,13 +262,13 @@ const logout = () => {
 }
 
 .custom-radio:checked {
-  background-color: #b074d1; /* synull */
-  border-color: #b074d1; /* synull */
+  background-color: var(--synull);
+  border-color: var(--synull);
 }
 
 .custom-radio:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgb(177 116 209 / 50%); /* synull with opacity */
+  box-shadow: 0 0 0 2px var(--ui-color-primary-300);
 }
 
 /* 可以添加以下样式来确保模态框显示在顶部 */

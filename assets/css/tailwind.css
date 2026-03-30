@@ -3,19 +3,30 @@
 @import "@nuxt/ui";
 
 @theme {
-  --color-synull-100: rgba(177, 116, 209, 0.1);
-  --color-synull-200: rgba(177, 116, 209, 0.2);
-  --color-synull-300: rgba(177, 116, 209, 0.3);
-  --color-synull-400: rgba(177, 116, 209, 0.4);
-  --color-synull-500: rgba(177, 116, 209, 0.5);
-  --color-synull-600: rgba(177, 116, 209, 0.6);
-  --color-synull-700: rgba(177, 116, 209, 0.7);
-  --color-synull-800: rgba(177, 116, 209, 0.8);
-  --color-synull-900: rgba(177, 116, 209, 0.9);
-  --color-synull: #b074d1;
-  --color-synull-light: #d7b9e8;
-  --color-synull-light-2: #f3e5f5;
-  --color-synull-light-3: #fbf5ff;
+  --ui-color-primary-50: var(--color-purple-50, oklch(97.7% 0.014 308.299));
+  --ui-color-primary-100: var(--color-purple-100, oklch(94.6% 0.033 307.174));
+  --ui-color-primary-200: var(--color-purple-200, oklch(90.2% 0.063 306.703));
+  --ui-color-primary-300: var(--color-purple-300, oklch(82.7% 0.119 306.383));
+  --ui-color-primary-400: var(--color-purple-400, oklch(71.4% 0.203 305.504));
+  --ui-color-primary-500: var(--color-purple-500, oklch(62.7% 0.265 303.9));
+  --ui-color-primary-600: var(--color-purple-600, oklch(55.8% 0.288 302.321));
+  --ui-color-primary-700: var(--color-purple-700, oklch(49.6% 0.265 301.924));
+  --ui-color-primary-800: var(--color-purple-800, oklch(43.8% 0.218 303.724));
+  --ui-color-primary-900: var(--color-purple-900, oklch(38.1% 0.176 304.987));
+  --ui-color-primary-950: var(--color-purple-950, oklch(29.1% 0.149 302.717));
+  --color-synull-100: var(--ui-color-primary-100);
+  --color-synull-200: var(--ui-color-primary-200);
+  --color-synull-300: var(--ui-color-primary-300);
+  --color-synull-400: var(--ui-color-primary-400);
+  --color-synull-500: var(--ui-color-primary-500);
+  --color-synull-600: var(--ui-color-primary-600);
+  --color-synull-700: var(--ui-color-primary-700);
+  --color-synull-800: var(--ui-color-primary-800);
+  --color-synull-900: var(--ui-color-primary-900);
+  --color-synull: var(--ui-color-primary-600);
+  --color-synull-light: var(--ui-color-primary-100);
+  --color-synull-light-2: var(--ui-color-primary-50);
+  --color-synull-light-3: var(--ui-color-primary-50);
 }
 
 .w-18 {
@@ -59,18 +70,29 @@
 }
 
 :root {
-  --synull-100: rgba(177, 116, 209, 0.1);
-  --synull-200: rgba(177, 116, 209, 0.2);
-  --synull-300: rgba(177, 116, 209, 0.3);
-  --synull-400: rgba(177, 116, 209, 0.4);
-  --synull-500: rgba(177, 116, 209, 0.5);
-  --synull-600: rgba(177, 116, 209, 0.6);
-  --synull-700: rgba(177, 116, 209, 0.7);
-  --synull-800: rgba(177, 116, 209, 0.8);
-  --synull-900: rgba(177, 116, 209, 0.9);
-  --synull: #b074d1;
-  --synull-light: #d7b9e8;
-  --synull-light-2: #f3e5f5;
-  --synull-light-3: #fbf5ff;
-  --p-inputtext-focus-border-color: var(--synull-500);
+  --ui-color-primary-50: var(--color-purple-50, oklch(97.7% 0.014 308.299));
+  --ui-color-primary-100: var(--color-purple-100, oklch(94.6% 0.033 307.174));
+  --ui-color-primary-200: var(--color-purple-200, oklch(90.2% 0.063 306.703));
+  --ui-color-primary-300: var(--color-purple-300, oklch(82.7% 0.119 306.383));
+  --ui-color-primary-400: var(--color-purple-400, oklch(71.4% 0.203 305.504));
+  --ui-color-primary-500: var(--color-purple-500, oklch(62.7% 0.265 303.9));
+  --ui-color-primary-600: var(--color-purple-600, oklch(55.8% 0.288 302.321));
+  --ui-color-primary-700: var(--color-purple-700, oklch(49.6% 0.265 301.924));
+  --ui-color-primary-800: var(--color-purple-800, oklch(43.8% 0.218 303.724));
+  --ui-color-primary-900: var(--color-purple-900, oklch(38.1% 0.176 304.987));
+  --ui-color-primary-950: var(--color-purple-950, oklch(29.1% 0.149 302.717));
+  --synull-100: var(--ui-color-primary-100);
+  --synull-200: var(--ui-color-primary-200);
+  --synull-300: var(--ui-color-primary-300);
+  --synull-400: var(--ui-color-primary-400);
+  --synull-500: var(--ui-color-primary-500);
+  --synull-600: var(--ui-color-primary-600);
+  --synull-700: var(--ui-color-primary-700);
+  --synull-800: var(--ui-color-primary-800);
+  --synull-900: var(--ui-color-primary-900);
+  --synull: var(--ui-color-primary-600);
+  --synull-light: var(--ui-color-primary-100);
+  --synull-light-2: var(--ui-color-primary-50);
+  --synull-light-3: var(--ui-color-primary-50);
+  --p-inputtext-focus-border-color: var(--ui-color-primary-500);
 }
