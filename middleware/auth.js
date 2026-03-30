@@ -1,5 +1,14 @@
 export default defineNuxtRouteMiddleware((to) => {
-  // 检查是否在客户端环境
+  const publicAuthRoutes = new Set([
+    "/auth/login",
+    "/auth/register",
+    "/auth/reset",
+  ]);
+
+  if (publicAuthRoutes.has(to.path)) {
+    return;
+  }
+
   if (process.client) {
     const token = localStorage.getItem("jwt");
     if (!token) {

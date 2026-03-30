@@ -10,16 +10,16 @@
     "generate": "nuxt generate",
     "lint:js": "eslint .",
     "lint:style": "stylelint \"**/*.{css,scss,sass,html,vue}\" --ignore-path .gitignore",
-    "lint:prettier": "prettier --check . --ignore-path .gitignore",
-    "lint": "eslint . && stylelint \"**/*.{css,scss,sass,html,vue}\" --ignore-path .gitignore && prettier --check . --ignore-path .gitignore",
-    "lintfix": "prettier --write --list-different . --ignore-path .gitignore && eslint . --fix && stylelint \"**/*.{css,scss,sass,html,vue}\" --ignore-path .gitignore --fix",
+    "lint:prettier": "prettier --check . --ignore-path .prettierignore",
+    "lint": "eslint . && stylelint \"**/*.{css,scss,sass,html,vue}\" --ignore-path .gitignore && prettier --check . --ignore-path .prettierignore",
+    "lintfix": "prettier --write --list-different . --ignore-path .prettierignore && eslint . --fix && stylelint \"**/*.{css,scss,sass,html,vue}\" --ignore-path .gitignore --fix",
     "prepare": "husky install",
     "test": "jest --config jest.config.cjs"
   },
   "lint-staged": {
     "*.{js,vue}": "eslint --cache",
     "*.{css,scss,sass,html,vue}": "stylelint",
-    "*.*": "prettier --check --ignore-unknown"
+    "*.*": "prettier --check --ignore-path .prettierignore --ignore-unknown"
   },
   "dependencies": {
     "@iconify-json/solar": "^1.2.1",

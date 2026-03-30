@@ -1,27 +1,41 @@
+import { useToast } from "#imports";
 import { defineStore } from "pinia";
 
-export const useAlertStore = defineStore("alert", {
-  state: () => ({
-    show: false,
-    message: "",
-    type: "info",
-    timeout: 3000,
-  }),
-  actions: {
-    showAlert(message, type = "info", timeout = 3000) {
-      console.log("showAlert 被调用:", message, type, timeout); // 添加这行
-      this.show = true;
-      this.message = message;
-      this.type = type;
-      this.timeout = timeout;
-
-      setTimeout(() => {
-        this.hideAlert();
-      }, this.timeout);
-    },
-    hideAlert() {
-      console.log("hideAlert 被调用"); // 添加这行
-      this.show = false;
-    },
+const TOAST_STYLES = {
+  success: {
+    color: "success",
+    icon: "solar:smile-circle-bold-duotone",
   },
+  error: {
+    color: "error",
+    icon: "solar:confounded-circle-bold-duotone",
+  },
+  info: {
+    color: "info",
+    icon: "solar:info-circle-bold-duotone",
+  },
+};
+
+export const useAlertStore = defineStore("alert", () => {
+  const toast = useToast();
+
+  const showAlert = (message, type = "info", timeout = 3000) => {
+    const toastStyle = TOAST_STYLES[type] || TOAST_STYLES.info;
+
+    toast.add({
+      title: message,
+      color: toastStyle.color,
+      icon: toastStyle.icon,
+      duration: timeout,
+    });
+  };
+
+  const hideAlert = () => {
+    toast.clear();
+  };
+
+  return {
+    hideAlert,
+    showAlert,
+  };
 });

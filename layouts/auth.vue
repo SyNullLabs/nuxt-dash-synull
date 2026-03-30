@@ -2,7 +2,6 @@
   <div
     class="auth-layout relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#101116_0%,#0a0b0e_100%)] text-white"
   >
-    <AlertMessage />
     <header
       class="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-8"
     >
@@ -37,7 +36,6 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import AlertMessage from "~/components/AlertMessage.vue";
 import {
   normalizeLocaleCode,
   persistLocaleCode,

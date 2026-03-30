@@ -9,7 +9,7 @@
     ]"
   >
     <!-- 导航菜单 -->
-    <nav class="m-3 flex-grow" v-auto-animate>
+    <nav class="m-3 flex-grow overflow-y-auto" v-auto-animate>
       <ul class="space-y-1">
         <li
           v-for="(item, index) in menuItems"
@@ -106,13 +106,28 @@
         </li>
       </ul>
     </nav>
+
+    <!-- 退出登录 -->
+    <div class="m-3 border-t border-white/8 pt-2 pb-20">
+      <button
+        @click="handleLogout"
+        :class="[
+          'flex w-full items-center rounded-2xl py-3 transition duration-300 ease-out hover:bg-red-500/10 hover:text-red-400 text-white/50',
+          sidebarStore.isOpen ? 'px-6' : 'px-4',
+        ]"
+      >
+        <Icon name="solar:logout-2-bold-duotone" class="w-5 h-5 flex-shrink-0 mr-3" />
+        <span v-if="sidebarStore.isOpen" class="text-sm">{{ $t("logout") }}</span>
+      </button>
+    </div>
   </aside>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useSidebarStore } from "~/stores/sidebar"; // 引入 Pinia store
+import { useSidebarStore } from "~/stores/sidebar";
+import { useAuthStore } from "~/stores/auth";
 
 const sidebarStore = useSidebarStore(); // 使用 Pinia store
 const route = useRoute();
@@ -120,6 +135,7 @@ const router = useRouter();
 const menuItems = [
   { href: "/", icon: "solar:home-2-bold-duotone", label: "home" },
   { href: "/buy", icon: "solar:cart-bold-duotone", label: "buy" },
+  { href: "/cart", icon: "solar:cart-large-bold-duotone", label: "shoppingCart" },
   {
     href: "javascript:void(0)",
     icon: "solar:widget-2-bold-duotone",
@@ -142,7 +158,23 @@ const menuItems = [
       },
     ],
   },
-  // 添加更多菜单项...
+  { href: "/tickets", icon: "solar:clipboard-text-bold-duotone", label: "tickets" },
+  {
+    href: "javascript:void(0)",
+    icon: "solar:user-bold-duotone",
+    label: "userCenter",
+    children: [
+      { href: "/user/profile", icon: "solar:user-id-bold-duotone", label: "personalProfile" },
+      { href: "/user/security", icon: "solar:shield-keyhole-bold-duotone", label: "securitySettings" },
+      { href: "/user/verify", icon: "solar:verified-check-bold-duotone", label: "realNameVerify" },
+      { href: "/user/contacts", icon: "solar:users-group-rounded-bold-duotone", label: "subAccounts" },
+      { href: "/user/api", icon: "solar:key-bold-duotone", label: "apiManagement" },
+      { href: "/user/credit", icon: "solar:wallet-bold-duotone", label: "creditManagement" },
+      { href: "/user/invoice", icon: "solar:document-text-bold-duotone", label: "invoiceManagement" },
+      { href: "/user/logs", icon: "solar:list-bold-duotone", label: "operationLogs" },
+      { href: "/user/affiliate", icon: "solar:share-bold-duotone", label: "affiliateProgram" },
+    ],
+  },
 ];
 
 const isMobile = ref(false);
@@ -164,9 +196,18 @@ const handleClick = (item, index) => {
   if (item.children) {
     sidebarStore.toggleSubmenu(index);
   } else {
-    // 使用路由进行导航
     router.push(item.href);
   }
+};
+
+const handleLogout = async () => {
+  try {
+    const api = useApiClient();
+    await api("/auth/logout").catch(() => {});
+  } catch {}
+  const authStore = useAuthStore();
+  authStore.logout();
+  router.push("/auth/login");
 };
 
 watch(

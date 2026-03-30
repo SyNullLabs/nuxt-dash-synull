@@ -23,15 +23,12 @@
       class="fixed inset-0 z-10 bg-black/70 backdrop-blur-sm"
       @click="sidebarStore.setIsOpen(false)"
     />
-
-    <AlertMessage />
   </div>
 </template>
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import AlertMessage from "~/components/AlertMessage.vue";
 import Sidebar from "~/components/Sidebar.vue";
 import TopBar from "~/components/TopBar.vue";
 import { normalizeLocaleCode } from "~/composables/useLocalePreference";

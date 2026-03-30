@@ -123,7 +123,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    backUrl: process.env.BACK_URL,
+    backUrl:
+      process.env.BACK_URL ||
+      process.env.BACKEND_URL ||
+      process.env.NUXT_BACK_URL,
     turnstile: {
       secretKey: process.env.TURNSTILE_SECRET_KEY,
     },

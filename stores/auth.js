@@ -11,6 +11,9 @@ export const useAuthStore = defineStore("auth", {
     clearToken() {
       this.token = null;
     },
+    logout() {
+      this.token = null;
+    },
   },
   persist: true,
 });
