@@ -5,6 +5,10 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: "用户后台",
+      htmlAttrs: {
+        class: "dark",
+        style: "color-scheme: dark;",
+      },
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -76,6 +80,12 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
   ],
 
+  colorMode: {
+    preference: "dark",
+    fallback: "dark",
+    classSuffix: "",
+  },
+
   // Vite 配置
   vite: {
     server: {
@@ -90,13 +100,15 @@ export default defineNuxtConfig({
   },
 
   i18n: {
-    vueI18n: "./nuxt-i18n.js",
-    locales: ["zh-CN", "en-US", "zh-TW"],
+    vueI18n: "./i18n.config.ts",
+    locales: [
+      { code: "zh-CN", language: "zh-CN", file: "zh-CN.json" },
+      { code: "en-US", language: "en-US", file: "en-US.json" },
+      { code: "zh-TW", language: "zh-TW", file: "zh-TW.json" },
+    ],
+    langDir: "locales",
     defaultLocale: "zh-CN",
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: "i18n_redirected",
-    },
+    detectBrowserLanguage: false,
     strategy: "no_prefix",
   },
 

@@ -3,13 +3,13 @@
     v-show="!sidebarStore.isMobile || sidebarStore.isOpen"
     v-auto-animate
     :class="[
-      'bg-white text-gray-700 h-screen transition-all duration-300 ease-in-out fixed top-16 left-0 z-20 backdrop-blur-sm flex flex-col justify-between',
+      'fixed left-0 top-16 z-20 flex h-screen flex-col justify-between border-r border-white/10 bg-black/62 text-white/72 backdrop-blur-2xl transition-all duration-300 ease-in-out',
       sidebarStore.isOpen ? 'w-64' : 'w-18',
       sidebarStore.isMobile && !sidebarStore.isOpen ? 'hidden' : '',
     ]"
   >
     <!-- 导航菜单 -->
-    <nav class="m-2 flex-grow" v-auto-animate>
+    <nav class="m-3 flex-grow" v-auto-animate>
       <ul class="space-y-1">
         <li
           v-for="(item, index) in menuItems"
@@ -20,10 +20,10 @@
             @click="handleClick(item, index)"
             :to="item.href"
             :class="[
-              'flex items-center justify-between py-4 hover:bg-synull-100 hover:text-synull-800 transition duration-300 ease-in-out rounded-xl',
+              'flex items-center justify-between rounded-2xl py-4 transition duration-300 ease-out hover:bg-white/7 hover:text-white',
               sidebarStore.currentRoute === item.href
-                ? 'bg-synull-100 text-synull-800 font-semibold'
-                : 'text-gray-700',
+                ? 'bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+                : 'text-white/72',
               sidebarStore.isOpen ? 'px-6' : 'px-4',
             ]"
           >
@@ -69,10 +69,10 @@
                 <NuxtLink
                   :to="child.href"
                   :class="[
-                    'flex items-center p-2 pl-6 hover:bg-synull-100 hover:text-synull-800 transition duration-300 ease-in-out rounded-xl',
+                    'flex items-center rounded-xl p-2 pl-6 transition duration-300 ease-out hover:bg-white/7 hover:text-white',
                     sidebarStore.currentRoute === child.href
-                      ? 'bg-synull-100 text-synull-800 font-semibold'
-                      : 'text-gray-700',
+                      ? 'bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+                      : 'text-white/68',
                   ]"
                 >
                   <Icon
@@ -89,15 +89,15 @@
           <!-- 悬停弹出窗口 -->
           <div
             v-if="!sidebarStore.isOpen && !sidebarStore.isMobile"
-            class="absolute left-0 top-0 w-64 h-full bg-white shadow-lg rounded-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-in-out transform translate-x-[-100%] group-hover:translate-x-0 z-10"
+            class="absolute left-0 top-0 z-10 h-full w-64 -translate-x-[100%] overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 opacity-0 shadow-[0_20px_60px_rgba(0,0,0,0.45)] invisible backdrop-blur-xl transition-all duration-300 ease-in-out group-hover:visible group-hover:translate-x-0 group-hover:opacity-100"
           >
             <NuxtLink
               :to="item.href"
-              class="flex items-center px-4 py-4"
+              class="flex items-center px-4 py-4 transition-colors hover:bg-white/6"
               :class="
                 sidebarStore.currentRoute === item.href
-                  ? 'bg-gray-100 text-gray-800 font-semibold'
-                  : 'text-gray-700'
+                  ? 'bg-white/[0.08] text-white font-semibold'
+                  : 'text-white/72'
               "
             >
               <span class="ml-16 text-sm">{{ $t(item.label) }}</span>

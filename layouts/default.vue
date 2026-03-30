@@ -1,10 +1,10 @@
 <template>
-  <div class="bg-gray-75 min-h-screen">
+  <div class="dashboard-shell min-h-screen text-white">
     <TopBar v-model="sidebarStore.isOpen" />
     <Sidebar v-model="sidebarStore.isOpen" />
     <main
       :class="[
-        'pt-20 pr-4 pb-4',
+        'relative pt-24 pr-4 pb-6',
         sidebarStore.isMobile
           ? 'pl-4'
           : [
@@ -13,12 +13,14 @@
             ],
       ]"
     >
-      <slot />
+      <div class="mx-auto w-full max-w-[1800px]">
+        <slot />
+      </div>
     </main>
 
     <div
       v-if="sidebarStore.isOpen && sidebarStore.isMobile"
-      class="fixed inset-0 z-10 bg-black bg-opacity-50"
+      class="fixed inset-0 z-10 bg-black/70 backdrop-blur-sm"
       @click="sidebarStore.setIsOpen(false)"
     />
 
@@ -32,6 +34,7 @@ import { useRouter } from "vue-router";
 import AlertMessage from "~/components/AlertMessage.vue";
 import Sidebar from "~/components/Sidebar.vue";
 import TopBar from "~/components/TopBar.vue";
+import { normalizeLocaleCode } from "~/composables/useLocalePreference";
 import { useAffStore } from "~/stores/aff";
 import { useAlertStore } from "~/stores/alert";
 import { useSidebarStore } from "~/stores/sidebar";
@@ -85,9 +88,7 @@ onMounted(async () => {
     "$1"
   );
 
-  if (savedLocale && ["zh-CN", "zh-TW", "en-US"].includes(savedLocale)) {
-    locale.value = savedLocale;
-  }
+  locale.value = normalizeLocaleCode(savedLocale || locale.value);
 });
 
 onUnmounted(() => {

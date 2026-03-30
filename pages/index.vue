@@ -5,16 +5,16 @@
       <div
         v-for="(card, index) in cards"
         :key="index"
-        class="bg-white rounded-xl shadow-xl shadow-gray-100 px-4 py-6 border-l-4 transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105 cursor-pointer"
+        class="dashboard-panel cursor-pointer rounded-[1.75rem] border-l-4 px-5 py-6 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-white/14"
         :class="card.borderColor"
       >
         <div class="flex items-center justify-between">
           <div>
-            <h6 class="text-sm text-gray-700 mb-2">
+            <h6 class="mb-2 text-sm text-white/60">
               <USkeleton v-if="loading" class="h-5 w-[100px] rounded-full" />
               <span v-else>{{ $t(card.title) }}</span>
             </h6>
-            <h4 class="text-xl text-gray-700">
+            <h4 class="text-xl text-white">
               <USkeleton
                 v-if="loading"
                 class="h-[30px] w-[50px] rounded-full"
@@ -37,25 +37,25 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
       <div
         v-if="loading"
-        class="bg-white shadow-xl shadow-gray-100 bg-opacity-50 border-0 rounded-xl"
+        class="dashboard-panel overflow-hidden rounded-[1.75rem]"
       >
         <USkeleton class="h-[300px] w-full rounded-xl" />
       </div>
       <div
         v-else-if="userInfo"
-        class="relative bg-cover bg-center shadow-xl shadow-gray-100 bg-opacity-50 border-0 rounded-xl"
+        class="dashboard-panel relative overflow-hidden rounded-[1.75rem] bg-cover bg-center"
         :style="{
           backgroundImage: `url(https://myhkw.cn/open/img/bing?key=a9eaebc74a264ca985d3c0a31ab84a41)`,
         }"
       >
         <div
-          class="backdrop-grayscale bg-synull-light bg-opacity-50 flex flex-col justify-between h-[300px] rounded-xl"
+          class="flex h-[300px] flex-col justify-between rounded-[1.75rem] bg-black/42 backdrop-blur-md"
         >
           <div
-            class="bg-white/90 backdrop-blur-sm mt-3 rounded-full self-start ml-4 shadow-md rounded-full"
+            class="ml-4 mt-4 self-start rounded-full border border-white/10 bg-black/45 backdrop-blur-xl"
           >
-            <div class="py-1 px-2 flex items-center text-gray-700">
-              <Icon name="solar:crown-line-bold-duotone" class="text-xl mr-1" />
+            <div class="flex items-center px-3 py-1.5 text-white/72">
+              <Icon name="solar:crown-line-bold-duotone" class="mr-1 text-xl" />
               <h6 class="mb-0">
                 <USkeleton v-if="loading" class="h-5 w-[100px] rounded-xl" />
                 <span v-else class="text-sm">{{ $t("defaultGroup") }}</span>
@@ -64,7 +64,7 @@
           </div>
         </div>
         <div
-          class="absolute bottom-0 bg-white/90 backdrop-blur-sm p-4 w-full rounded-b-xl"
+          class="absolute bottom-0 w-full rounded-b-[1.75rem] border-t border-white/10 bg-black/65 p-4 backdrop-blur-2xl"
         >
           <div class="w-full flex items-center">
             <USkeleton v-if="loading" class="mr-3 h-16 w-16 rounded-full" />
@@ -80,17 +80,17 @@
               alt="用户头像"
             />
             <div>
-              <h5 class="text-primary text-lg font-medium mb-1">
+              <h5 class="mb-1 text-lg font-semibold text-white">
                 <USkeleton v-if="loading" class="h-5 w-[150px] rounded-xl" />
                 <span v-else>
                   {{ userInfo.client.username }}
                   <span
-                    class="bg-synull-800 text-white text-xs px-2 py-1 rounded-full ml-2"
+                    class="ml-2 rounded-full border border-synull/30 bg-synull/18 px-2 py-1 text-xs text-synull-100"
                     >ID:{{ userInfo.user.id }}</span
                   >
                 </span>
               </h5>
-              <p class="mb-1">
+              <p class="mb-1 text-white/60">
                 <USkeleton v-if="loading" class="h-5 w-[200px] rounded-xl" />
                 <span v-else>{{ userInfo.client.email }}</span>
               </p>
@@ -157,7 +157,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* 可根据需要添加自定义样式 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;

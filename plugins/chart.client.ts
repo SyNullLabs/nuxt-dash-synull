@@ -24,6 +24,10 @@ Chart.register(
 );
 
 export default defineNuxtPlugin(() => {
+  Chart.defaults.color = "rgba(247, 247, 252, 0.72)";
+  Chart.defaults.borderColor = "rgba(255, 255, 255, 0.08)";
+  Chart.defaults.font.family = "Alimama FangYuanTi VF, sans-serif";
+
   return {
     provide: {
       Chart,

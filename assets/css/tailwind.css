@@ -1,8 +1,12 @@
+@import url("https://registry.npmmirror.com/shed-fonts/latest/files/%E9%98%BF%E9%87%8C%E5%A6%88%E5%A6%88%E6%96%B9%E5%9C%86%E4%BD%93/result.css");
+
 @config "../../tailwind.config.js";
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @import "@nuxt/ui";
 
-@theme {
+@theme static {
+  --font-sans: "Alimama FangYuanTi VF", sans-serif;
   --ui-color-primary-50: var(--color-purple-50, oklch(97.7% 0.014 308.299));
   --ui-color-primary-100: var(--color-purple-100, oklch(94.6% 0.033 307.174));
   --ui-color-primary-200: var(--color-purple-200, oklch(90.2% 0.063 306.703));
@@ -26,7 +30,140 @@
   --color-synull: var(--ui-color-primary-600);
   --color-synull-light: var(--ui-color-primary-100);
   --color-synull-light-2: var(--ui-color-primary-50);
-  --color-synull-light-3: var(--ui-color-primary-50);
+  --color-synull-light-3: color-mix(
+    in oklab,
+    white 84%,
+    var(--ui-color-primary-100)
+  );
+}
+
+:root {
+  --ui-color-primary-50: var(--color-purple-50, oklch(97.7% 0.014 308.299));
+  --ui-color-primary-100: var(--color-purple-100, oklch(94.6% 0.033 307.174));
+  --ui-color-primary-200: var(--color-purple-200, oklch(90.2% 0.063 306.703));
+  --ui-color-primary-300: var(--color-purple-300, oklch(82.7% 0.119 306.383));
+  --ui-color-primary-400: var(--color-purple-400, oklch(71.4% 0.203 305.504));
+  --ui-color-primary-500: var(--color-purple-500, oklch(62.7% 0.265 303.9));
+  --ui-color-primary-600: var(--color-purple-600, oklch(55.8% 0.288 302.321));
+  --ui-color-primary-700: var(--color-purple-700, oklch(49.6% 0.265 301.924));
+  --ui-color-primary-800: var(--color-purple-800, oklch(43.8% 0.218 303.724));
+  --ui-color-primary-900: var(--color-purple-900, oklch(38.1% 0.176 304.987));
+  --ui-color-primary-950: var(--color-purple-950, oklch(29.1% 0.149 302.717));
+  --synull-100: var(--ui-color-primary-100);
+  --synull-200: var(--ui-color-primary-200);
+  --synull-300: var(--ui-color-primary-300);
+  --synull-400: var(--ui-color-primary-400);
+  --synull-500: var(--ui-color-primary-500);
+  --synull-600: var(--ui-color-primary-600);
+  --synull-700: var(--ui-color-primary-700);
+  --synull-800: var(--ui-color-primary-800);
+  --synull-900: var(--ui-color-primary-900);
+  --synull: var(--ui-color-primary-600);
+  --synull-light: var(--ui-color-primary-100);
+  --synull-light-2: var(--ui-color-primary-50);
+  --synull-light-3: color-mix(in oklab, white 84%, var(--ui-color-primary-100));
+  --ui-bg: oklch(14.8% 0.018 286.067);
+  --ui-bg-elevated: rgb(15 16 29 / 78%);
+  --ui-bg-soft: rgb(255 255 255 / 5%);
+  --ui-border: rgb(255 255 255 / 9%);
+  --ui-border-strong: rgb(255 255 255 / 14%);
+  --ui-text: rgb(247 247 252 / 92%);
+  --ui-text-muted: rgb(247 247 252 / 62%);
+  --ui-text-dim: rgb(247 247 252 / 42%);
+  --ui-shadow: 0 24px 80px rgb(3 4 12 / 40%),
+    inset 0 1px 0 rgb(255 255 255 / 6%);
+  --p-inputtext-focus-border-color: var(--ui-color-primary-500);
+  color-scheme: dark;
+}
+
+html {
+  font-size: 15px;
+  background: var(--ui-bg);
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background: radial-gradient(
+      circle at top,
+      rgb(93 67 214 / 20%),
+      transparent 30%
+    ),
+    radial-gradient(circle at right top, rgb(255 255 255 / 8%), transparent 24%),
+    linear-gradient(180deg, rgb(12 12 20 / 98%), rgb(5 6 12) 58%);
+  color: var(--ui-text);
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(168 85 247 / 7%) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 10;
+  animation: scan 10s linear infinite;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.bg-gray-75 {
+  background: radial-gradient(
+      circle at top,
+      rgb(93 67 214 / 16%),
+      transparent 28%
+    ),
+    linear-gradient(180deg, rgb(12 12 20), rgb(5 6 12) 62%);
+}
+
+.dashboard-shell {
+  background: radial-gradient(
+      circle at top,
+      rgb(93 67 214 / 16%),
+      transparent 28%
+    ),
+    linear-gradient(180deg, rgb(12 12 20), rgb(5 6 12) 62%);
+}
+
+.dashboard-panel {
+  border: 1px solid var(--ui-border);
+  background: var(--ui-bg-elevated);
+  box-shadow: var(--ui-shadow);
+  backdrop-filter: blur(24px);
+}
+
+.dashboard-panel-soft {
+  border: 1px solid var(--ui-border);
+  background: var(--ui-bg-soft);
+  box-shadow: var(--ui-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.dashboard-line {
+  border-color: var(--ui-border);
+}
+
+.dashboard-muted {
+  color: var(--ui-text-muted);
+}
+
+.dashboard-dim {
+  color: var(--ui-text-dim);
 }
 
 .w-18 {
@@ -65,34 +202,8 @@
   padding-left: 6rem;
 }
 
-.bg-gray-75 {
-  background-color: #f5f5f5;
-}
-
-:root {
-  --ui-color-primary-50: var(--color-purple-50, oklch(97.7% 0.014 308.299));
-  --ui-color-primary-100: var(--color-purple-100, oklch(94.6% 0.033 307.174));
-  --ui-color-primary-200: var(--color-purple-200, oklch(90.2% 0.063 306.703));
-  --ui-color-primary-300: var(--color-purple-300, oklch(82.7% 0.119 306.383));
-  --ui-color-primary-400: var(--color-purple-400, oklch(71.4% 0.203 305.504));
-  --ui-color-primary-500: var(--color-purple-500, oklch(62.7% 0.265 303.9));
-  --ui-color-primary-600: var(--color-purple-600, oklch(55.8% 0.288 302.321));
-  --ui-color-primary-700: var(--color-purple-700, oklch(49.6% 0.265 301.924));
-  --ui-color-primary-800: var(--color-purple-800, oklch(43.8% 0.218 303.724));
-  --ui-color-primary-900: var(--color-purple-900, oklch(38.1% 0.176 304.987));
-  --ui-color-primary-950: var(--color-purple-950, oklch(29.1% 0.149 302.717));
-  --synull-100: var(--ui-color-primary-100);
-  --synull-200: var(--ui-color-primary-200);
-  --synull-300: var(--ui-color-primary-300);
-  --synull-400: var(--ui-color-primary-400);
-  --synull-500: var(--ui-color-primary-500);
-  --synull-600: var(--ui-color-primary-600);
-  --synull-700: var(--ui-color-primary-700);
-  --synull-800: var(--ui-color-primary-800);
-  --synull-900: var(--ui-color-primary-900);
-  --synull: var(--ui-color-primary-600);
-  --synull-light: var(--ui-color-primary-100);
-  --synull-light-2: var(--ui-color-primary-50);
-  --synull-light-3: var(--ui-color-primary-50);
-  --p-inputtext-focus-border-color: var(--ui-color-primary-500);
+@media (max-width: 640px) {
+  html {
+    font-size: 16px;
+  }
 }

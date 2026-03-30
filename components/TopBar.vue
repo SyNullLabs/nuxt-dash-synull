@@ -1,15 +1,12 @@
 <template>
   <div class="relative">
     <div
-      class="fixed top-0 left-0 right-0 h-16 backdrop-blur-md z-20"
-      :class="[
-        modelValue ? 'bg-white' : 'bg-white/85',
-        { 'lg:bg-white/85': modelValue },
-      ]"
-    ></div>
+      class="fixed left-0 right-0 top-0 z-20 h-16 border-b border-white/10 bg-black/80 backdrop-blur-2xl"
+      :class="[modelValue ? 'lg:bg-black/80' : 'bg-black/72']"
+    />
 
     <header
-      class="fixed top-0 left-0 right-0 z-30 flex items-center justify-between text-gray-700 h-16"
+      class="fixed left-0 right-0 top-0 z-30 flex h-16 items-center justify-between text-white"
     >
       <div class="flex items-center">
         <div
@@ -21,10 +18,10 @@
           <NuxtLink
             to="/"
             :class="[
-              'flex items-center justify-center rounded-2xl transition-all duration-300 ease-in-out font-black select-none',
+              'flex items-center justify-center font-black select-none transition-all duration-300 ease-in-out',
               sidebarStore.isOpen && !sidebarStore.isMobile
-                ? 'h-16 px-4 text-2xl tracking-[0.28em] text-synull'
-                : 'h-10 w-10 bg-synull text-sm tracking-[0.18em] text-white',
+                ? 'h-11 rounded-full border border-white/10 bg-white/5 px-5 text-[1.05rem] tracking-[0.28em] text-white/92 backdrop-blur-xl'
+                : 'h-11 w-11 rounded-2xl bg-white text-sm tracking-[0.18em] text-black shadow-[0_0_2px_rgb(255_255_255_/_0.4),inset_0_0_0_3px_rgb(7_7_10),inset_0_0_0_6px_var(--synull)]',
             ]"
           >
             {{
@@ -33,49 +30,49 @@
           </NuxtLink>
         </div>
         <button
-          class="p-4 text-gray-500 flex items-center justify-center"
+          class="flex items-center justify-center rounded-full border border-white/10 bg-white/5 p-3 text-white/70 backdrop-blur-xl transition-colors hover:bg-white/10 hover:text-white"
           @click="toggleSidebar"
         >
-          <Icon :name="sidebarIcon" class="h-8 w-8 text-gray-600" />
+          <Icon :name="sidebarIcon" class="h-6 w-6" />
         </button>
         <button
           :disabled="loading"
-          class="p-4 text-gray-500 flex items-center justify-center"
+          class="ml-3 flex items-center justify-center rounded-full border border-white/10 bg-white/5 p-3 text-white/70 backdrop-blur-xl transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           @click="refreshAll"
         >
           <Icon
             v-if="loading"
             name="solar:refresh-circle-bold-duotone"
-            class="h-8 w-8 text-gray-300 motion-safe:animate-spin rotate-180"
+            class="h-6 w-6 rotate-180 text-white/35 motion-safe:animate-spin"
           />
           <Icon
             v-else
             name="solar:refresh-square-line-duotone"
-            class="h-8 w-8 text-gray-600"
+            class="h-6 w-6"
           />
         </button>
-        <div class="text-lg font-semibold hidden lg:block ml-4">
+        <div class="ml-4 hidden text-lg font-semibold text-white/82 lg:block">
           {{ $t("dashboard") }}
         </div>
       </div>
-      <div class="flex items-center space-x-4 ml-auto mr-4">
+      <div class="ml-auto mr-4 flex items-center space-x-4">
         <button
           @click="openLanguageModal"
-          class="p-2 rounded-md hover:bg-gray-100 transition duration-300 flex items-center justify-center"
+          class="flex items-center justify-center rounded-full border border-white/10 bg-white/5 p-2.5 text-white/70 backdrop-blur-xl transition duration-300 hover:bg-white/10 hover:text-white"
         >
-          <Icon name="tabler:language" class="w-6 h-6 text-gray-600" />
+          <Icon name="tabler:language" class="h-5 w-5" />
         </button>
-        <span class="hidden sm:inline"
+        <span class="hidden text-sm text-white/65 sm:inline"
           >{{ $t("welcome") }} {{ userInfo?.user?.username || "" }}</span
         >
         <div class="relative">
-          <USkeleton v-if="loading" class="h-8 w-8 rounded-full" />
+          <USkeleton v-if="loading" class="h-8 w-8 rounded-full bg-white/10" />
           <img
             v-else-if="userInfo?.user?.email_md5"
             @click="toggleDropdown"
             :src="`https://cravatar.cn/avatar/${userInfo.user.email_md5}?d=https://cravatar.cn/wp-content/uploads/sites/9/2024/03/lgqsza1-2.png`"
             alt="用户头像"
-            class="h-8 w-8 rounded-full cursor-pointer"
+            class="h-8 w-8 cursor-pointer rounded-full ring-2 ring-white/10 transition duration-300 hover:ring-white/20"
           />
           <transition
             enter-active-class="transition ease-out duration-200"
@@ -87,11 +84,11 @@
           >
             <div
               v-if="showDropdown"
-              class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg py-1 z-50"
+              class="dashboard-panel absolute right-0 z-50 mt-3 w-56 rounded-2xl py-2"
             >
               <a
                 href="#"
-                class="flex items-center px-4 py-3 text-sm text-gray-600 transition duration-300 hover:bg-synull-100 hover:text-synull-800"
+                class="flex items-center px-4 py-3 text-sm text-white/70 transition duration-300 hover:bg-white/6 hover:text-white"
               >
                 <Icon
                   name="solar:user-circle-bold-duotone"
@@ -101,7 +98,7 @@
               </a>
               <a
                 href="#"
-                class="flex items-center px-4 py-3 text-sm text-gray-600 transition duration-300 hover:bg-synull-100 hover:text-synull-800"
+                class="flex items-center px-4 py-3 text-sm text-white/70 transition duration-300 hover:bg-white/6 hover:text-white"
               >
                 <Icon
                   name="solar:safe-square-bold-duotone"
@@ -112,7 +109,7 @@
               <a
                 href="#"
                 @click.prevent="logout"
-                class="flex items-center px-4 py-3 text-sm text-red-600 transition duration-300 hover:bg-synull-100 hover:text-synull-800"
+                class="flex items-center px-4 py-3 text-sm text-rose-300 transition duration-300 hover:bg-white/6 hover:text-white"
               >
                 <Icon name="solar:logout-3-bold-duotone" class="w-5 h-5 mr-3" />
                 <span>{{ $t("logout") }}</span>
@@ -135,11 +132,11 @@
           <label
             v-for="lang in availableLanguages"
             :key="lang.code"
-            class="flex items-center p-2 rounded-md transition duration-300 w-48 cursor-pointer"
+            class="flex w-48 cursor-pointer items-center rounded-2xl px-3 py-2.5 text-sm transition duration-300"
             :class="
               selectedLanguage === lang.code
-                ? 'bg-synull-100 text-synull-700'
-                : 'hover:bg-gray-100'
+                ? 'border border-synull/30 bg-synull/16 text-white'
+                : 'border border-transparent text-white/72 hover:bg-white/6 hover:text-white'
             "
           >
             <input
@@ -158,11 +155,15 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import Modal from "./Modal.vue";
+import {
+  normalizeLocaleCode,
+  persistLocaleCode,
+} from "~/composables/useLocalePreference";
 import { useSidebarStore } from "~/stores/sidebar";
 import { useUserInfoStore } from "~/stores/userInfo";
 
@@ -203,7 +204,7 @@ const closeDropdown = (event) => {
 const { locale } = useI18n();
 
 const showLanguageModal = ref(false);
-const selectedLanguage = ref(locale.value);
+const selectedLanguage = ref(normalizeLocaleCode(locale.value));
 
 const openLanguageModal = () => {
   showLanguageModal.value = true;
@@ -216,12 +217,21 @@ const availableLanguages = [
 ];
 
 const changeLanguage = () => {
-  locale.value = selectedLanguage.value;
+  locale.value = persistLocaleCode(selectedLanguage.value);
+  selectedLanguage.value = normalizeLocaleCode(locale.value);
   showLanguageModal.value = false;
-  document.cookie = `i18n_redirected=${selectedLanguage.value}; max-age=31536000; path=/`;
 };
 
+watch(
+  locale,
+  (value) => {
+    selectedLanguage.value = normalizeLocaleCode(value);
+  },
+  { immediate: true }
+);
+
 onMounted(async () => {
+  locale.value = normalizeLocaleCode(locale.value);
   if (!userInfo.value) {
     await userInfoStore.fetchUserInfo();
   }
@@ -255,7 +265,7 @@ const logout = () => {
   appearance: none;
   width: 0.75rem;
   height: 0.75rem;
-  border: 1px solid #d1d5db; /* gray-300 */
+  border: 1px solid rgb(255 255 255 / 18%);
   border-radius: 50%;
   transition: background-color 0.3s, border-color 0.3s;
   cursor: pointer;

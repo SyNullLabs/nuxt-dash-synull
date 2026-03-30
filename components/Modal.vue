@@ -2,48 +2,54 @@
   <transition name="modal">
     <div
       v-if="show"
-      class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center m-3"
+      class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3"
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
     >
       <div
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
         aria-hidden="true"
         @click="$emit('close')"
-      ></div>
+      />
 
       <div
-        class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all w-full max-w-lg mx-auto"
+        class="dashboard-panel relative mx-auto w-full max-w-lg overflow-hidden rounded-[1.75rem] transition-all"
       >
-        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div
+          class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.16),transparent_44%)]"
+        />
+        <div class="relative px-5 pt-6 pb-5 sm:px-6 sm:pb-6">
           <h3
-            class="text-lg leading-6 font-medium text-gray-900 mb-8 text-center flex items-center justify-center"
+            class="mb-8 flex items-center justify-center text-center text-lg font-semibold leading-6 tracking-[0.02em] text-white"
             id="modal-title"
           >
             <Icon
               v-if="iconName"
               :name="iconName"
-              class="text-gray-600 mr-2 w-6 h-6"
-            />{{ title }}
+              class="mr-2 h-6 w-6 text-synull-200"
+            />
+            {{ title }}
           </h3>
           <div class="mt-2">
-            <slot></slot>
+            <slot />
           </div>
         </div>
-        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <div
+          class="relative flex flex-col gap-3 border-t border-white/10 bg-black/20 px-4 py-4 sm:flex-row-reverse sm:px-6"
+        >
           <button
             v-if="showConfirm"
             @click="$emit('confirm')"
             type="button"
-            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-synull text-base font-medium text-white hover:bg-synull-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-synull sm:ml-3 sm:w-auto sm:text-sm"
+            class="inline-flex w-full justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black shadow-[0_0_2px_rgb(255_255_255_/_0.4),inset_0_0_0_3px_rgb(7_7_10),inset_0_0_0_6px_var(--synull)] transition-colors hover:bg-white/92 focus:outline-none focus:ring-2 focus:ring-white/20 sm:ml-3 sm:w-auto"
           >
             {{ confirmTextComputed }}
           </button>
           <button
             @click="$emit('close')"
             type="button"
-            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-synull sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            class="inline-flex w-full justify-center rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-synull/30 sm:mt-0 sm:ml-3 sm:w-auto"
           >
             {{ cancelTextComputed }}
           </button>

@@ -1,6 +1,6 @@
 <template>
   <div class="mb-4">
-    <nav class="text-gray-300 text-sm flex flex-row items-center m-0 gap-1">
+    <nav class="m-0 flex flex-row items-center gap-1 text-sm text-white/45">
       <router-link :to="home.route" class="flex flex-row items-center">
         <Icon :name="home.icon" :class="home.class" />
       </router-link>
@@ -17,7 +17,7 @@
         <Icon
           v-if="index < items.length - 1"
           name="solar:alt-arrow-right-outline"
-          class="text-gray-500 text-lg ml"
+          class="ml text-lg text-white/35"
         />
       </span>
     </nav>
@@ -47,37 +47,37 @@
       </span>
       <input
         v-model="searchQuery"
-        class="appearance-none border rounded-lg w-full py-2.5 pl-10 pr-3 text-sm text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-synull-200 bg-white"
+        class="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-3 text-sm leading-tight text-white placeholder:text-white/30 focus:border-synull/40 focus:outline-none focus:ring-2 focus:ring-synull/20"
         :placeholder="t('searchProducts')"
       />
     </div>
   </div>
   <div
     v-if="!loading && paginatedProducts.length > 0"
-    class="rounded-xl shadow-xl shadow-gray-100 mb-4 overflow-hidden bg-white"
+    class="dashboard-panel mb-4 overflow-hidden rounded-[1.75rem]"
   >
     <div class="flex flex-col rounded-xl p-1 gap-1">
       <div v-for="(item, index) in paginatedProducts" :key="index">
         <div>
           <div
-            class="flex flex-col sm:flex-row sm:items-center gap-2 border border-synull-200 rounded-lg p-2 w-full"
+            class="flex w-full flex-col gap-2 rounded-[1.35rem] border border-white/10 bg-white/5 p-2 transition-colors duration-300 hover:bg-white/7 sm:flex-row sm:items-center"
           >
             <div
-              class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-2 p-2 w-full"
+              class="flex w-full flex-1 flex-col justify-between gap-2 p-2 md:flex-row md:items-center"
             >
               <div class="flex flex-col whitespace-nowrap">
                 <span
-                  class="font-medium text-synull-800 text-sm flex items-center"
+                  class="flex items-center text-sm font-medium text-synull-100"
                 >
                   <Icon
                     name="solar:bolt-circle-bold-duotone"
-                    class="text-gray-500 mr-1 text-lg"
+                    class="mr-1 text-lg text-white/35"
                   >
                   </Icon
                   >{{ item.domain }}
                 </span>
                 <div
-                  class="text-lg font-medium mt-1 text-gray-700 whitespace-nowrap"
+                  class="mt-1 whitespace-nowrap text-lg font-medium text-white"
                 >
                   {{ item.productName }}
                   <span
@@ -98,7 +98,7 @@
                     />
                   </client-only>
                   <span
-                    class="absolute inset-x-0 top-1 flex items-center justify-center text-green-500 opacity-30 text-xl z-0 font-black whitespace-nowrap select-none pointer-events-none"
+                    class="pointer-events-none absolute inset-x-0 top-1 z-0 flex items-center justify-center whitespace-nowrap text-xl font-black text-emerald-300/18 select-none"
                   >
                     {{ $t("CPU Usage") }}
                   </span>
@@ -110,7 +110,7 @@
                     class="h-14 w-full"
                   />
                   <span
-                    class="absolute inset-x-0 top-1 flex items-center justify-center text-blue-500 opacity-30 text-xl z-0 font-black whitespace-nowrap select-none pointer-events-none"
+                    class="pointer-events-none absolute inset-x-0 top-1 z-0 flex items-center justify-center whitespace-nowrap text-xl font-black text-sky-300/18 select-none"
                   >
                     {{ $t("Memory Usage") }}
                   </span>
@@ -122,7 +122,7 @@
                     class="h-14 w-full"
                   />
                   <span
-                    class="absolute inset-x-0 top-1 flex items-center justify-center text-purple-500 opacity-30 text-xl z-0 font-black whitespace-nowrap select-none pointer-events-none"
+                    class="pointer-events-none absolute inset-x-0 top-1 z-0 flex items-center justify-center whitespace-nowrap text-xl font-black text-synull-200/20 select-none"
                   >
                     {{ $t("Disk Usage") }}
                   </span>
@@ -134,14 +134,14 @@
                     class="h-14 w-full"
                   />
                   <span
-                    class="absolute inset-x-0 top-1 flex items-center justify-center text-orange-500 opacity-30 text-xl z-0 font-black whitespace-nowrap select-none pointer-events-none"
+                    class="pointer-events-none absolute inset-x-0 top-1 z-0 flex items-center justify-center whitespace-nowrap text-xl font-black text-amber-300/18 select-none"
                   >
                     {{ $t("Network Usage") }}
                   </span>
                 </div>
               </div>
               <div
-                class="flex flex-row items-center gap-2 text-2xl text-gray-500"
+                class="flex flex-row items-center gap-2 text-2xl text-white/42"
               >
                 <Icon
                   name="solar:info-circle-line-duotone"
@@ -162,7 +162,7 @@
   </div>
   <div
     v-else-if="!loading"
-    class="flex items-center justify-center py-4 text-gray-500 rounded-xl shadow-xl shadow-gray-100 mb-4 bg-white"
+    class="dashboard-panel mb-4 flex items-center justify-center rounded-[1.75rem] py-8 text-white/55"
   >
     <span class="text-sm"
       ><i>{{ $t("noAvailableOptions") }}</i></span
@@ -170,7 +170,7 @@
   </div>
   <div
     v-else
-    class="flex items-center justify-center py-4 text-gray-500 rounded-xl shadow-xl shadow-gray-100 mb-4 bg-white"
+    class="dashboard-panel mb-4 flex items-center justify-center rounded-[1.75rem] py-8 text-white/55"
   >
     <span class="text-sm"
       ><i>{{ $t("loading") }}</i></span
@@ -185,7 +185,7 @@
         :total="filteredProducts.length"
         active-color="primary"
         show-edges
-        class="mb-4 rounded-xl border border-synull-200 bg-white p-1 shadow-xl shadow-gray-100"
+        class="dashboard-panel mb-4 rounded-2xl p-1"
       />
     </div>
   </div>
@@ -320,8 +320,8 @@ const home = ref({
   class: "text-synull text-xl",
 });
 const items = ref([
-  { label: t("productManagement"), class: "text-gray-500" },
-  { label: t("cloudVirtualMachine"), class: "text-gray-500" },
+  { label: t("productManagement"), class: "text-white/45" },
+  { label: t("cloudVirtualMachine"), class: "text-white/45" },
 ]);
 
 const searchQuery = ref("");

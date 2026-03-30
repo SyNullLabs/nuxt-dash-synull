@@ -1,0 +1,74 @@
+文档地址：http://w2.test.idcsmart.com/doc?name=app\\admin\\controller\\UpperReachesController::dcimClientReinstallStatus
+
+## 接口：DCIM客户端获取重装,重置密码进度
+
+接口地址：/admin/upper/dcim\_client/resintall\_status post
+
+DCIM客户端获取重装,重置密码进度 -- xj
+
+  
+
+**接口说明:DCIM客户端获取重装,重置密码进度**
+
+  
+
+-   [接口信息](#info)
+-   [在线测试](#test)
+
+### 接口参数
+
+参数名字
+
+类型
+
+是否必须
+
+默认值
+
+其他
+
+说明
+
+id
+
+整型
+
+必填
+
+\-
+
+\-
+
+资源id
+
+  
+
+### 返回结果
+
+`{     "status":200/201/203/204/400/401/406,     "msg":提示信息,     "data":{       "disk_check":[{//弹出错误时         "value":"disk_part的值",         "description":"描述",       }]       "error_type":"0,1,2,其他(当error_type>0并且progress>=20时弹出磁盘分区错误提示,1Windows磁盘错误,2Windows分区错误,其他Windows磁盘分区提示)",       "error_msg":"当error_type>0时弹出磁盘分区错误提示信息",       "disk_info":[{//当显示弹出磁盘分区错误提示         "disk":"磁盘",         "part":"分区",         "size":"大小",         "type":"类型",         "windows":"类型",       }]       "progress":"进度",       "windows_finish":"是否是windows已完成",       "hostid":"当前产品ID",       "task_type":"类型(0重装系统,1救援系统,2重置密码,3获取硬件信息)",       "reinstall_msg":"重装信息",       "crackPwd":[{//当有数据返回时,弹出重置密码用户选择         "user":"可选择的用户",         "password":"重置的密码",       }]       "step":"当前步骤描述",       "last_result":[{//上次执行结果         "act":"操作名称",         "status":"1成功",         "msg":"描述",       }]     }   }`
+
+  
+
+### 接口参数
+
+接口地址
+
+发送测试
+
+提交方式
+
+GET POST PUT DELETE
+
+Cookie
+
+   
+
+增加参数
+
+id
+
+### 返回结果
+
+自定义解析数据 缩进量: 1 2 3 4 5 6  引号 [全选](javascript:void(0);) [展开](javascript:void(0);) [叠起](javascript:void(0);) [2级](javascript:void(0);) [3级](javascript:void(0);) [4级](javascript:void(0);) [5级](javascript:void(0);) [6级](javascript:void(0);) [7级](javascript:void(0);) [8级](javascript:void(0);)
+
+  

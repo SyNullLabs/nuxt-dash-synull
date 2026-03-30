@@ -5,7 +5,14 @@ module.exports = {
     "at-rule-no-unknown": [
       true,
       {
-        ignoreAtRules: ["config", "theme", "tailwind", "apply", "layer"],
+        ignoreAtRules: [
+          "config",
+          "theme",
+          "tailwind",
+          "apply",
+          "layer",
+          "custom-variant",
+        ],
       },
     ],
     "selector-pseudo-class-no-unknown": [

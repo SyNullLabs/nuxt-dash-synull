@@ -3,9 +3,7 @@
     <div
       v-if="show"
       :class="[
-        'fixed top-5 left-1/2 transform -translate-x-1/2 p-3 text-center z-50',
-        'transition-all duration-300 ease-in-out rounded-xl shadow-lg',
-        'min-w-[200px] max-w-[80%] flex items-center',
+        'fixed left-1/2 top-5 z-50 flex min-w-[220px] max-w-[80%] -translate-x-1/2 items-center rounded-full px-4 py-3 text-center shadow-[0_20px_60px_rgba(0,0,0,0.45)] transition-all duration-300 ease-in-out backdrop-blur-xl',
         typeClasses,
       ]"
       role="alert"
@@ -17,7 +15,7 @@
 </template>
 
 <script setup>
-import { computed, watch, onMounted } from "vue";
+import { computed } from "vue";
 import { useAlertStore } from "~/stores/alert";
 
 const alertStore = useAlertStore();
@@ -29,13 +27,13 @@ const type = computed(() => alertStore.type);
 const typeClasses = computed(() => {
   switch (type.value) {
     case "success":
-      return "bg-green-100 text-green-800 border border-green-200";
+      return "border border-emerald-400/25 bg-emerald-500/12 text-emerald-100";
     case "error":
-      return "bg-red-100 text-red-800 border border-red-200";
+      return "border border-rose-400/25 bg-rose-500/12 text-rose-100";
     case "info":
-      return "bg-blue-100 text-blue-800 border border-blue-200";
+      return "border border-sky-400/25 bg-sky-500/12 text-sky-100";
     default:
-      return "bg-synull-100 text-synull-800 border border-synull-200";
+      return "border border-synull/25 bg-synull/12 text-white";
   }
 });
 
@@ -50,18 +48,6 @@ const iconName = computed(() => {
     default:
       return "solar:hashtag-circle-bold-duotone";
   }
-});
-
-watch(show, (newValue) => {
-  console.log("AlertMessage show 值变化:", newValue);
-});
-
-watch(message, (newValue) => {
-  console.log("AlertMessage message 值变化:", newValue);
-});
-
-onMounted(() => {
-  console.log("AlertMessage 组件已挂载");
 });
 </script>
 

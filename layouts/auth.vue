@@ -1,66 +1,78 @@
 <template>
   <div
-    class="auth-layout min-h-screen bg-gray-100 flex flex-col items-center justify-center bg-synull-100 relative p-3"
+    class="auth-layout relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#101116_0%,#0a0b0e_100%)] text-white"
   >
     <AlertMessage />
-    <slot />
-
-    <UDropdownMenu
-      :items="languageItems"
-      :content="{ align: 'end', side: 'top' }"
-      class="absolute right-3 top-3"
+    <header
+      class="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-8"
     >
-      <UButton
-        color="neutral"
-        variant="ghost"
-        square
-        class="h-10 w-10 rounded-full transition duration-300 ease-in-out"
+      <NuxtLink
+        to="/"
+        class="text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-white/34 transition-colors hover:text-white/72"
       >
-        <Icon
-          name="tabler:language"
-          class="text-xl"
-          :class="
-            loading
-              ? 'mt-2 text-gray-300'
-              : 'text-gray-400 hover:text-gray-500 active:text-synull transition duration-300 ease-in-out'
-          "
-        />
-      </UButton>
-    </UDropdownMenu>
+        Synull
+      </NuxtLink>
+      <UDropdownMenu
+        :items="languageItems"
+        :content="{ align: 'end', side: 'bottom' }"
+      >
+        <UButton
+          color="neutral"
+          variant="ghost"
+          class="rounded-full bg-white/6 px-3.5 py-2 text-xs font-medium text-white/58 ring-1 ring-white/10 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          {{ currentLanguageLabel }}
+        </UButton>
+      </UDropdownMenu>
+    </header>
+
+    <div
+      class="relative flex min-h-screen items-center justify-center px-6 py-24"
+    >
+      <slot />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import AlertMessage from "~/components/AlertMessage.vue";
+import {
+  normalizeLocaleCode,
+  persistLocaleCode,
+} from "~/composables/useLocalePreference";
 import { useAffStore } from "~/stores/aff";
-
-const loading = ref(true);
 
 useAffStore();
 
 const { locale } = useI18n();
 
 const availableLanguages = [
-  { code: "zh-CN", name: "简体中文", flag: "🇨🇳" },
-  { code: "zh-TW", name: "繁體中文", flag: "🇨🇳" },
-  { code: "en-US", name: "English", flag: "🇺🇸" },
+  { code: "zh-CN", name: "简体中文", shortName: "简中" },
+  { code: "zh-TW", name: "繁體中文", shortName: "繁中" },
+  { code: "en-US", name: "English", shortName: "EN" },
 ];
 
 const changeLanguage = (langCode) => {
-  locale.value = langCode;
-  document.cookie = `i18n_redirected=${langCode}; max-age=31536000; path=/`;
+  locale.value = persistLocaleCode(langCode);
 };
+
+const currentLanguageCode = computed(() => normalizeLocaleCode(locale.value));
+const currentLanguageLabel = computed(
+  () =>
+    availableLanguages.find((lang) => lang.code === currentLanguageCode.value)
+      ?.shortName || "简中"
+);
 
 const languageItems = computed(() => [
   availableLanguages.map((lang) => ({
-    label: `${locale.value === lang.code ? "✓ " : ""}${lang.flag} ${lang.name}`,
+    label: `${currentLanguageCode.value === lang.code ? "✓ " : ""}${lang.name}`,
     onSelect: () => changeLanguage(lang.code),
   })),
 ]);
 
 onMounted(() => {
-  loading.value = false;
+  locale.value = normalizeLocaleCode(locale.value);
 });
 </script>

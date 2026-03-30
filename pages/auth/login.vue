@@ -1,120 +1,105 @@
 <template>
-  <div class="w-full max-w-md m-3">
-    <div class="bg-white shadow-xl rounded-lg overflow-hidden">
-      <div class="h-2 bg-synull"></div>
-      <div class="px-12 py-12 pb-10">
-        <h2 class="text-3xl text-gray-700 mb-6 text-synull">
-          {{ $t("login") }}
-        </h2>
-        <form @submit.prevent="handleLoginClick">
-          <div class="mb-6">
-            <label class="block text-gray-400 text-sm mb-2" for="email">
-              {{ $t("email") }}
-            </label>
-            <div class="relative">
-              <span
-                class="absolute inset-y-0 left-0 flex items-center p-2.5 bg-synull-200 rounded-l-lg border-r border-synull"
-              >
-                <Icon
-                  name="solar:mention-circle-line-duotone"
-                  class="text-gray-700 w-5 h-5"
-                />
-              </span>
-              <input
-                class="appearance-none border rounded-lg w-full py-2.5 pl-12 pr-3 text-sm text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-synull bg-white"
-                id="email"
-                type="email"
-                :placeholder="$t('enterEmail')"
-                v-model.lazy="email"
-                autocomplete="email"
-              />
-            </div>
-          </div>
-          <div class="mb-6">
-            <label class="block text-gray-400 text-sm mb-2" for="password">
+  <div class="w-full max-w-[20rem] sm:max-w-[22rem]">
+    <div class="space-y-8">
+      <div class="space-y-2">
+        <h1
+          class="text-[2.2rem] font-semibold tracking-[-0.06em] text-white/92 sm:text-[2.45rem]"
+        >
+          {{ $t("welcomeBack") }}
+        </h1>
+        <p class="text-sm text-white/45">
+          {{ $t("signInToAccount") }}
+        </p>
+      </div>
+
+      <form class="space-y-5" @submit.prevent="handleLoginClick">
+        <div class="space-y-2.5">
+          <label class="block text-sm font-medium text-white/72" for="email">
+            {{ $t("email") }}
+          </label>
+          <input
+            id="email"
+            v-model.trim="email"
+            type="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            class="h-11 w-full appearance-none rounded-[0.7rem] border border-white/10 bg-white/6 px-3.5 text-sm text-white placeholder:text-white/28 focus:border-synull/45 focus:outline-none focus:ring-2 focus:ring-synull/18"
+          />
+        </div>
+
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between gap-4">
+            <label
+              class="block text-sm font-medium text-white/72"
+              for="password"
+            >
               {{ $t("password") }}
             </label>
-            <div class="relative">
-              <span
-                class="absolute inset-y-0 left-0 flex items-center p-2.5 bg-synull-200 rounded-l-lg border-r border-synull"
-              >
-                <Icon
-                  name="solar:key-bold-duotone"
-                  class="text-gray-700 w-5 h-5"
-                />
-              </span>
-              <input
-                class="appearance-none border rounded-lg w-full py-2.5 pl-12 pr-3 text-sm text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-synull bg-white"
-                id="password"
-                type="password"
-                :placeholder="$t('enterPassword')"
-                v-model.lazy="password"
-                autocomplete="current-password"
-              />
-            </div>
-          </div>
-          <div class="flex items-center justify-between mb-6">
-            <a
-              class="inline-block align-baseline font-bold text-sm text-synull hover:text-synull-800 text-xs"
-              href="/auth/register"
-            >
-              {{ $t("register") }}
-            </a>
-            <a
-              class="inline-block align-baseline font-bold text-sm text-synull hover:text-synull-800 text-xs"
-              href="/auth/reset"
+            <NuxtLink
+              to="/auth/reset"
+              class="text-sm text-white/56 transition-colors hover:text-white"
             >
               {{ $t("forgotPassword") }}
-            </a>
+            </NuxtLink>
           </div>
-          <div class="">
-            <div v-if="showTurnstile" class="">
-              <ClientOnly>
-                <div class="relative" style="height: 65px">
-                  <NuxtTurnstile
-                    class="absolute z-10"
-                    v-model="turnstileToken"
-                    @error="handleTurnstileError"
-                    :options="{ size: 'flexible' }"
-                    style="width: calc(100% - 1px); height: 64px"
-                  />
-                  <USkeleton
-                    v-if="!turnstileToken"
-                    class="absolute left-0 z-0 rounded-lg"
-                    style="width: calc(100% - 1px); height: 64px"
-                  />
-                </div>
-              </ClientOnly>
-            </div>
-            <button
-              v-if="!isVerifying"
-              class="bg-synull hover:bg-synull-900 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full text-sm text-bold flex items-center justify-center"
-              type="submit"
-              :disabled="isLoading"
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            autocomplete="current-password"
+            class="h-11 w-full appearance-none rounded-[0.7rem] border border-white/10 bg-white/6 px-3.5 text-sm text-white placeholder:text-white/28 focus:border-synull/45 focus:outline-none focus:ring-2 focus:ring-synull/18"
+          />
+        </div>
+
+        <div v-if="showTurnstile" class="space-y-2">
+          <p class="text-xs text-white/45">
+            {{ isLoading ? $t("loggingIn") : $t("completeVerification") }}
+          </p>
+          <ClientOnly>
+            <div
+              class="relative overflow-hidden rounded-[0.9rem] border border-white/10 bg-white/6"
+              style="height: 66px"
             >
-              <template v-if="isLoading">
-                <Icon name="eos-icons:loading" class="animate-spin mr-1" />
-                {{ $t("loading") }}
-              </template>
-              <template v-else>
-                {{ $t("loginButton") }}
-              </template>
-            </button>
-          </div>
-        </form>
-      </div>
-      <div class="px-6 py-1 flex justify-center">
-        <a href="/" class="text-sm text-synull hover:text-synull-800 text-xs">
-          SYNULL
-        </a>
-      </div>
-      <div class="h-2 bg-synull"></div>
+              <NuxtTurnstile
+                class="absolute inset-0 z-10"
+                v-model="turnstileToken"
+                @error="handleTurnstileError"
+                :options="{ size: 'flexible' }"
+                style="width: 100%; height: 64px"
+              />
+              <USkeleton
+                v-if="!turnstileToken"
+                class="absolute inset-[1px] z-0 rounded-[0.82rem]"
+              />
+            </div>
+          </ClientOnly>
+        </div>
+
+        <button
+          v-if="!showTurnstile"
+          class="flex h-11 w-full items-center justify-center rounded-[0.7rem] bg-white px-4 text-sm font-medium text-[#14151a] transition-colors hover:bg-white/92 focus:outline-none focus:ring-2 focus:ring-white/12 disabled:cursor-not-allowed disabled:opacity-70"
+          type="submit"
+          :disabled="isLoading"
+        >
+          {{ $t("loginButton") }}
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-white/48">
+        {{ $t("dontHaveAccount") }}
+        <NuxtLink
+          to="/auth/register"
+          class="font-semibold text-white underline underline-offset-4 transition-colors hover:text-white/72"
+        >
+          {{ $t("signUpNow") }}
+        </NuxtLink>
+      </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useAlertStore } from "~/stores/alert";
@@ -131,7 +116,6 @@ const password = ref("");
 const turnstileToken = ref("");
 const showTurnstile = ref(false);
 const isLoading = ref(false);
-const isVerifying = ref(false);
 
 definePageMeta({
   layout: "auth",
@@ -141,7 +125,6 @@ const handleTurnstileError = () => {
   alertStore.showAlert(t("turnstileError"), "error");
 };
 
-// 监听 turnstileToken 的变化
 watch(turnstileToken, async (newToken) => {
   if (newToken && email.value && password.value) {
     await handleLogin();
@@ -154,9 +137,7 @@ const handleLoginClick = async () => {
     return;
   }
 
-  isVerifying.value = true;
   showTurnstile.value = true;
-  alertStore.showAlert(t("pleaseCompleteVerification"), "info");
 };
 
 const handleLogin = async () => {
@@ -198,7 +179,6 @@ const handleLogin = async () => {
     resetTurnstile();
   } finally {
     isLoading.value = false;
-    isVerifying.value = false;
   }
 };
 
@@ -209,17 +189,8 @@ const handleSecondVerification = () => {
 const resetTurnstile = () => {
   turnstileToken.value = "";
   showTurnstile.value = false;
-  isVerifying.value = false;
   setTimeout(() => {
     showTurnstile.value = true;
-  }, 250); // 短暂延迟以确保 Turnstile 组件重新渲染
+  }, 250);
 };
-
-onMounted(() => {
-  isLoading.value = false;
-});
 </script>
-
-<style scoped>
-/* 你的样式保持不变 */
-</style>

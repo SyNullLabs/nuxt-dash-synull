@@ -1,6 +1,6 @@
 <template>
   <div class="mb-4">
-    <nav class="text-gray-300 text-sm flex flex-row items-center m-0 gap-1">
+    <nav class="m-0 flex flex-row items-center gap-1 text-sm text-white/45">
       <router-link :to="home.route" class="flex flex-row items-center">
         <Icon :name="home.icon" :class="home.class" />
       </router-link>
@@ -17,7 +17,7 @@
         <Icon
           v-if="index < items.length - 1"
           name="solar:alt-arrow-right-outline"
-          class="text-gray-500 text-lg ml"
+          class="ml text-lg text-white/35"
         />
       </span>
     </nav>
@@ -37,7 +37,7 @@ const home = ref({
   class: "text-synull text-xl",
 });
 const items = ref([
-  { label: t("productManagement"), class: "text-gray-500" },
-  { label: t("trafficCloudVirtualMachine"), class: "text-gray-500" },
+  { label: t("productManagement"), class: "text-white/45" },
+  { label: t("trafficCloudVirtualMachine"), class: "text-white/45" },
 ]);
 </script>
