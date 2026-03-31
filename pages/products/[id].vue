@@ -72,7 +72,8 @@
           class="dashboard-panel rounded-2xl p-5"
         >
           <h3 class="mb-2 text-sm font-medium text-white/60">{{ mod.name }}</h3>
-          <component :is="mod.component || 'div'" v-if="mod.html" v-html="mod.html" />
+          <div v-if="mod.html" v-html="mod.html" />
+          <component :is="mod.component" v-else-if="mod.component" />
           <p v-else class="text-sm text-white/40">{{ mod.description || "—" }}</p>
         </div>
       </div>
@@ -126,6 +127,7 @@
 </template>
 
 <script setup>
+import { useToast } from "#imports";
 import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
@@ -149,15 +151,17 @@ const cancelling = ref(false);
 const cancelReason = ref("");
 
 const statusClass = (status) => {
+  const neutralStatusClass =
+    "bg-[color:var(--ui-bg-soft)] text-[color:var(--ui-text-muted)] ring-1 ring-[color:var(--ui-border)]";
   const map = {
     Active: "bg-green-500/15 text-green-400",
     Running: "bg-green-500/15 text-green-400",
     Suspended: "bg-yellow-500/15 text-yellow-400",
     Pending: "bg-blue-500/15 text-blue-400",
     Cancelled: "bg-red-500/15 text-red-400",
-    Stopped: "bg-white/10 text-white/50",
+    Stopped: neutralStatusClass,
   };
-  return map[status] || "bg-white/10 text-white/50";
+  return map[status] || neutralStatusClass;
 };
 
 const infoFields = computed(() => {

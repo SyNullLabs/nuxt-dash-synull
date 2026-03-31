@@ -80,11 +80,13 @@ const totalPages = ref(0);
 
 const ticketStatusClass = (status) => {
   const s = (status || "").toLowerCase();
+  const neutralStatusClass =
+    "bg-[color:var(--ui-bg-soft)] text-[color:var(--ui-text-muted)] ring-1 ring-[color:var(--ui-border)]";
   if (s === "open" || s === "客户回复") return "bg-green-500/15 text-green-400";
   if (s === "answered" || s === "已回复") return "bg-blue-500/15 text-blue-400";
-  if (s === "closed" || s === "已关闭") return "bg-white/10 text-white/50";
+  if (s === "closed" || s === "已关闭") return neutralStatusClass;
   if (s === "waiting") return "bg-yellow-500/15 text-yellow-400";
-  return "bg-white/10 text-white/50";
+  return neutralStatusClass;
 };
 
 const loadTickets = async () => {

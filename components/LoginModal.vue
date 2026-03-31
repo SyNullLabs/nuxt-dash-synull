@@ -1,16 +1,18 @@
 <template>
   <div
-    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    class="fixed inset-0 flex items-center justify-center bg-[color:var(--synull-shell-overlay)] px-4 backdrop-blur-sm"
   >
-    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-      <h2 class="text-2xl font-bold mb-4">{{ $t("login") }}</h2>
+    <div
+      class="w-full max-w-md rounded-2xl border border-[color:var(--ui-border)] bg-[color:var(--ui-bg-elevated)] p-6 text-[color:var(--ui-text)] shadow-[var(--ui-shadow)]"
+    >
+      <h2 class="mb-4 text-2xl font-bold">{{ $t("login") }}</h2>
       <form @submit.prevent="handleLoginClick">
         <div class="mb-4">
-          <label class="block text-gray-700 text-sm mb-2" for="email">{{
+          <label class="mb-2 block text-sm font-medium text-[color:var(--ui-text-muted)]" for="email">{{
             $t("email")
           }}</label>
           <input
-            class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            class="w-full appearance-none rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-bg-soft)] px-3 py-2 text-sm leading-tight text-[color:var(--ui-text)] outline-none transition-colors placeholder:text-[color:var(--ui-text-dim)] focus:border-synull/45 focus:ring-2 focus:ring-synull/18"
             id="email"
             type="email"
             v-model="email"
@@ -18,11 +20,11 @@
           />
         </div>
         <div class="mb-4">
-          <label class="block text-gray-700 text-sm mb-2" for="password">{{
+          <label class="mb-2 block text-sm font-medium text-[color:var(--ui-text-muted)]" for="password">{{
             $t("password")
           }}</label>
           <input
-            class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            class="w-full appearance-none rounded-xl border border-[color:var(--ui-border)] bg-[color:var(--ui-bg-soft)] px-3 py-2 text-sm leading-tight text-[color:var(--ui-text)] outline-none transition-colors placeholder:text-[color:var(--ui-text-dim)] focus:border-synull/45 focus:ring-2 focus:ring-synull/18"
             id="password"
             type="password"
             v-model="password"
@@ -31,7 +33,7 @@
         </div>
         <div class="flex items-center justify-between">
           <button
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            class="rounded-xl bg-synull px-4 py-2 font-semibold text-white transition-colors hover:bg-synull/90 focus:outline-none focus:ring-2 focus:ring-synull/20"
             type="submit"
           >
             {{ $t("loginButton") }}

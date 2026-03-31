@@ -105,16 +105,18 @@ const statusOptions = [
 ];
 
 const statusClass = (status) => {
+  const neutralStatusClass =
+    "bg-[color:var(--ui-bg-soft)] text-[color:var(--ui-text-muted)] ring-1 ring-[color:var(--ui-border)]";
   const map = {
     Active: "bg-green-500/15 text-green-400",
     Running: "bg-green-500/15 text-green-400",
     Suspended: "bg-yellow-500/15 text-yellow-400",
     Pending: "bg-blue-500/15 text-blue-400",
     Cancelled: "bg-red-500/15 text-red-400",
-    Stopped: "bg-white/10 text-white/50",
-    Deleted: "bg-white/10 text-white/50",
+    Stopped: neutralStatusClass,
+    Deleted: neutralStatusClass,
   };
-  return map[status] || "bg-white/10 text-white/50";
+  return map[status] || neutralStatusClass;
 };
 
 const filteredProducts = computed(() => {

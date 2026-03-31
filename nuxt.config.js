@@ -77,11 +77,11 @@ export default defineNuxtConfig({
   ],
 
   colorMode: {
-    preference: "dark",
-    fallback: "dark",
+    preference: "light",
+    fallback: "light",
     classSuffix: "",
     disableTransition: true,
-    storageKey: "synull-color-mode",
+    storageKey: "synull-color-mode-v2",
   },
 
   // Vite 配置

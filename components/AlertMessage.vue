@@ -27,13 +27,13 @@ const type = computed(() => alertStore.type);
 const typeClasses = computed(() => {
   switch (type.value) {
     case "success":
-      return "border border-emerald-400/25 bg-emerald-500/12 text-emerald-100";
+      return "border border-emerald-400/25 bg-emerald-500/12 text-emerald-700 dark:text-emerald-100";
     case "error":
-      return "border border-rose-400/25 bg-rose-500/12 text-rose-100";
+      return "border border-rose-400/25 bg-rose-500/12 text-rose-700 dark:text-rose-100";
     case "info":
-      return "border border-sky-400/25 bg-sky-500/12 text-sky-100";
+      return "border border-sky-400/25 bg-sky-500/12 text-sky-700 dark:text-sky-100";
     default:
-      return "border border-synull/25 bg-synull/12 text-white";
+      return "border border-synull/25 bg-synull/12 text-[color:var(--ui-text)]";
   }
 });
 

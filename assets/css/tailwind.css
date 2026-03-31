@@ -62,29 +62,29 @@
   --synull-light: var(--ui-color-primary-100);
   --synull-light-2: var(--ui-color-primary-50);
   --synull-light-3: color-mix(in oklab, white 84%, var(--ui-color-primary-100));
-  --ui-bg: oklch(98.4% 0.004 286.32);
-  --ui-bg-elevated: rgb(255 255 255 / 82%);
-  --ui-bg-soft: rgb(255 255 255 / 68%);
-  --ui-border: rgb(93 67 214 / 10%);
-  --ui-border-strong: rgb(93 67 214 / 16%);
+  --ui-bg: rgb(255 255 255);
+  --ui-bg-elevated: rgb(255 255 255 / 96%);
+  --ui-bg-soft: rgb(255 255 255 / 92%);
+  --ui-border: rgb(15 23 42 / 8%);
+  --ui-border-strong: rgb(15 23 42 / 12%);
   --ui-text: rgb(33 27 48 / 92%);
   --ui-text-muted: rgb(56 46 78 / 72%);
   --ui-text-dim: rgb(74 64 96 / 56%);
-  --ui-shadow: 0 16px 48px rgb(105 82 168 / 14%),
-    inset 0 1px 0 rgb(255 255 255 / 72%);
-  --synull-shell-bg: rgb(255 255 255 / 74%);
-  --synull-shell-border: rgb(93 67 214 / 12%);
-  --synull-shell-hover: rgb(93 67 214 / 7%);
-  --synull-shell-hover-strong: rgb(93 67 214 / 12%);
+  --ui-shadow: 0 16px 40px rgb(15 23 42 / 8%),
+    inset 0 1px 0 rgb(255 255 255 / 92%);
+  --synull-shell-bg: rgb(255 255 255 / 94%);
+  --synull-shell-border: rgb(15 23 42 / 8%);
+  --synull-shell-hover: rgb(93 67 214 / 5%);
+  --synull-shell-hover-strong: rgb(93 67 214 / 9%);
   --synull-shell-text: rgb(33 27 48 / 88%);
   --synull-shell-text-muted: rgb(56 46 78 / 68%);
   --synull-shell-logo-bg: rgb(255 255 255 / 95%);
   --synull-shell-logo-fg: rgb(22 18 32 / 92%);
   --synull-shell-overlay: rgb(33 27 48 / 18%);
-  --synull-page-radial-a: rgb(93 67 214 / 10%);
-  --synull-page-radial-b: rgb(255 255 255 / 72%);
-  --synull-page-base-a: rgb(251 249 255);
-  --synull-page-base-b: rgb(241 236 250);
+  --synull-page-radial-a: rgb(255 255 255 / 0%);
+  --synull-page-radial-b: rgb(255 255 255 / 0%);
+  --synull-page-base-a: rgb(255 255 255);
+  --synull-page-base-b: rgb(255 255 255);
   --p-inputtext-focus-border-color: var(--ui-color-primary-500);
   color-scheme: light;
 }
@@ -260,60 +260,739 @@ summary::-webkit-details-marker {
   backdrop-filter: blur(10px);
 }
 
+.auth-panel {
+  border: 1px solid var(--ui-border);
+  background: var(--ui-bg-elevated);
+  box-shadow: var(--ui-shadow);
+  backdrop-filter: blur(24px);
+}
+
+.auth-primary-button {
+  background: var(--synull);
+  color: white;
+  box-shadow: 0 12px 28px rgb(93 67 214 / 18%);
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.auth-primary-button:hover {
+  background: color-mix(in oklab, var(--synull) 88%, black);
+  box-shadow: 0 14px 30px rgb(93 67 214 / 22%);
+}
+
+.auth-primary-button:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--synull) 30%, white);
+  outline-offset: 2px;
+}
+
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  ) {
+  --synull-light-surface: color-mix(in oklab, white 90%, var(--ui-color-primary-50) 10%);
+  --synull-light-surface-strong: color-mix(
+    in oklab,
+    white 84%,
+    var(--ui-color-primary-100) 16%
+  );
+  --synull-light-faint-text: color-mix(in oklab, var(--ui-text) 24%, transparent);
+}
+
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/92,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  ).text-white,
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/82,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/92"],
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/75 {
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/82"],
+html:not(.dark)
+  .dashboard-shell
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/80"],
+html:not(.dark)
+  .dashboard-shell
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/75"],
+html:not(.dark)
+  .dashboard-shell
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/72"] {
   color: var(--ui-text);
 }
 
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/72,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/70"],
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/70,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/68"],
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/68,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/65"],
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/65,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/60"],
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/60,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/58"],
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/58 {
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/56"],
+html:not(.dark)
+  .dashboard-shell
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/55"],
+html:not(.dark)
+  .dashboard-shell
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/50"] {
   color: var(--ui-text-muted);
 }
 
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/50,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/48"],
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/45,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/45"],
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/40,
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/42"],
 html:not(.dark)
   .dashboard-shell
-  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/35 {
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/40"],
+html:not(.dark)
+  .dashboard-shell
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/35"],
+html:not(.dark)
+  .dashboard-shell
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/30"],
+html:not(.dark)
+  .dashboard-shell
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    small,
+    strong,
+    em,
+    dt,
+    dd,
+    label,
+    li,
+    td,
+    th,
+    a,
+    div,
+    svg,
+    button,
+    input,
+    textarea,
+    code
+  )[class~="text-white/28"] {
   color: var(--ui-text-dim);
 }
 
-html:not(.dark) .dashboard-shell :where(span, p, div, svg).text-white\/20,
-html:not(.dark) .dashboard-shell :where(span, p, div, svg).text-white\/15 {
-  color: color-mix(in oklab, var(--ui-text) 24%, transparent);
+html:not(.dark)
+  .dashboard-shell
+  :where(span, p, div, svg, button, input, textarea, code)[class~="text-white/20"],
+html:not(.dark)
+  .dashboard-shell
+  :where(span, p, div, svg, button, input, textarea, code)[class~="text-white/15"] {
+  color: var(--synull-light-faint-text);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :is(input, textarea)[class~="placeholder:text-white/30"]::placeholder,
+html:not(.dark)
+  .dashboard-shell
+  :is(input, textarea)[class~="placeholder:text-white/28"]::placeholder {
+  color: color-mix(in oklab, var(--ui-text) 34%, transparent);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :is(
+    [class~="bg-white/[0.02]"],
+    [class~="bg-white/[0.03]"],
+    [class~="bg-white/[0.04]"],
+    [class~="bg-white/[0.05]"],
+    [class~="bg-white/[0.06]"],
+    [class~="bg-white/5"],
+    [class~="bg-white/6"],
+    [class~="bg-white/7"],
+    [class~="bg-white/10"]
+  ) {
+  background-color: var(--synull-light-surface);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :is([class~="bg-black"], [class~="bg-black/42"], [class~="bg-black/45"], [class~="bg-black/65"]) {
+  background-color: var(--synull-light-surface-strong);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :is(
+    [class~="border-white/8"],
+    [class~="border-white/10"],
+    [class~="border-white/14"],
+    [class~="border-white/16"]
+  ) {
+  border-color: var(--ui-border);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :is([class~="hover:border-white/14"], [class~="hover:border-white/16"]):hover {
+  border-color: var(--ui-border-strong);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :is(
+    [class~="hover:bg-white/[0.05]"],
+    [class~="hover:bg-white/[0.06]"],
+    [class~="hover:bg-white/7"],
+    [class~="hover:bg-white/10"]
+  ):hover {
+  background-color: var(--synull-light-surface-strong);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :is([class~="hover:text-white"], [class~="hover:text-white/70"], [class~="hover:text-white/72"]):hover {
+  color: var(--ui-text);
 }
 
 .w-18 {

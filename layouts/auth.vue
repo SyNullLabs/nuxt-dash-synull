@@ -28,7 +28,9 @@
     <div
       class="relative flex min-h-screen items-center justify-center px-6 py-24"
     >
-      <slot />
+      <div class="auth-panel w-full max-w-[28rem] rounded-[1.75rem] p-8 sm:p-9">
+        <slot />
+      </div>
     </div>
   </div>
 </template>

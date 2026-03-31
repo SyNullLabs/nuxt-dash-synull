@@ -196,7 +196,7 @@
           </div>
 
           <button
-            class="flex h-11 w-full items-center justify-center rounded-[0.7rem] bg-white px-4 text-sm font-medium text-[#14151a] transition-colors hover:bg-white/92 focus:outline-none focus:ring-2 focus:ring-white/12 disabled:cursor-not-allowed disabled:opacity-70"
+            class="auth-primary-button flex h-11 w-full items-center justify-center rounded-[0.7rem] px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-70"
             type="submit"
             :disabled="isSubmitting"
           >
