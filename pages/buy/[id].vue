@@ -224,6 +224,13 @@ const calcPrice = async () => {
 };
 
 const addToCart = async (checkout = false) => {
+  // Require login for cart actions
+  const authStore = useAuthStore();
+  if (!authStore.token) {
+    navigateTo({ path: "/auth/login", query: { redirect_uri: route.fullPath } });
+    return;
+  }
+
   addingToCart.value = true;
   try {
     const res = await api("/cart/add", {

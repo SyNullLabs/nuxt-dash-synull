@@ -1,15 +1,18 @@
 import {
   requestBackend,
-  requireBackendAuthorization,
 } from "../../utils/mf-api";
 
 export default defineEventHandler(async (event) => {
-  const authorization = requireBackendAuthorization(event);
+  // Auth is optional — allow unauthenticated product browsing
+  const authorization = getHeader(event, "authorization") || "";
   const query = getQuery(event);
+
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (authorization) headers.authorization = authorization;
 
   const response = (await requestBackend("/cart/get_product_config", {
     method: "GET",
-    headers: { "Content-Type": "application/json", authorization },
+    headers,
     query,
   })) as Record<string, any>;
 

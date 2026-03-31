@@ -12,6 +12,40 @@
       />
     </div>
 
+    <nav
+      v-if="!loading && !error && hasCategoryGroups"
+      class="mb-5 flex gap-1 overflow-x-auto border-b border-white/8 pb-px"
+    >
+      <button
+        v-if="allGroups.length > 1"
+        :class="[
+          'flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+          activeGroupId === null
+            ? 'border-synull text-synull'
+            : 'border-transparent text-white/45 hover:text-white/70',
+        ]"
+        @click="activeGroupId = null"
+      >
+        {{ t('allProducts') }}
+        <span class="text-xs opacity-60">({{ totalProductCount }})</span>
+      </button>
+      <button
+        v-for="group in allGroups"
+        :key="group.id"
+        :class="[
+          'flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+          activeGroupId === group.id
+            ? 'border-synull text-synull'
+            : 'border-transparent text-white/45 hover:text-white/70',
+        ]"
+        @click="activeGroupId = group.id"
+      >
+        <Icon v-if="group.icon" :name="group.icon" class="text-sm" />
+        {{ group.name }}
+        <span class="text-xs opacity-60">({{ group.items.length }})</span>
+      </button>
+    </nav>
+
     <div v-if="loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       <div v-for="n in 3" :key="n" class="dashboard-panel rounded-2xl p-5">
         <USkeleton class="mb-3 h-5 w-24 rounded-lg" />
@@ -31,14 +65,15 @@
 
     <div v-else>
       <div
-        v-for="(group, gIdx) in productGroups"
-        :key="gIdx"
+        v-for="group in visibleGroups"
+        :key="group.id"
         class="mb-6"
       >
         <h2
-          v-if="productGroups.length > 1"
-          class="mb-3 text-sm font-medium tracking-wide text-white/40 uppercase"
+          v-if="group.name && (allGroups.length > 1 || activeGroupId !== null)"
+          class="mb-3 flex items-center gap-2 text-sm font-medium tracking-wide text-white/40 uppercase"
         >
+          <Icon v-if="group.icon" :name="group.icon" class="text-base text-white/50" />
           {{ group.name }}
         </h2>
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -77,7 +112,7 @@
       </div>
 
       <div
-        v-if="productGroups.length === 0"
+        v-if="visibleGroups.length === 0"
         class="dashboard-panel rounded-2xl p-10 text-center"
       >
         <Icon
@@ -91,7 +126,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -99,9 +134,29 @@ const api = useApiClient();
 
 const loading = ref(true);
 const error = ref(false);
-const productGroups = ref([]);
+const allGroups = ref([]);
+const activeGroupId = ref(null);
+
+const hasCategoryGroups = computed(() =>
+  allGroups.value.some((group) => Boolean(group.name))
+);
+
+const visibleGroups = computed(() => {
+  if (activeGroupId.value === null) return allGroups.value;
+  return allGroups.value.filter((g) => g.id === activeGroupId.value);
+});
+
+const totalProductCount = computed(() =>
+  allGroups.value.reduce((sum, g) => sum + g.items.length, 0)
+);
+
+const setGroups = (groups) => {
+  allGroups.value = groups;
+  activeGroupId.value = groups.length === 1 && groups[0]?.name ? groups[0].id : null;
+};
 
 const getProductIcon = (product) => {
+  if (product._icon) return product._icon;
   const name = (product.name || "").toLowerCase();
   if (name.includes("cvm") || name.includes("云服务器"))
     return "solar:server-bold-duotone";
@@ -112,6 +167,38 @@ const getProductIcon = (product) => {
   return "solar:widget-2-bold-duotone";
 };
 
+/**
+ * Parse group name which may contain embedded metadata.
+ * Format: "displayName, cssClasses, meta, iconIdentifier"
+ * Returns { displayName, icon, cssClasses }
+ */
+const parseGroupName = (raw) => {
+  if (!raw) return { displayName: "", icon: "", cssClasses: "" };
+
+  const parts = raw.split(",").map((s) => s.trim());
+  let icon = "";
+  let displayName = "";
+  const cssParts = [];
+
+  for (const part of parts) {
+    if (!part) continue;
+    const normalized = part.replace("/", ":");
+    if (/^[a-z0-9-]+:[a-z0-9-]+/i.test(normalized)) {
+      icon = normalized;
+    } else if (/^[a-z0-9 -]+$/i.test(part) && part.includes("-") && part.includes(" ")) {
+      cssParts.push(part);
+    } else if (/^\d+$/.test(part)) {
+      // Pure number, skip (ordering metadata)
+    } else if (!displayName) {
+      displayName = part;
+    }
+  }
+
+  if (!displayName) displayName = raw;
+
+  return { displayName, icon, cssClasses: cssParts.join(" ") };
+};
+
 const loadProducts = async () => {
   loading.value = true;
   error.value = false;
@@ -120,29 +207,39 @@ const loadProducts = async () => {
     if (res?.success && res.data) {
       const data = res.data;
       if (Array.isArray(data)) {
-        productGroups.value = [{ name: "", items: data }];
+        setGroups([{ id: 0, name: "", icon: "", items: data }]);
+      } else if (data.products && Array.isArray(data.products)) {
+        setGroups(
+          data.products
+            .filter((g) => g.products && g.products.length > 0)
+            .map((g) => {
+              const parsed = parseGroupName(g.name);
+              return {
+                id: g.id,
+                name: parsed.displayName,
+                icon: parsed.icon,
+                cssClasses: parsed.cssClasses,
+                items: g.products,
+              };
+            })
+        );
       } else if (data.products) {
-        // Grouped products from backend
         const groups = [];
-        if (Array.isArray(data.products)) {
-          groups.push({ name: t("allProducts"), items: data.products });
-        } else {
-          for (const [groupName, items] of Object.entries(data.products)) {
-            groups.push({
-              name: groupName,
-              items: Array.isArray(items) ? items : [],
-            });
-          }
+        for (const [groupName, items] of Object.entries(data.products)) {
+          const parsed = parseGroupName(groupName);
+          groups.push({
+            id: groupName,
+            name: parsed.displayName,
+            icon: parsed.icon,
+            items: Array.isArray(items) ? items : [],
+          });
         }
-        productGroups.value = groups;
+        setGroups(groups.filter((g) => g.items.length > 0));
       } else {
-        // Fallback: treat entire data as flat product list
         const items = Object.values(data).filter(
           (v) => typeof v === "object" && v !== null && v.id
         );
-        productGroups.value = items.length
-          ? [{ name: "", items }]
-          : [];
+        setGroups(items.length ? [{ id: 0, name: "", icon: "", items }] : []);
       }
     } else {
       error.value = true;

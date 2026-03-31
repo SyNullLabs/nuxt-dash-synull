@@ -1,17 +1,17 @@
 <template>
   <transition name="modal">
-    <div
-      v-if="show"
-      class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3"
+      <div
+        v-if="show"
+        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3"
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
-    >
-      <div
-        class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
-        aria-hidden="true"
-        @click="$emit('close')"
-      />
+      >
+        <div
+          class="shell-overlay fixed inset-0 transition-opacity"
+          aria-hidden="true"
+          @click="$emit('close')"
+        />
 
       <div
         class="dashboard-panel relative mx-auto w-full max-w-lg overflow-hidden rounded-[1.75rem] transition-all"
@@ -21,7 +21,7 @@
         />
         <div class="relative px-5 pt-6 pb-5 sm:px-6 sm:pb-6">
           <h3
-            class="mb-8 flex items-center justify-center text-center text-lg font-semibold leading-6 tracking-[0.02em] text-white"
+            class="mb-8 flex items-center justify-center text-center text-lg font-semibold leading-6 tracking-[0.02em] text-[color:var(--ui-text)]"
             id="modal-title"
           >
             <Icon
@@ -36,7 +36,7 @@
           </div>
         </div>
         <div
-          class="relative flex flex-col gap-3 border-t border-white/10 bg-black/20 px-4 py-4 sm:flex-row-reverse sm:px-6"
+          class="relative flex flex-col gap-3 border-t border-[color:var(--ui-border)] bg-[var(--ui-bg-soft)] px-4 py-4 sm:flex-row-reverse sm:px-6"
         >
           <button
             v-if="showConfirm"
@@ -49,7 +49,7 @@
           <button
             @click="$emit('close')"
             type="button"
-            class="inline-flex w-full justify-center rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-synull/30 sm:mt-0 sm:ml-3 sm:w-auto"
+            class="inline-flex w-full justify-center rounded-full border border-[color:var(--ui-border)] bg-[var(--ui-bg-soft)] px-5 py-2.5 text-sm font-medium text-[color:var(--ui-text-muted)] transition-colors hover:bg-[var(--synull-shell-hover)] hover:text-[color:var(--ui-text)] focus:outline-none focus:ring-2 focus:ring-synull/30 sm:mt-0 sm:ml-3 sm:w-auto"
           >
             {{ cancelTextComputed }}
           </button>

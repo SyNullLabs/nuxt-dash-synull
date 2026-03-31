@@ -1,15 +1,17 @@
 import {
   requestBackend,
-  requireBackendAuthorization,
 } from "../../utils/mf-api";
 
 export default defineEventHandler(async (event) => {
-  const authorization = requireBackendAuthorization(event);
+  const authorization = getHeader(event, "authorization") || "";
   const body = await readBody(event);
+
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (authorization) headers.authorization = authorization;
 
   const response = (await requestBackend("/cart/get_total", {
     method: "POST",
-    headers: { "Content-Type": "application/json", authorization },
+    headers,
     body,
   })) as Record<string, any>;
 

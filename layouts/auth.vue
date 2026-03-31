@@ -1,13 +1,13 @@
 <template>
   <div
-    class="auth-layout relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#101116_0%,#0a0b0e_100%)] text-white"
+    class="auth-layout dashboard-shell relative min-h-screen overflow-hidden text-[color:var(--ui-text)]"
   >
     <header
       class="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-8"
     >
       <NuxtLink
         to="/"
-        class="text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-white/34 transition-colors hover:text-white/72"
+        class="text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[color:var(--ui-text-dim)] transition-colors hover:text-[color:var(--ui-text-muted)]"
       >
         Synull
       </NuxtLink>
@@ -18,7 +18,7 @@
         <UButton
           color="neutral"
           variant="ghost"
-          class="rounded-full bg-white/6 px-3.5 py-2 text-xs font-medium text-white/58 ring-1 ring-white/10 transition-colors hover:bg-white/10 hover:text-white"
+          class="rounded-full bg-[var(--ui-bg-soft)] px-3.5 py-2 text-xs font-medium text-[color:var(--ui-text-muted)] ring-1 ring-[color:var(--ui-border)] transition-colors hover:bg-[var(--synull-shell-hover)] hover:text-[color:var(--ui-text)]"
         >
           {{ currentLanguageLabel }}
         </UButton>

@@ -5,10 +5,6 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: "用户后台",
-      htmlAttrs: {
-        class: "dark",
-        style: "color-scheme: dark;",
-      },
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -84,6 +80,8 @@ export default defineNuxtConfig({
     preference: "dark",
     fallback: "dark",
     classSuffix: "",
+    disableTransition: true,
+    storageKey: "synull-color-mode",
   },
 
   // Vite 配置

@@ -62,6 +62,34 @@
   --synull-light: var(--ui-color-primary-100);
   --synull-light-2: var(--ui-color-primary-50);
   --synull-light-3: color-mix(in oklab, white 84%, var(--ui-color-primary-100));
+  --ui-bg: oklch(98.4% 0.004 286.32);
+  --ui-bg-elevated: rgb(255 255 255 / 82%);
+  --ui-bg-soft: rgb(255 255 255 / 68%);
+  --ui-border: rgb(93 67 214 / 10%);
+  --ui-border-strong: rgb(93 67 214 / 16%);
+  --ui-text: rgb(33 27 48 / 92%);
+  --ui-text-muted: rgb(56 46 78 / 72%);
+  --ui-text-dim: rgb(74 64 96 / 56%);
+  --ui-shadow: 0 16px 48px rgb(105 82 168 / 14%),
+    inset 0 1px 0 rgb(255 255 255 / 72%);
+  --synull-shell-bg: rgb(255 255 255 / 74%);
+  --synull-shell-border: rgb(93 67 214 / 12%);
+  --synull-shell-hover: rgb(93 67 214 / 7%);
+  --synull-shell-hover-strong: rgb(93 67 214 / 12%);
+  --synull-shell-text: rgb(33 27 48 / 88%);
+  --synull-shell-text-muted: rgb(56 46 78 / 68%);
+  --synull-shell-logo-bg: rgb(255 255 255 / 95%);
+  --synull-shell-logo-fg: rgb(22 18 32 / 92%);
+  --synull-shell-overlay: rgb(33 27 48 / 18%);
+  --synull-page-radial-a: rgb(93 67 214 / 10%);
+  --synull-page-radial-b: rgb(255 255 255 / 72%);
+  --synull-page-base-a: rgb(251 249 255);
+  --synull-page-base-b: rgb(241 236 250);
+  --p-inputtext-focus-border-color: var(--ui-color-primary-500);
+  color-scheme: light;
+}
+
+.dark {
   --ui-bg: oklch(14.8% 0.018 286.067);
   --ui-bg-elevated: rgb(15 16 29 / 78%);
   --ui-bg-soft: rgb(255 255 255 / 5%);
@@ -72,7 +100,19 @@
   --ui-text-dim: rgb(247 247 252 / 42%);
   --ui-shadow: 0 24px 80px rgb(3 4 12 / 40%),
     inset 0 1px 0 rgb(255 255 255 / 6%);
-  --p-inputtext-focus-border-color: var(--ui-color-primary-500);
+  --synull-shell-bg: rgb(8 10 18 / 78%);
+  --synull-shell-border: rgb(255 255 255 / 10%);
+  --synull-shell-hover: rgb(255 255 255 / 5%);
+  --synull-shell-hover-strong: rgb(255 255 255 / 10%);
+  --synull-shell-text: rgb(247 247 252 / 92%);
+  --synull-shell-text-muted: rgb(247 247 252 / 65%);
+  --synull-shell-logo-bg: rgb(255 255 255 / 96%);
+  --synull-shell-logo-fg: rgb(12 12 20 / 92%);
+  --synull-shell-overlay: rgb(0 0 0 / 70%);
+  --synull-page-radial-a: rgb(93 67 214 / 20%);
+  --synull-page-radial-b: rgb(255 255 255 / 8%);
+  --synull-page-base-a: rgb(12 12 20 / 98%);
+  --synull-page-base-b: rgb(5 6 12);
   color-scheme: dark;
 }
 
@@ -86,11 +126,11 @@ body {
   font-family: var(--font-sans);
   background: radial-gradient(
       circle at top,
-      rgb(93 67 214 / 20%),
+      var(--synull-page-radial-a),
       transparent 30%
     ),
-    radial-gradient(circle at right top, rgb(255 255 255 / 8%), transparent 24%),
-    linear-gradient(180deg, rgb(12 12 20 / 98%), rgb(5 6 12) 58%);
+    radial-gradient(circle at right top, var(--synull-page-radial-b), transparent 24%),
+    linear-gradient(180deg, var(--synull-page-base-a), var(--synull-page-base-b) 58%);
   color: var(--ui-text);
 }
 
@@ -125,19 +165,19 @@ summary::-webkit-details-marker {
 .bg-gray-75 {
   background: radial-gradient(
       circle at top,
-      rgb(93 67 214 / 16%),
+      var(--synull-page-radial-a),
       transparent 28%
     ),
-    linear-gradient(180deg, rgb(12 12 20), rgb(5 6 12) 62%);
+    linear-gradient(180deg, var(--synull-page-base-a), var(--synull-page-base-b) 62%);
 }
 
 .dashboard-shell {
   background: radial-gradient(
       circle at top,
-      rgb(93 67 214 / 16%),
+      var(--synull-page-radial-a),
       transparent 28%
     ),
-    linear-gradient(180deg, rgb(12 12 20), rgb(5 6 12) 62%);
+    linear-gradient(180deg, var(--synull-page-base-a), var(--synull-page-base-b) 62%);
 }
 
 .dashboard-panel {
@@ -164,6 +204,116 @@ summary::-webkit-details-marker {
 
 .dashboard-dim {
   color: var(--ui-text-dim);
+}
+
+.shell-chrome {
+  border-color: var(--synull-shell-border);
+  background: var(--synull-shell-bg);
+  backdrop-filter: blur(24px);
+}
+
+.shell-chip {
+  border: 1px solid var(--synull-shell-border);
+  background: var(--synull-shell-hover);
+  color: var(--synull-shell-text-muted);
+  backdrop-filter: blur(24px);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.shell-chip:hover {
+  background: var(--synull-shell-hover-strong);
+  color: var(--synull-shell-text);
+}
+
+.shell-logo-pill {
+  border: 1px solid var(--synull-shell-border);
+  background: var(--synull-shell-hover);
+  color: var(--synull-shell-text);
+  backdrop-filter: blur(24px);
+}
+
+.shell-logo-mini {
+  background: var(--synull-shell-logo-bg);
+  color: var(--synull-shell-logo-fg);
+  box-shadow:
+    0 12px 32px rgb(93 67 214 / 18%),
+    inset 0 0 0 1px rgb(255 255 255 / 28%);
+}
+
+.shell-link {
+  color: var(--synull-shell-text-muted);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.shell-link:hover {
+  background: var(--synull-shell-hover);
+  color: var(--synull-shell-text);
+}
+
+.shell-overlay {
+  background: var(--synull-shell-overlay);
+  backdrop-filter: blur(10px);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/92,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/82,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/75 {
+  color: var(--ui-text);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/72,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/70,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/68,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/65,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/60,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/58 {
+  color: var(--ui-text-muted);
+}
+
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/50,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/45,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/40,
+html:not(.dark)
+  .dashboard-shell
+  :where(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, dt, dd, label, li, td, th, a, div, svg).text-white\/35 {
+  color: var(--ui-text-dim);
+}
+
+html:not(.dark) .dashboard-shell :where(span, p, div, svg).text-white\/20,
+html:not(.dark) .dashboard-shell :where(span, p, div, svg).text-white\/15 {
+  color: color-mix(in oklab, var(--ui-text) 24%, transparent);
 }
 
 .w-18 {

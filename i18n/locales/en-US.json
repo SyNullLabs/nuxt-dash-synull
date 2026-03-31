@@ -1,6 +1,8 @@
 {
   "welcome": "Welcome, {user}",
   "selectLanguage": "Select Language",
+  "switchToLightMode": "Switch to light mode",
+  "switchToDarkMode": "Switch to dark mode",
   "personalProfile": "Personal Profile",
   "securitySettings": "Security Settings",
   "logout": "Logout",

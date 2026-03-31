@@ -1,60 +1,42 @@
 <template>
-  <div class="dashboard-shell min-h-screen text-white">
-    <TopBar v-model="sidebarStore.isOpen" />
-    <Sidebar v-model="sidebarStore.isOpen" />
-    <main
-      :class="[
-        'relative pt-24 pr-4 pb-6',
-        sidebarStore.isMobile
-          ? 'pl-4'
-          : [
-              'transition-all duration-300 ease-in-out',
-              sidebarStore.isOpen ? 'pl-69' : 'pl-23',
-            ],
-      ]"
-    >
-      <div class="mx-auto w-full max-w-[1800px]">
-        <slot />
-      </div>
-    </main>
+  <div class="dashboard-shell min-h-screen text-[color:var(--ui-text)]">
+    <UDashboardGroup storage="local" storage-key="synull-dashboard">
+      <Sidebar />
 
-    <div
-      v-if="sidebarStore.isOpen && sidebarStore.isMobile"
-      class="fixed inset-0 z-10 bg-black/70 backdrop-blur-sm"
-      @click="sidebarStore.setIsOpen(false)"
-    />
+      <UDashboardPanel id="synull-main-panel">
+        <template #header>
+          <TopBar />
+        </template>
+
+        <template #body>
+          <main class="px-4 pb-6 pt-4 sm:px-6">
+            <div class="mx-auto w-full max-w-[1800px]">
+              <slot />
+            </div>
+          </main>
+        </template>
+      </UDashboardPanel>
+    </UDashboardGroup>
   </div>
 </template>
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
-import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
-import Sidebar from "~/components/Sidebar.vue";
-import TopBar from "~/components/TopBar.vue";
-import { normalizeLocaleCode } from "~/composables/useLocalePreference";
-import { useAffStore } from "~/stores/aff";
-import { useAlertStore } from "~/stores/alert";
-import { useSidebarStore } from "~/stores/sidebar";
-import { useUserInfoStore } from "~/stores/userInfo";
-
-const sidebarStore = useSidebarStore();
-const userInfoStore = useUserInfoStore();
-const isMobile = ref(false);
-const { locale } = useI18n();
-const router = useRouter();
-const alertStore = useAlertStore();
-
-const handleResize = () => {
-  if (!process.client) {
-    return;
-  }
-
-  isMobile.value = window.innerWidth < 1024;
-  sidebarStore.setIsMobile(isMobile.value);
-};
-
-const redirectToLogin = () => {
-  router.push({
+ import { onMounted } from "vue";
+ import { useI18n } from "vue-i18n";
+ import { useRouter } from "vue-router";
+ import Sidebar from "~/components/Sidebar.vue";
+ import TopBar from "~/components/TopBar.vue";
+ import { normalizeLocaleCode } from "~/composables/useLocalePreference";
+ import { useAffStore } from "~/stores/aff";
+ import { useAlertStore } from "~/stores/alert";
+ import { useUserInfoStore } from "~/stores/userInfo";
+ 
+ const userInfoStore = useUserInfoStore();
+ const { locale } = useI18n();
+ const router = useRouter();
+ const alertStore = useAlertStore();
+ 
+ const redirectToLogin = () => {
+   router.push({
     path: "/auth/login",
     query: {
       redirect_uri: router.currentRoute.value.fullPath,
@@ -63,6 +45,12 @@ const redirectToLogin = () => {
 };
 
 const checkLoginStatus = async () => {
+  // Skip auth check on public pages (e.g. /buy)
+  const path = router.currentRoute.value.path.replace(/\/+$/, "") || "/";
+  if (path === "/buy" || path.startsWith("/buy/")) {
+    return;
+  }
+
   const token = getAuthToken();
 
   if (!token) {
@@ -74,23 +62,15 @@ const checkLoginStatus = async () => {
   await userInfoStore.fetchUserInfo();
 };
 
-onMounted(async () => {
-  useAffStore();
-  await checkLoginStatus();
-  handleResize();
-  window.addEventListener("resize", handleResize);
-
-  const savedLocale = document.cookie.replace(
-    /(?:(?:^|.*;\s*)i18n_redirected\s*=\s*([^;]*).*$)|^.*$/,
-    "$1"
-  );
-
-  locale.value = normalizeLocaleCode(savedLocale || locale.value);
-});
-
-onUnmounted(() => {
-  if (process.client) {
-    window.removeEventListener("resize", handleResize);
-  }
-});
-</script>
+ onMounted(async () => {
+   useAffStore();
+   await checkLoginStatus();
+ 
+   const savedLocale = document.cookie.replace(
+     /(?:(?:^|.*;\s*)i18n_redirected\s*=\s*([^;]*).*$)|^.*$/,
+     "$1"
+   );
+ 
+   locale.value = normalizeLocaleCode(savedLocale || locale.value);
+ });
+ </script>

@@ -1,11 +1,14 @@
 export default defineNuxtRouteMiddleware((to) => {
-  const publicAuthRoutes = new Set([
-    "/auth/login",
-    "/auth/register",
-    "/auth/reset",
-  ]);
+  const path = to.path.replace(/\/+$/, "") || "/";
 
-  if (publicAuthRoutes.has(to.path)) {
+  // Public routes that don't require login
+  if (
+    path === "/auth/login" ||
+    path === "/auth/register" ||
+    path === "/auth/reset" ||
+    path === "/buy" ||
+    path.startsWith("/buy/")
+  ) {
     return;
   }
 
