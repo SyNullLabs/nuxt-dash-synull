@@ -3,11 +3,13 @@ import {
   resolveSmsMkToken,
 } from "../../../../utils/mf-auth";
 import { requestBackendResult } from "../../../../utils/mf-api";
+import { validateTurnstileToken } from "../../../../utils/mf-turnstile";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const phoneCode = body.phoneCode?.toString().trim();
   const phone = body.phone?.toString().trim();
+  const turnstileToken = body.turnstileToken;
 
   if (!phoneCode || !phone) {
     return {
@@ -15,6 +17,12 @@ export default defineEventHandler(async (event) => {
       status: 400,
       message: "请输入区号和手机号",
     };
+  }
+
+  const turnstileValidation = await validateTurnstileToken(turnstileToken);
+
+  if (!turnstileValidation.success) {
+    return turnstileValidation;
   }
 
   const mk = await resolveSmsMkToken();

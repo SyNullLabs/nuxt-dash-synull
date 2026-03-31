@@ -52,16 +52,28 @@
         </form>
       </div>
     </div>
+
+    <TurnstileDialog
+      v-model="passwordTurnstile.token"
+      :open="passwordTurnstile.isOpen"
+      :nonce="passwordTurnstile.nonce"
+      :title="t('verify')"
+      :description="t('completeVerification')"
+      @error="handleTurnstileError"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from "vue";
+import { useToast } from "#imports";
 import { useI18n } from "vue-i18n";
+import { useTurnstileChallenge } from "~/composables/useTurnstileChallenge";
 
 const { t } = useI18n();
 const api = useApiClient();
 const toast = useToast();
+const passwordTurnstile = useTurnstileChallenge();
 
 const loading = ref(true);
 const saving = ref(false);
@@ -99,6 +111,20 @@ onMounted(async () => {
   }
 });
 
+const handleTurnstileError = () => {
+  toast.add({ title: t("turnstileError"), color: "error" });
+};
+
+const withPasswordTurnstile = async (handler) => {
+  const turnstileToken = await passwordTurnstile.ensureToken();
+
+  try {
+    return await handler(turnstileToken);
+  } finally {
+    passwordTurnstile.reset();
+  }
+};
+
 const saveProfile = async () => {
   saving.value = true;
   try {
@@ -122,7 +148,12 @@ const changePassword = async () => {
   }
   changingPw.value = true;
   try {
-    const res = await api("/user/password", { method: "POST", body: { ...pwForm } });
+    const res = await withPasswordTurnstile((turnstileToken) =>
+      api("/user/password", {
+        method: "POST",
+        body: { ...pwForm, turnstileToken },
+      })
+    );
     if (res?.success) {
       toast.add({ title: res.message || t("passwordChanged"), color: "success" });
       pwForm.old_password = "";

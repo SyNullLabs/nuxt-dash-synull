@@ -118,16 +118,28 @@
         </div>
       </template>
     </UModal>
+
+    <TurnstileDialog
+      v-model="securityTurnstile.token"
+      :open="securityTurnstile.isOpen"
+      :nonce="securityTurnstile.nonce"
+      :title="t('verify')"
+      :description="t('completeVerification')"
+      @error="handleTurnstileError"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from "vue";
+import { useToast } from "#imports";
 import { useI18n } from "vue-i18n";
+import { useTurnstileChallenge } from "~/composables/useTurnstileChallenge";
 
 const { t } = useI18n();
 const api = useApiClient();
 const toast = useToast();
+const securityTurnstile = useTurnstileChallenge();
 
 const userPhone = ref("");
 const userEmail = ref("");
@@ -157,9 +169,28 @@ onMounted(async () => {
   }
 });
 
+const handleTurnstileError = () => {
+  toast.add({ title: t("turnstileError"), color: "error" });
+};
+
+const withSecurityTurnstile = async (handler) => {
+  const turnstileToken = await securityTurnstile.ensureToken();
+
+  try {
+    return await handler(turnstileToken);
+  } finally {
+    securityTurnstile.reset();
+  }
+};
+
 const securityAction = async (action, body = {}) => {
   try {
-    const res = await api("/user/security", { method: "POST", body: { action, ...body } });
+    const res = await withSecurityTurnstile((turnstileToken) =>
+      api("/user/security", {
+        method: "POST",
+        body: { action, ...body, turnstileToken },
+      })
+    );
     if (res?.success) {
       toast.add({ title: res.message || t("success"), color: "success" });
       return true;
@@ -185,6 +216,11 @@ const openEmailModal = () => {
 };
 
 const sendPhoneCode = async () => {
+  if (!phoneForm.phone) {
+    toast.add({ title: t("pleaseEnterPhone"), color: "error" });
+    return;
+  }
+
   sendingPhoneCode.value = true;
   const action = userPhone.value ? "change_phone_send" : "bind_phone_send";
   await securityAction(action, { phone: phoneForm.phone });
@@ -192,6 +228,16 @@ const sendPhoneCode = async () => {
 };
 
 const bindPhone = async () => {
+  if (!phoneForm.phone) {
+    toast.add({ title: t("pleaseEnterPhone"), color: "error" });
+    return;
+  }
+
+  if (!phoneForm.code) {
+    toast.add({ title: t("pleaseEnterVerificationCode"), color: "error" });
+    return;
+  }
+
   bindingPhone.value = true;
   const action = userPhone.value ? "change_phone" : "bind_phone";
   const ok = await securityAction(action, { phone: phoneForm.phone, code: phoneForm.code });
@@ -203,6 +249,11 @@ const bindPhone = async () => {
 };
 
 const sendEmailCode = async () => {
+  if (!emailForm.email) {
+    toast.add({ title: t("pleaseEnterEmail"), color: "error" });
+    return;
+  }
+
   sendingEmailCode.value = true;
   const action = userEmail.value ? "change_email_send" : "bind_email_send";
   await securityAction(action, { email: emailForm.email });
@@ -210,6 +261,16 @@ const sendEmailCode = async () => {
 };
 
 const bindEmail = async () => {
+  if (!emailForm.email) {
+    toast.add({ title: t("pleaseEnterEmail"), color: "error" });
+    return;
+  }
+
+  if (!emailForm.code) {
+    toast.add({ title: t("pleaseEnterVerificationCode"), color: "error" });
+    return;
+  }
+
   bindingEmail.value = true;
   const action = userEmail.value ? "change_email" : "bind_email";
   const ok = await securityAction(action, { email: emailForm.email, code: emailForm.code });

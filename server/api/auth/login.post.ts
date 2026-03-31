@@ -1,4 +1,5 @@
 import { requestBackend } from "../../utils/mf-api";
+import { validateTurnstileToken } from "../../utils/mf-turnstile";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -13,20 +14,10 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  if (!turnstileToken) {
-    return {
-      success: false,
-      message: "请先完成人机验证",
-    };
-  }
+  const turnstileValidation = await validateTurnstileToken(turnstileToken);
 
-  const turnstileVerification = await verifyTurnstileToken(turnstileToken);
-
-  if (!turnstileVerification.success) {
-    return {
-      success: false,
-      message: "Turnstile 验证失败",
-    };
+  if (!turnstileValidation.success) {
+    return turnstileValidation;
   }
 
   const loginResponse = await requestBackend("/login_pass_email", {

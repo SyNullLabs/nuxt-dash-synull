@@ -209,6 +209,15 @@
             </template>
           </button>
         </form>
+
+        <TurnstileDialog
+          v-model="registerTurnstile.token"
+          :open="registerTurnstile.isOpen"
+          :nonce="registerTurnstile.nonce"
+          :title="$t('verify')"
+          :description="$t('completeVerification')"
+          @error="handleTurnstileError"
+        />
       </template>
       <p v-else class="text-sm text-white/48">
         {{ $t("registerUnavailable") }}
@@ -231,7 +240,9 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import { useAffiliateReferral } from "~/composables/useAffiliateReferral";
 import { useAuthMethods } from "~/composables/useAuthMethods";
+import { useTurnstileChallenge } from "~/composables/useTurnstileChallenge";
 import { useVerificationCode } from "~/composables/useVerificationCode";
 import { useAlertStore } from "~/stores/alert";
 
@@ -240,7 +251,9 @@ const route = useRoute();
 const router = useRouter();
 const alertStore = useAlertStore();
 const api = useApiClient();
+const { affiliateRef, readAffiliateQuery } = useAffiliateReferral();
 const { methods, loadAuthMethods } = useAuthMethods();
+const registerTurnstile = useTurnstileChallenge();
 
 const activeMode = ref("email");
 const email = ref("");
@@ -261,10 +274,7 @@ definePageMeta({
 });
 
 const saleId = computed(() => {
-  const queryValue = route.query.sale_id;
-  return Array.isArray(queryValue)
-    ? queryValue[0]
-    : queryValue?.toString().trim();
+  return readAffiliateQuery(route.query) || affiliateRef.value || "";
 });
 
 const registerModes = computed(() => {
@@ -319,6 +329,20 @@ const refreshCaptcha = () => {
   captchaNonce.value = Date.now();
 };
 
+const handleTurnstileError = () => {
+  alertStore.showAlert(t("turnstileError"), "error");
+};
+
+const withTurnstile = async (handler) => {
+  const turnstileToken = await registerTurnstile.ensureToken();
+
+  try {
+    return await handler(turnstileToken);
+  } finally {
+    registerTurnstile.reset();
+  }
+};
+
 const validateSharedFields = () => {
   if (
     !verificationCode.value ||
@@ -340,16 +364,39 @@ const validateSharedFields = () => {
 
 const handleSendCode = async () => {
   try {
-    await activeSender.value.send(async () => {
-      if (activeMode.value === "email") {
-        if (!email.value) {
-          throw new Error(t("pleaseEnterEmail"));
+    await activeSender.value.send(() =>
+      withTurnstile(async (turnstileToken) => {
+        if (activeMode.value === "email") {
+          if (!email.value) {
+            throw new Error(t("pleaseEnterEmail"));
+          }
+
+          const response = await api("/auth/register/email/send", {
+            method: "POST",
+            body: {
+              email: email.value,
+              turnstileToken,
+            },
+          });
+
+          if (!response.success) {
+            throw new Error(response.message || t("sendCodeFailed"));
+          }
+
+          alertStore.showAlert(response.message || t("codeSent"), "success");
+          return;
         }
 
-        const response = await api("/auth/register/email/send", {
+        if (!phoneCode.value || !phone.value) {
+          throw new Error(t("pleaseEnterPhone"));
+        }
+
+        const response = await api("/auth/register/phone/send", {
           method: "POST",
           body: {
-            email: email.value,
+            phoneCode: phoneCode.value,
+            phone: phone.value,
+            turnstileToken,
           },
         });
 
@@ -358,29 +405,10 @@ const handleSendCode = async () => {
         }
 
         alertStore.showAlert(response.message || t("codeSent"), "success");
-        return;
-      }
-
-      if (!phoneCode.value || !phone.value) {
-        throw new Error(t("pleaseEnterPhone"));
-      }
-
-      const response = await api("/auth/register/phone/send", {
-        method: "POST",
-        body: {
-          phoneCode: phoneCode.value,
-          phone: phone.value,
-        },
-      });
-
-      if (!response.success) {
-        throw new Error(response.message || t("sendCodeFailed"));
-      }
-
-      alertStore.showAlert(response.message || t("codeSent"), "success");
-    });
+      })
+    );
   } catch (error) {
-    alertStore.showAlert(error.message || t("sendCodeFailed"), "error");
+    alertStore.showAlert(error?.message || t("sendCodeFailed"), "error");
   }
 };
 
@@ -402,22 +430,25 @@ const handleRegister = async () => {
   isSubmitting.value = true;
 
   try {
-    const response = await api(
-      activeMode.value === "email"
-        ? "/auth/register/email"
-        : "/auth/register/phone",
-      {
-        method: "POST",
-        body: {
-          email: email.value,
-          phoneCode: phoneCode.value,
-          phone: phone.value,
-          password: password.value,
-          code: verificationCode.value,
-          captcha: captcha.value,
-          saleId: saleId.value,
-        },
-      }
+    const response = await withTurnstile((turnstileToken) =>
+      api(
+        activeMode.value === "email"
+          ? "/auth/register/email"
+          : "/auth/register/phone",
+        {
+          method: "POST",
+          body: {
+            email: email.value,
+            phoneCode: phoneCode.value,
+            phone: phone.value,
+            password: password.value,
+            code: verificationCode.value,
+            captcha: captcha.value,
+            saleId: saleId.value,
+            turnstileToken,
+          },
+        }
+      )
     );
 
     if (!response.success) {
@@ -432,7 +463,7 @@ const handleRegister = async () => {
     );
     await router.push("/auth/login");
   } catch (error) {
-    alertStore.showAlert(error.message || t("registerFailed"), "error");
+    alertStore.showAlert(error?.message || t("registerFailed"), "error");
     refreshCaptcha();
   } finally {
     isSubmitting.value = false;

@@ -3,6 +3,26 @@ import {
   requireBackendAuthorization,
 } from "../../utils/mf-api";
 
+const normalizeAffiliateData = (data: Record<string, any> = {}) => {
+  const firstItem = Array.isArray(data?.data) ? data.data[0] || {} : {};
+
+  return {
+    ...data,
+    ...firstItem,
+    referral_link:
+      data.referral_link ||
+      firstItem.referral_link ||
+      firstItem.url ||
+      data.url ||
+      "",
+    total_referrals:
+      data.total_referrals ?? firstItem.registcount ?? data.registcount ?? 0,
+    total_earnings: data.total_earnings ?? firstItem.sum ?? data.sum ?? "0.00",
+    available_balance:
+      data.available_balance ?? firstItem.balance ?? data.balance ?? "0.00",
+  };
+};
+
 export default defineEventHandler(async (event) => {
   const authorization = requireBackendAuthorization(event);
   const query = getQuery(event);
@@ -34,5 +54,5 @@ export default defineEventHandler(async (event) => {
     return { success: false, message: response.msg || "获取推荐信息失败" };
   }
 
-  return { success: true, data: response.data };
+  return { success: true, data: normalizeAffiliateData(response.data) };
 });

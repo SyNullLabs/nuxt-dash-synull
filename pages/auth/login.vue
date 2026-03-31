@@ -12,7 +12,7 @@
         </p>
       </div>
 
-      <form class="space-y-5" @submit.prevent="handleLoginClick">
+      <form class="space-y-5" @submit.prevent="handleLogin">
         <div class="space-y-2.5">
           <label class="block text-sm font-medium text-white/72" for="email">
             {{ $t("email") }}
@@ -51,39 +51,23 @@
           />
         </div>
 
-        <div v-if="showTurnstile" class="space-y-2">
-          <p class="text-xs text-white/45">
-            {{ isLoading ? $t("loggingIn") : $t("completeVerification") }}
-          </p>
-          <ClientOnly>
-            <div
-              class="relative overflow-hidden rounded-[0.9rem] border border-white/10 bg-white/6"
-              style="height: 66px"
-            >
-              <NuxtTurnstile
-                class="absolute inset-0 z-10"
-                v-model="turnstileToken"
-                @error="handleTurnstileError"
-                :options="{ size: 'flexible' }"
-                style="width: 100%; height: 64px"
-              />
-              <USkeleton
-                v-if="!turnstileToken"
-                class="absolute inset-[1px] z-0 rounded-[0.82rem]"
-              />
-            </div>
-          </ClientOnly>
-        </div>
-
         <button
-          v-if="!showTurnstile"
           class="auth-primary-button flex h-11 w-full items-center justify-center rounded-[0.7rem] px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-70"
           type="submit"
           :disabled="isLoading"
         >
-          {{ $t("loginButton") }}
+          {{ isLoading ? $t("loggingIn") : $t("loginButton") }}
         </button>
       </form>
+
+      <TurnstileDialog
+        v-model="loginTurnstile.token"
+        :open="loginTurnstile.isOpen"
+        :nonce="loginTurnstile.nonce"
+        :title="$t('verify')"
+        :description="$t('completeVerification')"
+        @error="handleTurnstileError"
+      />
 
       <p class="text-center text-sm text-white/48">
         {{ $t("dontHaveAccount") }}
@@ -99,9 +83,10 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+import { useTurnstileChallenge } from "~/composables/useTurnstileChallenge";
 import { useAlertStore } from "~/stores/alert";
 import { useAuthStore } from "~/stores/auth";
 
@@ -110,11 +95,10 @@ const router = useRouter();
 const authStore = useAuthStore();
 const alertStore = useAlertStore();
 const api = useApiClient();
+const loginTurnstile = useTurnstileChallenge();
 
 const email = ref("");
 const password = ref("");
-const turnstileToken = ref("");
-const showTurnstile = ref(false);
 const isLoading = ref(false);
 
 definePageMeta({
@@ -125,22 +109,20 @@ const handleTurnstileError = () => {
   alertStore.showAlert(t("turnstileError"), "error");
 };
 
-watch(turnstileToken, async (newToken) => {
-  if (newToken && email.value && password.value) {
-    await handleLogin();
-  }
-});
-
-const handleLoginClick = async () => {
+const handleLogin = async () => {
   if (!email.value || !password.value) {
     alertStore.showAlert(t("pleaseEnterCredentials"), "error");
     return;
   }
 
-  showTurnstile.value = true;
-};
+  let turnstileToken = "";
 
-const handleLogin = async () => {
+  try {
+    turnstileToken = await loginTurnstile.ensureToken();
+  } catch {
+    return;
+  }
+
   try {
     isLoading.value = true;
     alertStore.showAlert(t("loggingIn"), "info");
@@ -150,7 +132,7 @@ const handleLogin = async () => {
       body: {
         email: email.value,
         password: password.value,
-        turnstileToken: turnstileToken.value,
+        turnstileToken,
       },
     });
 
@@ -169,28 +151,19 @@ const handleLogin = async () => {
         t("loginFailed") + (response.message || t("unknownError")),
         "error"
       );
-      resetTurnstile();
     }
   } catch (error) {
     alertStore.showAlert(
       error?.data?.message || error?.statusMessage || t("loginError"),
       "error"
     );
-    resetTurnstile();
   } finally {
     isLoading.value = false;
+    loginTurnstile.reset();
   }
 };
 
 const handleSecondVerification = () => {
   // 实现二次验证逻辑
-};
-
-const resetTurnstile = () => {
-  turnstileToken.value = "";
-  showTurnstile.value = false;
-  setTimeout(() => {
-    showTurnstile.value = true;
-  }, 250);
 };
 </script>

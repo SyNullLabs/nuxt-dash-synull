@@ -2,11 +2,13 @@ import {
   requestBackend,
   requireBackendAuthorization,
 } from "../../utils/mf-api";
+import { validateTurnstileToken } from "../../utils/mf-turnstile";
 
 export default defineEventHandler(async (event) => {
   const authorization = requireBackendAuthorization(event);
   const body = await readBody(event);
   const action = body?.action;
+  const turnstileValidation = await validateTurnstileToken(body?.turnstileToken);
 
   const endpointMap: Record<string, { path: string; method: string }> = {
     bind_phone_send: { path: "/bind_phone", method: "POST" },
@@ -29,13 +31,19 @@ export default defineEventHandler(async (event) => {
     return { success: false, message: "无效的操作" };
   }
 
+  if (!turnstileValidation.success) {
+    return turnstileValidation;
+  }
+
+  const { turnstileToken, ...requestBody } = body || {};
+
   const requestOptions: Record<string, any> = {
     method: endpoint.method,
     headers: { "Content-Type": "application/json", authorization },
   };
 
   if (endpoint.method === "POST") {
-    requestOptions.body = body;
+    requestOptions.body = requestBody;
   }
 
   const response = (await requestBackend(

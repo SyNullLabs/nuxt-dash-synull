@@ -2,15 +2,23 @@ import {
   requestBackend,
   requireBackendAuthorization,
 } from "../../utils/mf-api";
+import { validateTurnstileToken } from "../../utils/mf-turnstile";
 
 export default defineEventHandler(async (event) => {
   const authorization = requireBackendAuthorization(event);
   const body = await readBody(event);
+  const turnstileValidation = await validateTurnstileToken(body?.turnstileToken);
+
+  if (!turnstileValidation.success) {
+    return turnstileValidation;
+  }
+
+  const { turnstileToken, ...requestBody } = body || {};
 
   const response = (await requestBackend("/modify_password", {
     method: "POST",
     headers: { "Content-Type": "application/json", authorization },
-    body,
+    body: requestBody,
   })) as Record<string, any>;
 
   if (typeof response !== "object" || response === null) {

@@ -170,6 +170,15 @@
             </template>
           </button>
         </form>
+
+        <TurnstileDialog
+          v-model="resetTurnstile.token"
+          :open="resetTurnstile.isOpen"
+          :nonce="resetTurnstile.nonce"
+          :title="$t('verify')"
+          :description="$t('completeVerification')"
+          @error="handleTurnstileError"
+        />
       </template>
       <p v-else class="text-sm text-white/48">
         {{ $t("resetUnavailable") }}
@@ -192,6 +201,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useAuthMethods } from "~/composables/useAuthMethods";
+import { useTurnstileChallenge } from "~/composables/useTurnstileChallenge";
 import { useVerificationCode } from "~/composables/useVerificationCode";
 import { useAlertStore } from "~/stores/alert";
 
@@ -200,6 +210,7 @@ const router = useRouter();
 const alertStore = useAlertStore();
 const api = useApiClient();
 const { methods, loadAuthMethods } = useAuthMethods();
+const resetTurnstile = useTurnstileChallenge();
 
 const activeMode = ref("email");
 const email = ref("");
@@ -255,6 +266,20 @@ const sendCodeLabel = computed(() => {
   return t("sendCode");
 });
 
+const handleTurnstileError = () => {
+  alertStore.showAlert(t("turnstileError"), "error");
+};
+
+const withTurnstile = async (handler) => {
+  const turnstileToken = await resetTurnstile.ensureToken();
+
+  try {
+    return await handler(turnstileToken);
+  } finally {
+    resetTurnstile.reset();
+  }
+};
+
 const validateResetFields = () => {
   if (!verificationCode.value || !password.value || !confirmPassword.value) {
     alertStore.showAlert(t("pleaseCompleteResetInfo"), "error");
@@ -271,16 +296,39 @@ const validateResetFields = () => {
 
 const handleSendCode = async () => {
   try {
-    await activeSender.value.send(async () => {
-      if (activeMode.value === "email") {
-        if (!email.value) {
-          throw new Error(t("pleaseEnterEmail"));
+    await activeSender.value.send(() =>
+      withTurnstile(async (turnstileToken) => {
+        if (activeMode.value === "email") {
+          if (!email.value) {
+            throw new Error(t("pleaseEnterEmail"));
+          }
+
+          const response = await api("/auth/reset/email/send", {
+            method: "POST",
+            body: {
+              email: email.value,
+              turnstileToken,
+            },
+          });
+
+          if (!response.success) {
+            throw new Error(response.message || t("sendCodeFailed"));
+          }
+
+          alertStore.showAlert(response.message || t("codeSent"), "success");
+          return;
         }
 
-        const response = await api("/auth/reset/email/send", {
+        if (!phoneCode.value || !phone.value) {
+          throw new Error(t("pleaseEnterPhone"));
+        }
+
+        const response = await api("/auth/reset/phone/send", {
           method: "POST",
           body: {
-            email: email.value,
+            phoneCode: phoneCode.value,
+            phone: phone.value,
+            turnstileToken,
           },
         });
 
@@ -289,29 +337,10 @@ const handleSendCode = async () => {
         }
 
         alertStore.showAlert(response.message || t("codeSent"), "success");
-        return;
-      }
-
-      if (!phoneCode.value || !phone.value) {
-        throw new Error(t("pleaseEnterPhone"));
-      }
-
-      const response = await api("/auth/reset/phone/send", {
-        method: "POST",
-        body: {
-          phoneCode: phoneCode.value,
-          phone: phone.value,
-        },
-      });
-
-      if (!response.success) {
-        throw new Error(response.message || t("sendCodeFailed"));
-      }
-
-      alertStore.showAlert(response.message || t("codeSent"), "success");
-    });
+      })
+    );
   } catch (error) {
-    alertStore.showAlert(error.message || t("sendCodeFailed"), "error");
+    alertStore.showAlert(error?.message || t("sendCodeFailed"), "error");
   }
 };
 
@@ -333,18 +362,23 @@ const handleReset = async () => {
   isSubmitting.value = true;
 
   try {
-    const response = await api(
-      activeMode.value === "email" ? "/auth/reset/email" : "/auth/reset/phone",
-      {
-        method: "POST",
-        body: {
-          email: email.value,
-          phoneCode: phoneCode.value,
-          phone: phone.value,
-          password: password.value,
-          code: verificationCode.value,
-        },
-      }
+    const response = await withTurnstile((turnstileToken) =>
+      api(
+        activeMode.value === "email"
+          ? "/auth/reset/email"
+          : "/auth/reset/phone",
+        {
+          method: "POST",
+          body: {
+            email: email.value,
+            phoneCode: phoneCode.value,
+            phone: phone.value,
+            password: password.value,
+            code: verificationCode.value,
+            turnstileToken,
+          },
+        }
+      )
     );
 
     if (!response.success) {
@@ -355,7 +389,7 @@ const handleReset = async () => {
     alertStore.showAlert(response.message || t("resetSuccessMsg"), "success");
     await router.push("/auth/login");
   } catch (error) {
-    alertStore.showAlert(error.message || t("resetFailed"), "error");
+    alertStore.showAlert(error?.message || t("resetFailed"), "error");
   } finally {
     isSubmitting.value = false;
   }
