@@ -27,13 +27,7 @@
           </UDropdownMenu>
         </div>
       </div>
-
-      <NuxtLink
-        to="/"
-        class="absolute bottom-6 text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[color:var(--ui-text-dim)] transition-colors hover:text-[color:var(--ui-text-muted)]"
-      >
-        SyNull
-      </NuxtLink>
+      <UButton class="absolute bottom-6 p-0" color="neutral" size="sm" variant="link" :to="officialSiteUrl">SyNull</UButton>
     </div>
   </div>
 </template>
@@ -49,7 +43,9 @@ import { useAffStore } from "~/stores/aff";
 
 useAffStore();
 
+const runtimeConfig = useRuntimeConfig();
 const { locale } = useI18n();
+const officialSiteUrl = runtimeConfig.public.officialSiteUrl || "/";
 
 const availableLanguages = [
   { code: "zh-CN", name: "简体中文", flag: "🇨🇳" },

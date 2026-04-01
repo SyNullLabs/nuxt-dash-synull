@@ -134,6 +134,10 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_BASE_URL ||
         process.env.BASE_URL ||
         "http://localhost:3000",
+      officialSiteUrl:
+        process.env.NUXT_PUBLIC_OFFICIAL_SITE_URL ||
+        process.env.OFFICIAL_SITE_URL ||
+        "/",
       turnstileSiteKey: process.env.TURNSTILE_SITE_KEY,
     },
   },
