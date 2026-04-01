@@ -131,7 +131,11 @@ const handleLogin = async () => {
 
   try {
     turnstileToken = await loginTurnstile.ensureToken("submit");
-  } catch {
+  } catch (error) {
+    if (error?.message === "Turnstile challenge unavailable") {
+      handleTurnstileError();
+    }
+
     return;
   }
 

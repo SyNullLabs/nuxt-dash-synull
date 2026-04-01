@@ -1,6 +1,7 @@
 import { onBeforeUnmount, ref, watch } from "vue";
 
 const TURNSTILE_CANCELLED_ERROR = "Turnstile challenge cancelled";
+const TURNSTILE_UNAVAILABLE_ERROR = "Turnstile challenge unavailable";
 
 export const useTurnstileChallenge = () => {
   const token = ref("");
@@ -37,6 +38,16 @@ export const useTurnstileChallenge = () => {
   };
 
   const ensureToken = (slot = "default") => {
+    const runtimeConfig = useRuntimeConfig();
+    const siteKey =
+      runtimeConfig.public.turnstileSiteKey ||
+      runtimeConfig.public.turnstile?.siteKey ||
+      "";
+
+    if (!siteKey) {
+      return Promise.reject(new Error(TURNSTILE_UNAVAILABLE_ERROR));
+    }
+
     if (token.value) {
       return Promise.resolve(token.value);
     }

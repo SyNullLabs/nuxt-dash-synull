@@ -297,6 +297,8 @@ const handleTurnstileError = () => {
 
 const isTurnstileCancelled = (error) =>
   error?.message === "Turnstile challenge cancelled";
+const isTurnstileUnavailable = (error) =>
+  error?.message === "Turnstile challenge unavailable";
 
 const withTurnstile = async (handler, slot = "submit") => {
   const turnstileToken = await resetTurnstile.ensureToken(slot);
@@ -323,14 +325,20 @@ const validateResetFields = () => {
 };
 
 const handleSendCode = async () => {
+  if (activeMode.value === "email" && !email.value) {
+    alertStore.showAlert(t("pleaseEnterEmail"), "error");
+    return;
+  }
+
+  if (activeMode.value === "phone" && (!phoneCode.value || !phone.value)) {
+    alertStore.showAlert(t("pleaseEnterPhone"), "error");
+    return;
+  }
+
   try {
     await activeSender.value.send(() =>
       withTurnstile(async (turnstileToken) => {
         if (activeMode.value === "email") {
-          if (!email.value) {
-            throw new Error(t("pleaseEnterEmail"));
-          }
-
           const response = await api("/auth/reset/email/send", {
             method: "POST",
             body: {
@@ -345,10 +353,6 @@ const handleSendCode = async () => {
 
           alertStore.showAlert(response.message || t("codeSent"), "success");
           return;
-        }
-
-        if (!phoneCode.value || !phone.value) {
-          throw new Error(t("pleaseEnterPhone"));
         }
 
         const response = await api("/auth/reset/phone/send", {
@@ -369,6 +373,11 @@ const handleSendCode = async () => {
     );
   } catch (error) {
     if (isTurnstileCancelled(error)) {
+      return;
+    }
+
+    if (isTurnstileUnavailable(error)) {
+      handleTurnstileError();
       return;
     }
 
@@ -422,6 +431,11 @@ const handleReset = async () => {
     await router.push("/auth/login");
   } catch (error) {
     if (isTurnstileCancelled(error)) {
+      return;
+    }
+
+    if (isTurnstileUnavailable(error)) {
+      handleTurnstileError();
       return;
     }
 
