@@ -1,6 +1,7 @@
 import {
   buildBackendActionResponse,
   clearCaptchaSession,
+  fetchAuthMethodConfig,
   readCaptchaSession,
 } from "../../../utils/mf-auth";
 import { requestBackendResult } from "../../../utils/mf-api";
@@ -14,8 +15,10 @@ export default defineEventHandler(async (event) => {
   const captcha = body.captcha?.trim();
   const saleId = body.saleId?.toString().trim();
   const turnstileToken = body.turnstileToken;
+  const authMethodConfig = await fetchAuthMethodConfig();
+  const requiresCaptcha = authMethodConfig.captcha?.register?.email;
 
-  if (!email || !password || !code || !captcha) {
+  if (!email || !password || !code || (requiresCaptcha && !captcha)) {
     return {
       success: false,
       status: 400,
@@ -29,9 +32,9 @@ export default defineEventHandler(async (event) => {
     return turnstileValidation;
   }
 
-  const captchaSession = readCaptchaSession(event);
+  const captchaSession = requiresCaptcha ? readCaptchaSession(event) : "";
 
-  if (!captchaSession) {
+  if (requiresCaptcha && !captchaSession) {
     return {
       success: false,
       status: 400,
@@ -41,19 +44,17 @@ export default defineEventHandler(async (event) => {
 
   const { payload } = await requestBackendResult("/register_email", {
     method: "POST",
-    headers: {
-      cookie: captchaSession,
-    },
+    headers: captchaSession ? { cookie: captchaSession } : undefined,
     body: {
       email,
       password,
       code,
-      captcha,
+      ...(requiresCaptcha ? { captcha } : {}),
       ...(saleId ? { sale_id: saleId } : {}),
     },
   });
 
-  if (Number(payload?.status) === 200) {
+  if (requiresCaptcha && Number(payload?.status) === 200) {
     clearCaptchaSession(event);
   }
 

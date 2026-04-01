@@ -170,7 +170,7 @@
             />
           </div>
 
-          <div class="space-y-2.5">
+          <div v-if="requiresCaptcha" class="space-y-2.5">
             <div class="flex items-center justify-between gap-4">
               <label
                 class="block text-sm font-medium text-white/72"
@@ -323,6 +323,15 @@ const registerModes = computed(() => {
 const hasRegisterMethods = computed(
   () => !methods.value || registerModes.value.length > 0
 );
+const requiresCaptcha = computed(() => {
+  if (!methods.value) {
+    return true;
+  }
+
+  return activeMode.value === "email"
+    ? !!methods.value.captcha?.register?.email
+    : !!methods.value.captcha?.register?.phone;
+});
 
 const activeSender = computed(() =>
   activeMode.value === "email" ? emailSender : phoneSender
@@ -374,12 +383,12 @@ const withTurnstile = async (handler, slot = "submit") => {
 };
 
 const validateSharedFields = () => {
-  if (
-    !verificationCode.value ||
-    !password.value ||
-    !confirmPassword.value ||
-    !captcha.value
-  ) {
+  if (!verificationCode.value || !password.value || !confirmPassword.value) {
+    alertStore.showAlert(t("pleaseCompleteRegisterInfo"), "error");
+    return false;
+  }
+
+  if (requiresCaptcha.value && !captcha.value) {
     alertStore.showAlert(t("pleaseCompleteRegisterInfo"), "error");
     return false;
   }
@@ -484,9 +493,9 @@ const handleRegister = async () => {
             phone: phone.value,
             password: password.value,
             code: verificationCode.value,
-            captcha: captcha.value,
             saleId: saleId.value,
             turnstileToken,
+            ...(requiresCaptcha.value ? { captcha: captcha.value } : {}),
           },
         }
       )
@@ -494,7 +503,9 @@ const handleRegister = async () => {
 
     if (!response.success) {
       alertStore.showAlert(response.message || t("registerFailed"), "error");
-      refreshCaptcha();
+      if (requiresCaptcha.value) {
+        refreshCaptcha();
+      }
       return;
     }
 
@@ -514,7 +525,9 @@ const handleRegister = async () => {
     }
 
     alertStore.showAlert(error?.message || t("registerFailed"), "error");
-    refreshCaptcha();
+    if (requiresCaptcha.value) {
+      refreshCaptcha();
+    }
   } finally {
     isSubmitting.value = false;
   }

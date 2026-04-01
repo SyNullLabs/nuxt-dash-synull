@@ -145,7 +145,40 @@ export const extractAuthMethodConfig = (data: Record<string, any> = {}) => {
           resetPhoneBase
         ) && resetPhoneBase,
     },
+    captcha: {
+      register: {
+        email: readBooleanFlag(data, ["allow_register_email_captcha"]),
+        phone: readBooleanFlag(data, ["allow_register_phone_captcha"]),
+      },
+      reset: {
+        email: readBooleanFlag(data, [
+          "allow_reset_email_captcha",
+          "allow_findpass_email_captcha",
+          "allow_forget_email_captcha",
+        ]),
+        phone: readBooleanFlag(data, [
+          "allow_reset_phone_captcha",
+          "allow_findpass_phone_captcha",
+          "allow_forget_phone_captcha",
+        ]),
+      },
+    },
   };
+};
+
+export const fetchAuthMethodConfig = async () => {
+  const { payload } = await requestBackendResult("/login_register_index", {
+    method: "GET",
+  });
+
+  if (Number(payload?.status) !== 200) {
+    throw createError({
+      statusCode: 502,
+      statusMessage: payload?.msg || "获取认证方式失败",
+    });
+  }
+
+  return extractAuthMethodConfig(payload?.data || {});
 };
 
 export const resolveSmsMkToken = async () => {
