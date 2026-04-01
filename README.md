@@ -20,12 +20,27 @@
 
 ## 环境变量
 
-项目使用以下环境变量进行配置：
+建议先复制一份模板：
 
+```bash
+cp .env.example .env
+```
+
+项目当前实际使用到的环境变量如下：
+
+- `MIDDLEWARE_BACKEND_URL`：自定义中间件 / BFF 实际转发的后端地址。若配置，则优先于下面的默认后端地址。
+- `BACKEND_URL`：默认魔方财务后端地址。代码同时兼容 `BACK_URL`、`NUXT_BACK_URL`，三选一即可。
+- `NUXT_PUBLIC_BASE_URL`：当前站点对外访问地址。代码同时兼容 `BASE_URL`。
 - `TURNSTILE_SITE_KEY`：Cloudflare Turnstile 的站点密钥。
 - `TURNSTILE_SECRET_KEY`：Cloudflare Turnstile 的私密密钥。
-- `BASE_URL`：项目的基础 URL，默认为 `http://localhost:3000`。
-- `NUXT_SESSION_PASSWORD`：Nuxt 会话的密码，默认会自动生成。
+- `NUXT_SESSION_PASSWORD`：Nuxt 会话密钥，必须配置，建议使用 32 位以上随机字符串。
+
+其中：
+
+- 登录、注册、找回密码、安全中心等带 Turnstile 的流程会依赖 `TURNSTILE_SITE_KEY` 和 `TURNSTILE_SECRET_KEY`。
+- `NUXT_SESSION_PASSWORD` 为空时，基于 `nuxt-auth-utils` 的会话接口会直接报错。
+- 所有本地 `/api/*` 自定义中间件 / BFF 转发默认读取 `BACKEND_URL`，若配置了 `MIDDLEWARE_BACKEND_URL` 则以它为准。
+- 若只想本地跑静态页面，`TURNSTILE_*` 可以先留空，但相关验证流程不会正常工作。
 
 ## 安装与运行
 

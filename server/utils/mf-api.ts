@@ -8,7 +8,8 @@ const resolveBackendBaseUrl = () => {
   if (!config.backUrl) {
     throw createError({
       statusCode: 500,
-      statusMessage: "BACK_URL/BACKEND_URL 未配置",
+      statusMessage:
+        "MIDDLEWARE_BACKEND_URL/BACK_URL/BACKEND_URL/NUXT_BACK_URL 未配置",
     });
   }
 

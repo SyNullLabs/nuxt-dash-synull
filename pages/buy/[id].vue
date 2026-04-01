@@ -147,9 +147,12 @@
 </template>
 
 <script setup>
+import { useToast } from "#imports";
 import { ref, reactive, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
+import { buildLoginRedirectLocation } from "~/composables/useSession";
+import { useAuthStore } from "~/stores/auth";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -227,7 +230,7 @@ const addToCart = async (checkout = false) => {
   // Require login for cart actions
   const authStore = useAuthStore();
   if (!authStore.token) {
-    navigateTo({ path: "/auth/login", query: { redirect_uri: route.fullPath } });
+    navigateTo(buildLoginRedirectLocation(route.fullPath));
     return;
   }
 

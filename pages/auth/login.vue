@@ -51,23 +51,28 @@
           />
         </div>
 
-        <button
-          class="auth-primary-button flex h-11 w-full items-center justify-center rounded-[0.7rem] px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-70"
-          type="submit"
-          :disabled="isLoading"
+        <TurnstileInlinePanel
+          v-model="loginTurnstileToken"
+          :open="isLoginTurnstileOpen"
+          :nonce="loginTurnstileNonce"
+          :active-slot="loginTurnstileActiveSlot"
+          slot-name="submit"
+          :title="$t('verify')"
+          :description="$t('completeVerification')"
+          :cancel-label="$t('cancel')"
+          @cancel="loginTurnstile.cancel()"
+          @error="handleTurnstileError"
         >
-          {{ isLoading ? $t("loggingIn") : $t("loginButton") }}
-        </button>
+          <button
+            class="auth-primary-button flex h-11 w-full items-center justify-center rounded-[0.7rem] px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-70"
+            type="button"
+            :disabled="isLoading"
+            @click.prevent="handleLogin"
+          >
+            {{ isLoading ? $t("loggingIn") : $t("loginButton") }}
+          </button>
+        </TurnstileInlinePanel>
       </form>
-
-      <TurnstileDialog
-        v-model="loginTurnstile.token"
-        :open="loginTurnstile.isOpen"
-        :nonce="loginTurnstile.nonce"
-        :title="$t('verify')"
-        :description="$t('completeVerification')"
-        @error="handleTurnstileError"
-      />
 
       <p class="text-center text-sm text-white/48">
         {{ $t("dontHaveAccount") }}
@@ -86,6 +91,7 @@
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+import { normalizeAuthRedirectUri } from "~/composables/useSession";
 import { useTurnstileChallenge } from "~/composables/useTurnstileChallenge";
 import { useAlertStore } from "~/stores/alert";
 import { useAuthStore } from "~/stores/auth";
@@ -96,6 +102,12 @@ const authStore = useAuthStore();
 const alertStore = useAlertStore();
 const api = useApiClient();
 const loginTurnstile = useTurnstileChallenge();
+const {
+  token: loginTurnstileToken,
+  isOpen: isLoginTurnstileOpen,
+  nonce: loginTurnstileNonce,
+  activeSlot: loginTurnstileActiveSlot,
+} = loginTurnstile;
 
 const email = ref("");
 const password = ref("");
@@ -118,7 +130,7 @@ const handleLogin = async () => {
   let turnstileToken = "";
 
   try {
-    turnstileToken = await loginTurnstile.ensureToken();
+    turnstileToken = await loginTurnstile.ensureToken("submit");
   } catch {
     return;
   }
@@ -141,8 +153,9 @@ const handleLogin = async () => {
       setAuthToken(response.jwt);
       alertStore.showAlert(t("loginSuccess"), "success");
 
-      const redirectUri =
-        new URLSearchParams(window.location.search).get("redirect_uri") || "/";
+      const redirectUri = normalizeAuthRedirectUri(
+        new URLSearchParams(window.location.search).get("redirect_uri")
+      );
       router.push(redirectUri);
     } else if (response.secondVerify) {
       handleSecondVerification(response.secondVerify);

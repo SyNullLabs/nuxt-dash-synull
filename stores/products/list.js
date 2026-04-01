@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { buildLoginRedirectLocation } from "~/composables/useSession";
 import { useAlertStore } from "~/stores/alert";
 
 export const useProductsListStore = defineStore("productsList", () => {
@@ -12,12 +13,7 @@ export const useProductsListStore = defineStore("productsList", () => {
 
   const redirectToLogin = () => {
     clearAuthToken();
-    router.push({
-      path: "/auth/login",
-      query: {
-        redirect_uri: router.currentRoute.value.fullPath,
-      },
-    });
+    router.push(buildLoginRedirectLocation(router.currentRoute.value.fullPath));
   };
 
   const fetchProductsList = async (groupid = null) => {

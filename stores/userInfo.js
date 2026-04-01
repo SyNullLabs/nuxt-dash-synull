@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { buildLoginRedirectLocation } from "~/composables/useSession";
 import { useAlertStore } from "~/stores/alert";
 
 export const useUserInfoStore = defineStore("userInfo", () => {
@@ -13,12 +14,7 @@ export const useUserInfoStore = defineStore("userInfo", () => {
   const redirectToLogin = () => {
     clearAuthToken();
     userInfo.value = null;
-    router.push({
-      path: "/auth/login",
-      query: {
-        redirect_uri: router.currentRoute.value.fullPath,
-      },
-    });
+    router.push(buildLoginRedirectLocation(router.currentRoute.value.fullPath));
   };
 
   const fetchUserInfo = async () => {

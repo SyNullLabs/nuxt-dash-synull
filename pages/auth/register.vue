@@ -113,13 +113,27 @@
                 class="h-11 rounded-[0.7rem] border border-white/10 bg-white/6 px-3 text-sm font-medium text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:text-white/35"
                 :disabled="
                   activeSender.isSending.value ||
-                  activeSender.secondsLeft.value > 0
+                  activeSender.secondsLeft.value > 0 ||
+                  (isRegisterTurnstileOpen &&
+                    registerTurnstileActiveSlot === 'send-code')
                 "
                 @click="handleSendCode"
               >
                 {{ sendCodeLabel }}
               </button>
             </div>
+            <TurnstileInlinePanel
+              v-model="registerTurnstileToken"
+              :open="isRegisterTurnstileOpen"
+              :nonce="registerTurnstileNonce"
+              :active-slot="registerTurnstileActiveSlot"
+              slot-name="send-code"
+              :cancel-label="$t('cancel')"
+              @cancel="registerTurnstile.cancel()"
+              @error="handleTurnstileError"
+            >
+              <div class="hidden"></div>
+            </TurnstileInlinePanel>
           </div>
 
           <div class="space-y-2.5">
@@ -195,29 +209,34 @@
             </div>
           </div>
 
-          <button
-            class="auth-primary-button flex h-11 w-full items-center justify-center rounded-[0.7rem] px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-70"
-            type="submit"
-            :disabled="isSubmitting"
+          <TurnstileInlinePanel
+            v-model="registerTurnstileToken"
+            :open="isRegisterTurnstileOpen"
+            :nonce="registerTurnstileNonce"
+            :active-slot="registerTurnstileActiveSlot"
+            slot-name="submit"
+            :title="$t('verify')"
+            :description="$t('completeVerification')"
+            :cancel-label="$t('cancel')"
+            @cancel="registerTurnstile.cancel()"
+            @error="handleTurnstileError"
           >
-            <template v-if="isSubmitting">
-              <Icon name="eos-icons:loading" class="mr-1 animate-spin" />
-              {{ $t("loading") }}
-            </template>
-            <template v-else>
-              {{ $t("createAccount") }}
-            </template>
-          </button>
+            <button
+              class="auth-primary-button flex h-11 w-full items-center justify-center rounded-[0.7rem] px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-70"
+              type="button"
+              :disabled="isSubmitting"
+              @click.prevent="handleRegister"
+            >
+              <template v-if="isSubmitting">
+                <Icon name="eos-icons:loading" class="mr-1 animate-spin" />
+                {{ $t("loading") }}
+              </template>
+              <template v-else>
+                {{ $t("createAccount") }}
+              </template>
+            </button>
+          </TurnstileInlinePanel>
         </form>
-
-        <TurnstileDialog
-          v-model="registerTurnstile.token"
-          :open="registerTurnstile.isOpen"
-          :nonce="registerTurnstile.nonce"
-          :title="$t('verify')"
-          :description="$t('completeVerification')"
-          @error="handleTurnstileError"
-        />
       </template>
       <p v-else class="text-sm text-white/48">
         {{ $t("registerUnavailable") }}
@@ -254,6 +273,12 @@ const api = useApiClient();
 const { affiliateRef, readAffiliateQuery } = useAffiliateReferral();
 const { methods, loadAuthMethods } = useAuthMethods();
 const registerTurnstile = useTurnstileChallenge();
+const {
+  token: registerTurnstileToken,
+  isOpen: isRegisterTurnstileOpen,
+  nonce: registerTurnstileNonce,
+  activeSlot: registerTurnstileActiveSlot,
+} = registerTurnstile;
 
 const activeMode = ref("email");
 const email = ref("");
@@ -333,8 +358,11 @@ const handleTurnstileError = () => {
   alertStore.showAlert(t("turnstileError"), "error");
 };
 
-const withTurnstile = async (handler) => {
-  const turnstileToken = await registerTurnstile.ensureToken();
+const isTurnstileCancelled = (error) =>
+  error?.message === "Turnstile challenge cancelled";
+
+const withTurnstile = async (handler, slot = "submit") => {
+  const turnstileToken = await registerTurnstile.ensureToken(slot);
 
   try {
     return await handler(turnstileToken);
@@ -405,9 +433,13 @@ const handleSendCode = async () => {
         }
 
         alertStore.showAlert(response.message || t("codeSent"), "success");
-      })
+      }, "send-code")
     );
   } catch (error) {
+    if (isTurnstileCancelled(error)) {
+      return;
+    }
+
     alertStore.showAlert(error?.message || t("sendCodeFailed"), "error");
   }
 };
@@ -463,6 +495,10 @@ const handleRegister = async () => {
     );
     await router.push("/auth/login");
   } catch (error) {
+    if (isTurnstileCancelled(error)) {
+      return;
+    }
+
     alertStore.showAlert(error?.message || t("registerFailed"), "error");
     refreshCaptcha();
   } finally {

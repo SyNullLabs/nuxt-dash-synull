@@ -122,6 +122,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     backUrl:
+      process.env.MIDDLEWARE_BACKEND_URL ||
       process.env.BACK_URL ||
       process.env.BACKEND_URL ||
       process.env.NUXT_BACK_URL,

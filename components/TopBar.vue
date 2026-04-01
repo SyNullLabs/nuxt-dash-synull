@@ -66,6 +66,7 @@ import {
   normalizeLocaleCode,
   persistLocaleCode,
 } from "~/composables/useLocalePreference";
+import { buildLoginRedirectLocation } from "~/composables/useSession";
 import { useUserInfoStore } from "~/stores/userInfo";
 
 const userInfoStore = useUserInfoStore();
@@ -138,7 +139,9 @@ onMounted(async () => {
 const logout = () => {
   clearAuthToken();
   userInfoStore.clearUserInfo();
-  window.location.href =
-    "/auth/login?redirect_uri=" + router.currentRoute.value.fullPath;
+  window.location.assign(
+    router.resolve(buildLoginRedirectLocation(router.currentRoute.value.fullPath))
+      .href
+  );
 };
 </script>

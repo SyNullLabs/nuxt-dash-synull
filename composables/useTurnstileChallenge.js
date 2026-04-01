@@ -1,9 +1,12 @@
 import { onBeforeUnmount, ref, watch } from "vue";
 
+const TURNSTILE_CANCELLED_ERROR = "Turnstile challenge cancelled";
+
 export const useTurnstileChallenge = () => {
   const token = ref("");
   const isOpen = ref(false);
   const nonce = ref(0);
+  const activeSlot = ref("default");
 
   let pendingPromise = null;
   let resolvePending = null;
@@ -18,11 +21,22 @@ export const useTurnstileChallenge = () => {
   const reset = () => {
     token.value = "";
     isOpen.value = false;
+    activeSlot.value = "default";
     nonce.value += 1;
     clearPending();
   };
 
-  const ensureToken = () => {
+  const cancel = () => {
+    const reject = rejectPending;
+
+    reset();
+
+    if (reject) {
+      reject(new Error(TURNSTILE_CANCELLED_ERROR));
+    }
+  };
+
+  const ensureToken = (slot = "default") => {
     if (token.value) {
       return Promise.resolve(token.value);
     }
@@ -31,6 +45,7 @@ export const useTurnstileChallenge = () => {
       return pendingPromise;
     }
 
+    activeSlot.value = slot;
     isOpen.value = true;
     pendingPromise = new Promise((resolve, reject) => {
       resolvePending = resolve;
@@ -54,7 +69,7 @@ export const useTurnstileChallenge = () => {
 
   onBeforeUnmount(() => {
     if (rejectPending) {
-      rejectPending(new Error("Turnstile challenge cancelled"));
+      rejectPending(new Error(TURNSTILE_CANCELLED_ERROR));
     }
 
     clearPending();
@@ -64,8 +79,9 @@ export const useTurnstileChallenge = () => {
     token,
     isOpen,
     nonce,
+    activeSlot,
+    cancel,
     ensureToken,
     reset,
   };
 };
-

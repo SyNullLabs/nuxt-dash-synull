@@ -26,6 +26,7 @@
  import Sidebar from "~/components/Sidebar.vue";
  import TopBar from "~/components/TopBar.vue";
  import { normalizeLocaleCode } from "~/composables/useLocalePreference";
+ import { buildLoginRedirectLocation } from "~/composables/useSession";
  import { useAffStore } from "~/stores/aff";
  import { useAlertStore } from "~/stores/alert";
  import { useUserInfoStore } from "~/stores/userInfo";
@@ -35,19 +36,18 @@
  const router = useRouter();
  const alertStore = useAlertStore();
  
- const redirectToLogin = () => {
-   router.push({
-    path: "/auth/login",
-    query: {
-      redirect_uri: router.currentRoute.value.fullPath,
-    },
-  });
+const redirectToLogin = () => {
+  router.push(buildLoginRedirectLocation(router.currentRoute.value.fullPath));
 };
 
 const checkLoginStatus = async () => {
-  // Skip auth check on public pages (e.g. /buy)
+  // Skip auth check on public pages and auth routes to avoid redirect loops.
   const path = router.currentRoute.value.path.replace(/\/+$/, "") || "/";
-  if (path === "/buy" || path.startsWith("/buy/")) {
+  if (
+    path === "/buy" ||
+    path.startsWith("/buy/") ||
+    path.startsWith("/auth/")
+  ) {
     return;
   }
 

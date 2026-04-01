@@ -1,6 +1,8 @@
 import {
+  buildLoginRedirectLocation,
   clearAuthToken,
   getAuthToken,
+  normalizeAuthRedirectUri,
   setAuthToken,
 } from "@/composables/useSession.js";
 
@@ -33,5 +35,25 @@ describe("useSession", () => {
 
     clearAuthToken();
     expect(getAuthToken()).toBeNull();
+  });
+
+  test("normalizes nested login redirects to the final safe path", () => {
+    expect(normalizeAuthRedirectUri("/products?group=1")).toBe(
+      "/products?group=1"
+    );
+    expect(
+      normalizeAuthRedirectUri("/auth/login?redirect_uri=%2Forders%3Fpage%3D2")
+    ).toBe("/orders?page=2");
+    expect(
+      normalizeAuthRedirectUri("/auth/login?redirect_uri=/auth/login?redirect_uri=/")
+    ).toBe("/");
+    expect(normalizeAuthRedirectUri("//evil.example")).toBe("/");
+  });
+
+  test("builds login redirect locations with normalized redirect params", () => {
+    expect(
+      buildLoginRedirectLocation("/auth/login?redirect_uri=%2Fservices").query
+        .redirect_uri
+    ).toBe("/services");
   });
 });

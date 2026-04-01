@@ -1,3 +1,5 @@
+import { buildLoginRedirectLocation } from "~/composables/useSession";
+
 export default defineNuxtRouteMiddleware((to) => {
   const path = to.path.replace(/\/+$/, "") || "/";
 
@@ -15,10 +17,7 @@ export default defineNuxtRouteMiddleware((to) => {
   if (process.client) {
     const token = localStorage.getItem("jwt");
     if (!token) {
-      return navigateTo({
-        path: "/auth/login",
-        query: { redirect_uri: to.fullPath },
-      });
+      return navigateTo(buildLoginRedirectLocation(to.fullPath));
     }
   }
 });
