@@ -100,6 +100,7 @@
 </template>
 
 <script setup>
+import { useToast } from "#imports";
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 

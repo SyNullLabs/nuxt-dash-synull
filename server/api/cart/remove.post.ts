@@ -1,5 +1,5 @@
 import {
-  requestBackend,
+  requestBackendForScope,
   requireBackendAuthorization,
 } from "../../utils/mf-api";
 
@@ -7,11 +7,15 @@ export default defineEventHandler(async (event) => {
   const authorization = requireBackendAuthorization(event);
   const body = await readBody(event);
 
-  const response = (await requestBackend("/cart/remove_product", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", authorization },
-    body,
-  })) as Record<string, any>;
+  const response = (await requestBackendForScope(
+    "cart",
+    "/cart/remove_product",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", authorization },
+      body,
+    }
+  )) as Record<string, any>;
 
   if (typeof response !== "object" || response === null) {
     return { success: false, message: "无效的响应数据" };

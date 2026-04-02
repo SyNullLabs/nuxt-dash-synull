@@ -1,5 +1,5 @@
 import {
-  requestBackend,
+  requestBackendForScope,
   requireBackendAuthorization,
 } from "../../utils/mf-api";
 
@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const authorization = requireBackendAuthorization(event);
   const body = await readBody(event);
 
-  const response = (await requestBackend("/host/renew", {
+  const response = (await requestBackendForScope("products", "/host/renew", {
     method: "POST",
     headers: { "Content-Type": "application/json", authorization },
     body,

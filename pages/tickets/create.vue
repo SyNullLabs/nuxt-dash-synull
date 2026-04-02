@@ -56,6 +56,7 @@
 </template>
 
 <script setup>
+import { useToast } from "#imports";
 import { ref, reactive, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -83,9 +84,14 @@ onMounted(async () => {
     const res = await api("/ticket/departments");
     if (res?.success && res.data) {
       departments.value = Array.isArray(res.data) ? res.data : res.data.list || [];
+    } else {
+      toast.add({ title: res?.message || t("operationFailed"), color: "error" });
     }
-  } catch {
-    // silent
+  } catch (error) {
+    toast.add({
+      title: error?.data?.message || error?.message || t("operationFailed"),
+      color: "error",
+    });
   }
 });
 

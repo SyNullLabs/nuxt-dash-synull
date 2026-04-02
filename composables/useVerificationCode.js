@@ -27,6 +27,12 @@ export const useVerificationCode = (duration = 60) => {
     }, 1000);
   };
 
+  const reset = () => {
+    clearTimer();
+    secondsLeft.value = 0;
+    isSending.value = false;
+  };
+
   const send = async (handler) => {
     if (isSending.value || secondsLeft.value > 0) {
       return false;
@@ -50,6 +56,7 @@ export const useVerificationCode = (duration = 60) => {
   return {
     isSending,
     secondsLeft,
+    reset,
     send,
   };
 };

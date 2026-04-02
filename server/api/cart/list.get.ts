@@ -1,5 +1,5 @@
 import {
-  requestBackend,
+  requestBackendForScope,
   requireBackendAuthorization,
 } from "../../utils/mf-api";
 
@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const authorization = requireBackendAuthorization(event);
   const query = getQuery(event);
 
-  const response = (await requestBackend("/cart/get_shop_data", {
+  const response = (await requestBackendForScope("cart", "/cart/get_shop_data", {
     method: "GET",
     headers: { "Content-Type": "application/json", authorization },
     query,

@@ -121,11 +121,20 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    globalMiddlewareUrl: process.env.MIDDLEWARE_BACKEND_URL || "",
+    directBackUrl:
+      process.env.BACK_URL ||
+      process.env.BACKEND_URL ||
+      process.env.NUXT_BACK_URL,
     backUrl:
       process.env.MIDDLEWARE_BACKEND_URL ||
       process.env.BACK_URL ||
       process.env.BACKEND_URL ||
       process.env.NUXT_BACK_URL,
+    backHeaders: process.env.MIDDLEWARE_BACKEND_HEADERS || "",
+    middlewareServiceUrl: process.env.MIDDLEWARE_SERVICE_URL || "",
+    middlewareServiceScopes: process.env.MIDDLEWARE_SERVICE_SCOPES || "",
+    middlewareServiceHeaders: process.env.MIDDLEWARE_SERVICE_HEADERS || "",
     turnstile: {
       secretKey: process.env.TURNSTILE_SECRET_KEY,
     },

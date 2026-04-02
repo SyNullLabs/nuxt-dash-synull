@@ -33,11 +33,13 @@
 </template>
 
 <script setup>
+import { useToast } from "#imports";
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const api = useApiClient();
+const toast = useToast();
 
 const loading = ref(true);
 const invoices = ref([]);
@@ -48,6 +50,13 @@ onMounted(async () => {
     if (res?.success && res.data) {
       invoices.value = Array.isArray(res.data) ? res.data : res.data.list || [];
     }
-  } catch {} finally { loading.value = false; }
+  } catch (error) {
+    toast.add({
+      title: error?.data?.message || error?.message || t("operationFailed"),
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
 });
 </script>

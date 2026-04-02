@@ -1,7 +1,7 @@
-import { requestBackend } from "../../utils/mf-api";
+import { requestBackendForScope } from "../../utils/mf-api";
 
 export default defineEventHandler(async () => {
-  const response = (await requestBackend("/cart/all", {
+  const response = (await requestBackendForScope("cart", "/cart/all", {
     method: "GET",
   })) as Record<string, any>;
 

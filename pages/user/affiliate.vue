@@ -46,6 +46,7 @@
 </template>
 
 <script setup>
+import { useToast } from "#imports";
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -57,12 +58,26 @@ const loading = ref(true);
 const activating = ref(false);
 const affData = ref({});
 
-onMounted(async () => {
+const loadAffiliate = async () => {
+  loading.value = true;
+
   try {
     const res = await api("/user/affiliate", { query: { action: "page" } });
-    if (res?.success && res.data) affData.value = res.data;
-  } catch {} finally { loading.value = false; }
-});
+    if (res?.success && res.data) {
+      affData.value = res.data;
+      return;
+    }
+
+    toast.add({ title: res?.message || t("operationFailed"), color: "error" });
+  } catch (error) {
+    toast.add({
+      title: error?.data?.message || error?.message || t("operationFailed"),
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
 
 const activate = async () => {
   activating.value = true;
@@ -70,9 +85,18 @@ const activate = async () => {
     const res = await api("/user/affiliate", { query: { action: "activate" } });
     if (res?.success) {
       toast.add({ title: t("activated"), color: "success" });
-      affData.value = { ...affData.value, is_active: true, ...res.data };
+      await loadAffiliate();
+    } else {
+      toast.add({ title: res?.message || t("operationFailed"), color: "error" });
     }
-  } catch {} finally { activating.value = false; }
+  } catch (error) {
+    toast.add({
+      title: error?.data?.message || error?.message || t("operationFailed"),
+      color: "error",
+    });
+  } finally {
+    activating.value = false;
+  }
 };
 
 const copyLink = async () => {
@@ -83,4 +107,6 @@ const copyLink = async () => {
     toast.add({ title: t("copyFailed"), color: "error" });
   }
 };
+
+onMounted(loadAffiliate);
 </script>

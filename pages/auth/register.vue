@@ -534,7 +534,10 @@ const handleRegister = async () => {
 };
 
 onMounted(() => {
-  refreshCaptcha();
+  if (requiresCaptcha.value) {
+    refreshCaptcha();
+  }
+
   loadAuthMethods();
 });
 
@@ -551,6 +554,17 @@ watch(
 watch(activeMode, () => {
   verificationCode.value = "";
   captcha.value = "";
-  refreshCaptcha();
+
+  if (requiresCaptcha.value) {
+    refreshCaptcha();
+  }
+});
+
+watch(requiresCaptcha, (nextValue) => {
+  captcha.value = "";
+
+  if (nextValue) {
+    refreshCaptcha();
+  }
 });
 </script>

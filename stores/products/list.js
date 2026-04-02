@@ -11,6 +11,16 @@ export const useProductsListStore = defineStore("productsList", () => {
   const alertStore = useAlertStore();
   const api = useApiClient();
 
+  const formatTimestamp = (value) => {
+    const timestamp = Number(value);
+
+    if (!Number.isFinite(timestamp) || timestamp <= 0) {
+      return "-";
+    }
+
+    return new Date(timestamp * 1000).toLocaleDateString();
+  };
+
   const redirectToLogin = () => {
     clearAuthToken();
     router.push(buildLoginRedirectLocation(router.currentRoute.value.fullPath));
@@ -58,14 +68,19 @@ export const useProductsListStore = defineStore("productsList", () => {
 
     return products.value.data.list.map((product) => ({
       id: product.id,
-      domain: product.domain,
+      domain: product.domain || product.name || `#${product.id}`,
       domainstatus: product.domainstatus,
-      productName: product.productname,
-      dedicatedip: product.dedicatedip,
+      productName: product.productname || product.name || `#${product.id}`,
+      dedicatedip: product.dedicatedip || "",
       status: product.domainstatus,
       statusDesc: product.domainstatus_desc,
       price: product.price_desc,
-      nextDueDate: new Date(product.nextduedate * 1000).toLocaleDateString(),
+      nextDueDate: formatTimestamp(product.nextduedate),
+      apiType: product.api_type,
+      type: product.type,
+      zjmfApiId: product.zjmf_api_id,
+      dcimid: product.dcimid,
+      raw: product,
     }));
   };
 

@@ -1,5 +1,5 @@
 import {
-  requestBackend,
+  requestBackendForScope,
 } from "../../utils/mf-api";
 
 export default defineEventHandler(async (event) => {
@@ -10,11 +10,15 @@ export default defineEventHandler(async (event) => {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (authorization) headers.authorization = authorization;
 
-  const response = (await requestBackend("/cart/get_product_config", {
-    method: "GET",
-    headers,
-    query,
-  })) as Record<string, any>;
+  const response = (await requestBackendForScope(
+    "cart",
+    "/cart/get_product_config",
+    {
+      method: "GET",
+      headers,
+      query,
+    }
+  )) as Record<string, any>;
 
   if (typeof response !== "object" || response === null) {
     return { success: false, message: "无效的响应数据" };

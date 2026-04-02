@@ -119,12 +119,16 @@
                   {{ priceInfo.total || "—" }}
                 </span>
               </div>
+              <p v-if="priceError" class="mt-3 text-xs text-red-300/80">
+                {{ priceError }}
+              </p>
             </div>
           </div>
 
           <UButton
             block
             :loading="addingToCart"
+            :disabled="!canSubmitOrder"
             @click="addToCart"
             icon="i-solar-cart-plus-bold-duotone"
           >
@@ -135,6 +139,7 @@
             block
             variant="soft"
             :loading="addingToCart"
+            :disabled="!canSubmitOrder"
             @click="addToCart(true)"
             icon="i-solar-bag-check-bold-duotone"
           >
@@ -148,7 +153,7 @@
 
 <script setup>
 import { useToast } from "#imports";
-import { ref, reactive, watch, onMounted } from "vue";
+import { computed, ref, reactive, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { buildLoginRedirectLocation } from "~/composables/useSession";
@@ -168,7 +173,17 @@ const selectedOptions = reactive({});
 const customFields = reactive({});
 const priceInfo = ref({});
 const priceLoading = ref(false);
+const priceError = ref("");
 const addingToCart = ref(false);
+
+const hasResolvedPrice = computed(() => {
+  const total = priceInfo.value?.total;
+  return total !== undefined && total !== null && `${total}` !== "";
+});
+
+const canSubmitOrder = computed(
+  () => !priceLoading.value && !priceError.value && hasResolvedPrice.value
+);
 
 const selectOption = (key, value) => {
   selectedOptions[key] = value;
@@ -206,6 +221,7 @@ const loadConfig = async () => {
 
 const calcPrice = async () => {
   priceLoading.value = true;
+  priceError.value = "";
   try {
     const res = await api("/cart/total", {
       method: "POST",
@@ -218,9 +234,14 @@ const calcPrice = async () => {
     });
     if (res?.success && res.data) {
       priceInfo.value = res.data;
+      return;
     }
-  } catch {
-    // Silent fail for price calculation
+    priceInfo.value = {};
+    priceError.value = res?.message || t("operationFailed");
+  } catch (error) {
+    priceInfo.value = {};
+    priceError.value =
+      error?.data?.message || error?.message || t("operationFailed");
   } finally {
     priceLoading.value = false;
   }
@@ -231,6 +252,11 @@ const addToCart = async (checkout = false) => {
   const authStore = useAuthStore();
   if (!authStore.token) {
     navigateTo(buildLoginRedirectLocation(route.fullPath));
+    return;
+  }
+
+  if (!canSubmitOrder.value) {
+    toast.add({ title: priceError.value || t("operationFailed"), color: "error" });
     return;
   }
 
@@ -265,10 +291,10 @@ const addToCart = async (checkout = false) => {
 
 // Recalculate price when options change
 let priceTimer = null;
-watch([selectedCycle, selectedOptions], () => {
+watch([selectedCycle, selectedOptions, customFields], () => {
   clearTimeout(priceTimer);
   priceTimer = setTimeout(calcPrice, 500);
-});
+}, { deep: true });
 
 onMounted(async () => {
   await loadConfig();

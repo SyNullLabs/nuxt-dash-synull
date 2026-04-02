@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
     return turnstileValidation;
   }
 
-  const { turnstileToken, ...requestBody } = body || {};
+  const { turnstileToken, action: _action, ...requestBody } = body || {};
 
   const requestOptions: Record<string, any> = {
     method: endpoint.method,
@@ -44,6 +44,8 @@ export default defineEventHandler(async (event) => {
 
   if (endpoint.method === "POST") {
     requestOptions.body = requestBody;
+  } else if (Object.keys(requestBody).length > 0) {
+    requestOptions.query = requestBody;
   }
 
   const response = (await requestBackend(

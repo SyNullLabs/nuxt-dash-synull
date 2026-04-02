@@ -22,7 +22,7 @@
       </span>
     </nav>
   </div>
-  <div class="flex flex-row justify-between mb-4">
+  <div class="mb-4 flex flex-row justify-between">
     <div class="w-full pr-2">
       <USelectMenu
         v-if="!loading"
@@ -38,11 +38,11 @@
     </div>
     <div class="relative">
       <span
-        class="absolute inset-y-0 left-0 flex items-center p-2.5 rounded-l-lg"
+        class="absolute inset-y-0 left-0 flex items-center rounded-l-lg p-2.5"
       >
         <Icon
           name="solar:minimalistic-magnifer-bold-duotone"
-          class="text-synull w-5 h-5"
+          class="text-synull h-5 w-5"
         />
       </span>
       <input
@@ -56,8 +56,8 @@
     v-if="!loading && paginatedProducts.length > 0"
     class="dashboard-panel mb-4 overflow-hidden rounded-[1.75rem]"
   >
-    <div class="flex flex-col rounded-xl p-1 gap-1">
-      <div v-for="(item, index) in paginatedProducts" :key="index">
+    <div class="flex flex-col gap-1 rounded-xl p-1">
+      <div v-for="item in paginatedProducts" :key="item.id || item.domain">
         <div>
           <div
             class="flex w-full flex-col gap-2 rounded-[1.35rem] border border-white/10 bg-white/5 p-2 transition-colors duration-300 hover:bg-white/7 sm:flex-row sm:items-center"
@@ -81,18 +81,18 @@
                 >
                   {{ item.productName }}
                   <span
-                    class="px-2 py-1 border rounded-full text-xs select-none"
-                    :class="statusColors[item.domainstatus].class"
+                    class="rounded-full border px-2 py-1 text-xs select-none"
+                    :class="resolveStatusColor(item.domainstatus).class"
                   >
                     {{ $t(item.domainstatus) }}
                   </span>
                 </div>
               </div>
-              <div class="flex flex-wrap justify-center grow max-w-5xl">
+              <div class="flex max-w-5xl grow flex-wrap justify-center">
                 <div class="relative w-1/2 sm:w-1/4">
                   <client-only>
                     <LineChart
-                      :chart-data="chartDataCPU"
+                      :chart-data="chartDataFor(item.id, 'cpu')"
                       :options="chartOptions"
                       class="h-14 w-full"
                     />
@@ -104,11 +104,13 @@
                   </span>
                 </div>
                 <div class="relative w-1/2 sm:w-1/4">
-                  <LineChart
-                    :chart-data="chartDataMemory"
-                    :options="chartOptions"
-                    class="h-14 w-full"
-                  />
+                  <client-only>
+                    <LineChart
+                      :chart-data="chartDataFor(item.id, 'memory')"
+                      :options="chartOptions"
+                      class="h-14 w-full"
+                    />
+                  </client-only>
                   <span
                     class="pointer-events-none absolute inset-x-0 top-1 z-0 flex items-center justify-center whitespace-nowrap text-xl font-black text-sky-300/18 select-none"
                   >
@@ -116,11 +118,13 @@
                   </span>
                 </div>
                 <div class="relative w-1/2 sm:w-1/4">
-                  <LineChart
-                    :chart-data="chartDataDisk"
-                    :options="chartOptions"
-                    class="h-14 w-full"
-                  />
+                  <client-only>
+                    <LineChart
+                      :chart-data="chartDataFor(item.id, 'disk')"
+                      :options="chartOptions"
+                      class="h-14 w-full"
+                    />
+                  </client-only>
                   <span
                     class="pointer-events-none absolute inset-x-0 top-1 z-0 flex items-center justify-center whitespace-nowrap text-xl font-black text-synull-200/20 select-none"
                   >
@@ -128,11 +132,13 @@
                   </span>
                 </div>
                 <div class="relative w-1/2 sm:w-1/4">
-                  <LineChart
-                    :chart-data="chartDataNetwork"
-                    :options="chartOptions"
-                    class="h-14 w-full"
-                  />
+                  <client-only>
+                    <LineChart
+                      :chart-data="chartDataFor(item.id, 'network')"
+                      :options="chartOptions"
+                      class="h-14 w-full"
+                    />
+                  </client-only>
                   <span
                     class="pointer-events-none absolute inset-x-0 top-1 z-0 flex items-center justify-center whitespace-nowrap text-xl font-black text-amber-300/18 select-none"
                   >
@@ -143,16 +149,31 @@
               <div
                 class="flex flex-row items-center gap-2 text-2xl text-white/42"
               >
+                <NuxtLink
+                  :to="`/products/${item.id}`"
+                  class="transition-colors hover:text-white"
+                >
+                  <Icon
+                    name="solar:info-circle-line-duotone"
+                    :label="$t('info')"
+                  />
+                </NuxtLink>
                 <Icon
-                  name="solar:info-circle-line-duotone"
-                  :label="$t('info')"
+                  name="solar:power-bold-duotone"
+                  :label="$t('power')"
+                  class="opacity-60"
                 />
-                <Icon name="solar:power-bold-duotone" :label="$t('power')" />
                 <Icon
                   name="solar:link-minimalistic-2-bold-duotone"
                   :label="$t('VNC')"
+                  class="opacity-60"
                 />
-                <Icon name="solar:eye-bold-duotone" :label="$t('view')" />
+                <NuxtLink
+                  :to="`/products/${item.id}`"
+                  class="transition-colors hover:text-white"
+                >
+                  <Icon name="solar:eye-bold-duotone" :label="$t('view')" />
+                </NuxtLink>
               </div>
             </div>
           </div>
@@ -192,62 +213,245 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { useToast } from "#imports";
+import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useProductsListStore } from "@/stores/products/list";
 
 const { t } = useI18n();
+const toast = useToast();
+const api = useApiClient();
 const loading = ref(true);
 const productsStore = useProductsListStore();
 const products = ref([]);
+const chartDataByProduct = ref({});
+const chartLoadingByProduct = ref({});
 
-// 定义一个初始的空图表数据结构
-const emptyChartData = {
-  labels: [],
+const chartMetricDefinitions = {
+  cpu: {
+    color: "#10B981",
+    labelKey: "CPU Usage",
+    aliases: ["cpu", "cpu_usage", "cpuuse", "cpu_data"],
+  },
+  memory: {
+    color: "#3B82F6",
+    labelKey: "Memory Usage",
+    aliases: ["memory", "memory_usage", "memoryuse", "mem", "ram"],
+  },
+  disk: {
+    color: "#8B5CF6",
+    labelKey: "Disk Usage",
+    aliases: ["disk", "disk_usage", "diskuse", "storage"],
+  },
+  network: {
+    color: "#F59E0B",
+    labelKey: "Network Usage",
+    aliases: [
+      "network",
+      "network_usage",
+      "networkuse",
+      "net",
+      "bandwidth",
+    ],
+  },
+};
+
+const buildChartDataset = (definition, labels = [], values = [], unit = "") => ({
+  labels,
   datasets: [
     {
-      label: "",
-      data: [],
-      fill: false,
-      borderColor: "rgba(0, 0, 0, 0)",
-      borderWidth: 0,
+      label: unit ? `${t(definition.labelKey)} (${unit})` : t(definition.labelKey),
+      data: values,
+      fill: true,
+      borderColor: definition.color,
+      borderWidth: 2,
+      tension: 0.4,
+      backgroundColor: `${definition.color}20`,
+      pointStyle: false,
     },
   ],
+});
+
+const createEmptyChartSet = () =>
+  Object.fromEntries(
+    Object.entries(chartMetricDefinitions).map(([key, definition]) => [
+      key,
+      buildChartDataset(definition),
+    ])
+  );
+
+const emptyCharts = computed(() => createEmptyChartSet());
+
+const isRecord = (value) =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const toFiniteNumber = (value) => {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? numericValue : null;
 };
 
-// 使用空数据结构初始化图表数
-const chartDataCPU = ref(emptyChartData);
-const chartDataMemory = ref(emptyChartData);
-const chartDataDisk = ref(emptyChartData);
-const chartDataNetwork = ref(emptyChartData);
+const pickChartList = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
 
-const updateChartData = () => {
-  const labels = Array.from({ length: 7 }, (_, i) => `${i + 1}h`);
-  const generateRandomData = () =>
-    Array.from({ length: 7 }, () => Math.floor(Math.random() * 100));
+  if (!isRecord(payload)) {
+    return [];
+  }
 
-  const createDataset = (color) => ({
-    labels: labels,
-    datasets: [
-      {
-        label: t("Usage"),
-        data: generateRandomData(),
-        fill: true,
-        borderColor: color,
-        borderWidth: 2,
-        tension: 0.4,
-        backgroundColor: `${color}20`,
-        pointStyle: false,
-      },
-    ],
+  if (Array.isArray(payload.list)) {
+    return payload.list;
+  }
+
+  if (Array.isArray(payload.data)) {
+    return payload.data;
+  }
+
+  if (Array.isArray(payload.series)) {
+    return payload.series;
+  }
+
+  const directEntries = Object.entries(payload)
+    .filter(
+      ([key]) =>
+        !["unit", "label", "chart_type", "title", "name"].includes(
+          key.toLowerCase()
+        )
+    )
+    .map(([label, value]) => {
+      const numericValue = toFiniteNumber(value);
+      return numericValue === null ? null : { label, value: numericValue };
+    })
+    .filter(Boolean);
+
+  return directEntries.length ? directEntries : [];
+};
+
+const normalizeChartPoint = (point, index) => {
+  if (Array.isArray(point)) {
+    const numericValue = toFiniteNumber(point[1] ?? point[0]);
+
+    if (numericValue === null) {
+      return null;
+    }
+
+    return {
+      label: `${point[0] ?? index + 1}`,
+      value: numericValue,
+    };
+  }
+
+  const directNumber = toFiniteNumber(point);
+
+  if (directNumber !== null) {
+    return {
+      label: `${index + 1}`,
+      value: directNumber,
+    };
+  }
+
+  if (!isRecord(point)) {
+    return null;
+  }
+
+  const numericValue =
+    [
+      point.value,
+      point.usage,
+      point.percent,
+      point.y,
+      point.data,
+      point.num,
+      point.total,
+    ]
+      .map((value) => toFiniteNumber(value))
+      .find((value) => value !== null) ?? null;
+
+  if (numericValue === null) {
+    return null;
+  }
+
+  return {
+    label:
+      point.time ||
+      point.label ||
+      point.name ||
+      point.date ||
+      point.x ||
+      `${index + 1}`,
+    value: numericValue,
+  };
+};
+
+const findMetricPayload = (source, aliases) => {
+  if (!isRecord(source)) {
+    return null;
+  }
+
+  const entries = Object.entries(source);
+
+  for (const alias of aliases) {
+    if (source[alias] !== undefined && source[alias] !== null) {
+      return source[alias];
+    }
+
+    const matchedEntry = entries.find(
+      ([key]) => key.toLowerCase() === alias.toLowerCase()
+    );
+
+    if (matchedEntry) {
+      return matchedEntry[1];
+    }
+  }
+
+  return null;
+};
+
+const normalizeMetricChart = (definition, payload) => {
+  const points = pickChartList(payload)
+    .map((point, index) => normalizeChartPoint(point, index))
+    .filter(Boolean);
+  const unit =
+    isRecord(payload) && typeof payload.unit === "string" ? payload.unit : "";
+
+  return buildChartDataset(
+    definition,
+    points.map((point) => point.label),
+    points.map((point) => point.value),
+    unit
+  );
+};
+
+const normalizeProductCharts = (data) => {
+  const source = isRecord(data?.data) ? data.data : data;
+  const charts = createEmptyChartSet();
+
+  Object.entries(chartMetricDefinitions).forEach(([metricKey, definition]) => {
+    const payload = findMetricPayload(source, definition.aliases);
+
+    if (payload !== null) {
+      charts[metricKey] = normalizeMetricChart(definition, payload);
+    }
   });
 
-  // 为每个图表设置不同的颜色
-  chartDataCPU.value = createDataset("#10B981"); // 绿色
-  chartDataMemory.value = createDataset("#3B82F6"); // 蓝色
-  chartDataDisk.value = createDataset("#8B5CF6"); // 紫色
-  chartDataNetwork.value = createDataset("#F59E0B"); // 橙色
+  return charts;
 };
+
+const buildChartQuery = (product) =>
+  Object.fromEntries(
+    Object.entries({
+      host_id: product.id,
+      api_type: product.apiType,
+      domainstatus: product.domainstatus,
+      type: product.type,
+      zjmf_api_id: product.zjmfApiId,
+      dcimid: product.dcimid,
+    }).filter(([, value]) => value !== undefined && value !== null && value !== "")
+  );
+
+const chartDataFor = (productId, metricKey) =>
+  chartDataByProduct.value[productId]?.[metricKey] ||
+  emptyCharts.value[metricKey];
 
 const chartOptions = ref({
   responsive: true,
@@ -265,15 +469,8 @@ const chartOptions = ref({
       },
     },
     y: {
-      display: false, // 改为 true 显示 y 轴
-      min: 0,
-      max: 100,
-      ticks: {
-        stepSize: 20, // y 轴刻度步长
-        callback: function (value) {
-          return value + "%"; // 添加百分号
-        },
-      },
+      display: false,
+      beginAtZero: true,
     },
   },
   elements: {
@@ -281,12 +478,12 @@ const chartOptions = ref({
       tension: 0.4,
     },
     point: {
-      radius: 0, // 隐藏数据点
+      radius: 0,
     },
   },
   interaction: {
-    intersect: false, // 不需要精确指向数据点
-    mode: "index", // 显示垂直线上的所有数据点
+    intersect: false,
+    mode: "index",
   },
   hover: {
     mode: "index",
@@ -302,11 +499,66 @@ const chartOptions = ref({
   },
 });
 
+const loadChartsForProducts = async (items = []) => {
+  const pendingProducts = items.filter(
+    (item) =>
+      item?.id &&
+      !chartDataByProduct.value[item.id] &&
+      !chartLoadingByProduct.value[item.id]
+  );
+
+  if (!pendingProducts.length) {
+    return;
+  }
+
+  chartLoadingByProduct.value = {
+    ...chartLoadingByProduct.value,
+    ...Object.fromEntries(pendingProducts.map((item) => [item.id, true])),
+  };
+
+  const results = await Promise.allSettled(
+    pendingProducts.map((item) =>
+      api("/products/chart", {
+        method: "GET",
+        query: buildChartQuery(item),
+      })
+    )
+  );
+
+  const nextCharts = { ...chartDataByProduct.value };
+  const nextLoading = { ...chartLoadingByProduct.value };
+  let hasFailedCharts = false;
+
+  results.forEach((result, index) => {
+    const product = pendingProducts[index];
+    nextLoading[product.id] = false;
+
+    if (result.status === "fulfilled" && result.value?.success) {
+      nextCharts[product.id] = normalizeProductCharts(result.value.data);
+      return;
+    }
+
+    nextCharts[product.id] = createEmptyChartSet();
+    hasFailedCharts = true;
+    console.error("获取产品图表失败", product.id, result);
+  });
+
+  chartDataByProduct.value = nextCharts;
+  chartLoadingByProduct.value = nextLoading;
+
+  if (hasFailedCharts) {
+    toast.add({
+      title: t("chartLoadFailed"),
+      color: "error",
+    });
+  }
+};
+
 onMounted(async () => {
   try {
     await productsStore.fetchProductsList();
     products.value = productsStore.parseProductsToArray();
-    updateChartData(); // 在数据加载完成后更新图表数据
+    await loadChartsForProducts(paginatedProducts.value);
   } catch (error) {
     console.error("获取产品列表时出错:", error);
   } finally {
@@ -331,14 +583,15 @@ const filteredProducts = computed(() => {
     console.warn("products.value 不是数组:", products.value);
     return [];
   }
+
   const query = searchQuery.value.toLowerCase();
   const selectedStatuses = selectedStatus.value || [];
 
   return products.value.filter((product) => {
     const matchesQuery =
-      product.productName.toLowerCase().includes(query) ||
-      product.domain.toLowerCase().includes(query) ||
-      product.dedicatedip.toLowerCase().includes(query);
+      (product.productName || "").toLowerCase().includes(query) ||
+      (product.domain || "").toLowerCase().includes(query) ||
+      (product.dedicatedip || "").toLowerCase().includes(query);
 
     const matchesStatus =
       selectedStatuses.length === 0 ||
@@ -348,7 +601,7 @@ const filteredProducts = computed(() => {
   });
 });
 
-const first = ref(1); // 将初始页码改为1
+const first = ref(1);
 const selectedStatus = ref([]);
 
 const paginatedProducts = computed(() => {
@@ -361,6 +614,14 @@ const paginatedProducts = computed(() => {
 watch([searchQuery, selectedStatus], () => {
   first.value = 1;
 });
+
+watch(
+  paginatedProducts,
+  (items) => {
+    void loadChartsForProducts(items);
+  },
+  { deep: false }
+);
 
 const selectStatus = ref([
   { label: t("Pending"), value: "Pending" },
@@ -384,7 +645,10 @@ const statusColors = {
     name: "被取消",
     class: "bg-gray-100 border-gray-200/80 text-gray-500",
   },
-  Fraud: { name: "有欺诈", class: "bg-red-100 border-red-200/80 text-red-500" },
+  Fraud: {
+    name: "有欺诈",
+    class: "bg-red-100 border-red-200/80 text-red-500",
+  },
   Deleted: {
     name: "被删除",
     class: "bg-zinc-100 border-zinc-200/80 text-zinc-500",
@@ -394,4 +658,10 @@ const statusColors = {
     class: "bg-yellow-100 border-yellow-200/80 text-yellow-500",
   },
 };
+
+const resolveStatusColor = (status) =>
+  statusColors[status] || {
+    name: status || "unknown",
+    class: "bg-zinc-100 border-zinc-200/80 text-zinc-500",
+  };
 </script>

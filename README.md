@@ -28,7 +28,11 @@ cp .env.example .env
 
 项目当前实际使用到的环境变量如下：
 
-- `MIDDLEWARE_BACKEND_URL`：自定义中间件 / BFF 实际转发的后端地址。若配置，则优先于下面的默认后端地址。
+- `MIDDLEWARE_BACKEND_URL`：全量接管模式下，自定义中间件 / BFF 的地址。若配置，则所有现有 BFF 转发都会优先走这里。
+- `MIDDLEWARE_SERVICE_URL`：渐进式拆分时的外部业务中间件地址（例如 Deno 服务）。
+- `MIDDLEWARE_SERVICE_SCOPES`：哪些模块优先走 `MIDDLEWARE_SERVICE_URL`，使用逗号分隔，例如 `cart,products`。当前支持：`auth`、`cart`、`dashboard`、`products`、`tickets`、`upload`、`user`。
+- `MIDDLEWARE_SERVICE_HEADERS`：Nuxt 请求外部业务中间件时附带的额外请求头配置，要求是 JSON 数组。
+- `MIDDLEWARE_BACKEND_HEADERS`：BFF 转发到后端时附带的额外请求头配置，要求是 JSON 数组。
 - `BACKEND_URL`：默认魔方财务后端地址。代码同时兼容 `BACK_URL`、`NUXT_BACK_URL`，三选一即可。
 - `NUXT_PUBLIC_BASE_URL`：当前站点对外访问地址。代码同时兼容 `BASE_URL`。
 - `TURNSTILE_SITE_KEY`：Cloudflare Turnstile 的站点密钥。
@@ -39,7 +43,13 @@ cp .env.example .env
 
 - 登录、注册、找回密码、安全中心等带 Turnstile 的流程会依赖 `TURNSTILE_SITE_KEY` 和 `TURNSTILE_SECRET_KEY`。
 - `NUXT_SESSION_PASSWORD` 为空时，基于 `nuxt-auth-utils` 的会话接口会直接报错。
-- 所有本地 `/api/*` 自定义中间件 / BFF 转发默认读取 `BACKEND_URL`，若配置了 `MIDDLEWARE_BACKEND_URL` 则以它为准。
+- 所有本地 `/api/*` 自定义中间件 / BFF 转发默认读取 `BACKEND_URL`，若配置了 `MIDDLEWARE_BACKEND_URL` 则全量以它为准。
+- 若要渐进式把后端能力拆出 Nuxt，可配置 `MIDDLEWARE_SERVICE_URL` 与 `MIDDLEWARE_SERVICE_SCOPES`。当前购物车与产品相关 BFF 已接入 scope 路由能力，因此可以先让 `cart,products` 走外部业务中间件，其余接口继续直连闭源后端。
+- 若配置了 `MIDDLEWARE_BACKEND_HEADERS`，所有 BFF 转发到后端的请求都会自动附带这些请求头。支持以下数组项格式：
+  - `{"name":"x-header","value":"secret"}`
+  - `["x-header","secret"]`
+  - `"x-header:secret"`
+- 若配置了 `MIDDLEWARE_SERVICE_HEADERS`，只有命中 `MIDDLEWARE_SERVICE_SCOPES` 的接口在请求外部业务中间件时会自动附带这些请求头，格式与 `MIDDLEWARE_BACKEND_HEADERS` 相同。
 - 若只想本地跑静态页面，`TURNSTILE_*` 可以先留空，但相关验证流程不会正常工作。
 
 ## 安装与运行

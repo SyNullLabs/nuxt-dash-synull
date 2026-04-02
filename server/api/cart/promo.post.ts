@@ -1,5 +1,5 @@
 import {
-  requestBackend,
+  requestBackendForScope,
   requireBackendAuthorization,
 } from "../../utils/mf-api";
 
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const path =
     action === "remove" ? "/cart/remove_promo" : "/cart/add_promo";
 
-  const response = (await requestBackend(path, {
+  const response = (await requestBackendForScope("cart", path, {
     method: "POST",
     headers: { "Content-Type": "application/json", authorization },
     body,

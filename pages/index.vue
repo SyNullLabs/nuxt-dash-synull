@@ -70,7 +70,7 @@
             <USkeleton v-if="loading" class="mr-3 h-16 w-16 rounded-full" />
             <img
               v-else
-              @click="router.push('/details')"
+              @click="router.push('/user/profile')"
               :src="
                 'https://cravatar.cn/avatar/' +
                 userInfo.user?.email_md5 +
@@ -122,34 +122,34 @@ onMounted(async () => {
     await userInfoStore.value.fetchUserInfo();
     userInfo.value = userInfoStore.value.userInfo;
     loading.value = userInfoStore.value.loading;
-    cards.value = [
-      {
-        title: "productQuantity",
-        value: userInfo.value?.host,
-        icon: "solar:box-bold-duotone",
-        borderColor: "border-blue-500",
-        iconColor: "text-blue-500",
-      },
-      {
-        title: "unpaidOrders",
-        value: userInfo.value?.order_count,
-        icon: "solar:cart-large-bold-duotone",
-        borderColor: "border-yellow-500",
-        iconColor: "text-yellow-500",
-      },
-      {
-        title: "pendingTickets",
-        value: userInfo.value?.ticket_count,
-        icon: "solar:clipboard-text-bold-duotone",
-        borderColor: "border-green-500",
-        iconColor: "text-green-500",
-      },
-      {
-        title: "accountBalance",
-        value: userInfo.value?.client.credit,
-        icon: "solar:wallet-bold-duotone",
-        borderColor: "border-synull",
-        iconColor: "text-synull",
+      cards.value = [
+        {
+          title: "productQuantity",
+          value: userInfo.value?.host ?? 0,
+          icon: "solar:box-bold-duotone",
+          borderColor: "border-blue-500",
+          iconColor: "text-blue-500",
+        },
+        {
+          title: "unpaidOrders",
+          value: userInfo.value?.order_count ?? 0,
+          icon: "solar:cart-large-bold-duotone",
+          borderColor: "border-yellow-500",
+          iconColor: "text-yellow-500",
+        },
+        {
+          title: "pendingTickets",
+          value: userInfo.value?.ticket_count ?? 0,
+          icon: "solar:clipboard-text-bold-duotone",
+          borderColor: "border-green-500",
+          iconColor: "text-green-500",
+        },
+        {
+          title: "accountBalance",
+          value: userInfo.value?.client?.credit ?? "0.00",
+          icon: "solar:wallet-bold-duotone",
+          borderColor: "border-synull",
+          iconColor: "text-synull",
       },
     ];
   }, 100);

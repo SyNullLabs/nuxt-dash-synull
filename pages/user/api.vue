@@ -15,7 +15,11 @@
               {{ apiEnabled ? t("apiEnabled") : t("apiDisabled") }}
             </p>
           </div>
-          <UToggle v-model="apiEnabled" @update:model-value="toggleApi" />
+          <UToggle
+            v-model="apiEnabled"
+            :disabled="loading || apiUpdating"
+            @update:model-value="toggleApi"
+          />
         </div>
       </div>
 
@@ -48,6 +52,7 @@
 </template>
 
 <script setup>
+import { useToast } from "#imports";
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -56,38 +61,84 @@ const api = useApiClient();
 const toast = useToast();
 
 const loading = ref(true);
+const apiUpdating = ref(false);
 const apiEnabled = ref(false);
 const apiKey = ref("");
 const showKey = ref(false);
 const resetting = ref(false);
 const logs = ref([]);
 
-onMounted(async () => {
+const loadApiData = async () => {
+  loading.value = true;
+
   try {
     const [summaryRes, logsRes] = await Promise.all([
       api("/user/api", { query: { action: "summary" } }),
       api("/user/api", { query: { action: "logs" } }),
     ]);
+
     if (summaryRes?.success && summaryRes.data) {
       apiEnabled.value = !!summaryRes.data.is_open;
       apiKey.value = summaryRes.data.api_key || summaryRes.data.secret || "";
+    } else {
+      toast.add({ title: summaryRes?.message || t("operationFailed"), color: "error" });
     }
+
     if (logsRes?.success && logsRes.data) {
-      logs.value = Array.isArray(logsRes.data) ? logsRes.data : logsRes.data.list || [];
+      logs.value = Array.isArray(logsRes.data)
+        ? logsRes.data
+        : logsRes.data.logs || logsRes.data.list || [];
+    } else {
+      logs.value = [];
     }
-  } catch {
-    // silent
+
+    if (!logsRes?.success) {
+      toast.add({ title: logsRes?.message || t("operationFailed"), color: "error" });
+    }
+  } catch (error) {
+    toast.add({
+      title: error?.data?.message || error?.message || t("operationFailed"),
+      color: "error",
+    });
   } finally {
     loading.value = false;
   }
-});
+};
 
-const toggleApi = async () => {
+const toggleApi = async (nextValue) => {
+  const previousValue = apiEnabled.value;
+  apiUpdating.value = true;
+
   try {
-    const res = await api("/user/api", { method: "POST", body: { action: "open" } });
-    if (!res?.success) toast.add({ title: res?.message || t("operationFailed"), color: "error" });
-  } catch {
+    const res = await api("/user/api", {
+      method: "POST",
+      body: {
+        action: nextValue ? "open" : "close",
+        api_open: nextValue ? 1 : 0,
+      },
+    });
+
+    if (res?.success) {
+      apiEnabled.value =
+        typeof res.data?.is_open === "boolean" ? res.data.is_open : nextValue;
+      if (!apiEnabled.value) {
+        showKey.value = false;
+      }
+      toast.add({
+        title: res.message || t(apiEnabled.value ? "apiEnabled" : "apiDisabled"),
+        color: "success",
+      });
+      return;
+    }
+
+    apiEnabled.value = previousValue;
+    toast.add({ title: res?.message || t("operationFailed"), color: "error" });
+  } catch (error) {
+    apiEnabled.value = previousValue;
     toast.add({ title: t("operationFailed"), color: "error" });
+    console.error("[user/api] toggle failed", error);
+  } finally {
+    apiUpdating.value = false;
   }
 };
 
@@ -101,10 +152,13 @@ const resetKey = async () => {
     } else {
       toast.add({ title: res?.message || t("operationFailed"), color: "error" });
     }
-  } catch {
+  } catch (error) {
+    console.error("[user/api] reset failed", error);
     toast.add({ title: t("operationFailed"), color: "error" });
   } finally {
     resetting.value = false;
   }
 };
+
+onMounted(loadApiData);
 </script>

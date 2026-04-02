@@ -1,12 +1,12 @@
 import {
-  requestBackend,
+  requestBackendForScope,
   requireBackendAuthorization,
 } from "../../utils/mf-api";
 
 export default defineEventHandler(async (event) => {
   const authorization = requireBackendAuthorization(event);
 
-  const response = (await requestBackend("/cart/clear", {
+  const response = (await requestBackendForScope("cart", "/cart/clear", {
     method: "POST",
     headers: { "Content-Type": "application/json", authorization },
   })) as Record<string, any>;

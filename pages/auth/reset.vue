@@ -170,6 +170,45 @@
             />
           </div>
 
+          <div v-if="requiresCaptcha" class="space-y-2.5">
+            <div class="flex items-center justify-between gap-4">
+              <label
+                class="block text-sm font-medium text-white/72"
+                for="reset-captcha"
+              >
+                {{ $t("captcha") }}
+              </label>
+              <button
+                type="button"
+                class="text-xs text-white/48 transition-colors hover:text-white"
+                @click="refreshCaptcha"
+              >
+                {{ $t("refreshCaptcha") }}
+              </button>
+            </div>
+            <div class="grid grid-cols-[minmax(0,1fr)_112px] gap-3">
+              <input
+                id="reset-captcha"
+                v-model.trim="captcha"
+                type="text"
+                autocomplete="off"
+                :placeholder="$t('enterCaptcha')"
+                class="h-11 w-full appearance-none rounded-[0.7rem] border border-white/10 bg-white/6 px-3.5 text-sm text-white placeholder:text-white/28 focus:border-synull/45 focus:outline-none focus:ring-2 focus:ring-synull/18"
+              />
+              <button
+                type="button"
+                class="h-11 overflow-hidden rounded-[0.7rem] border border-white/10 bg-white/6"
+                @click="refreshCaptcha"
+              >
+                <img
+                  :src="captchaUrl"
+                  :alt="$t('captcha')"
+                  class="h-full w-full object-cover"
+                />
+              </button>
+            </div>
+          </div>
+
           <TurnstileInlinePanel
             v-model="resetTurnstileToken"
             :open="isResetTurnstileOpen"
@@ -244,6 +283,8 @@ const phone = ref("");
 const verificationCode = ref("");
 const password = ref("");
 const confirmPassword = ref("");
+const captcha = ref("");
+const captchaNonce = ref(0);
 const isSubmitting = ref(false);
 
 const emailSender = useVerificationCode();
@@ -274,6 +315,15 @@ const resetModes = computed(() => {
 const hasResetMethods = computed(
   () => !methods.value || resetModes.value.length > 0
 );
+const requiresCaptcha = computed(() => {
+  if (!methods.value) {
+    return false;
+  }
+
+  return activeMode.value === "email"
+    ? !!methods.value.captcha?.reset?.email
+    : !!methods.value.captcha?.reset?.phone;
+});
 
 const activeSender = computed(() =>
   activeMode.value === "email" ? emailSender : phoneSender
@@ -290,6 +340,20 @@ const sendCodeLabel = computed(() => {
 
   return t("sendCode");
 });
+
+const captchaUrl = computed(
+  () =>
+    `/api/auth/captcha?name=${
+      activeMode.value === "email"
+        ? "allow_reset_email_captcha"
+        : "allow_reset_phone_captcha"
+    }&t=${captchaNonce.value}`
+);
+
+const refreshCaptcha = () => {
+  captcha.value = "";
+  captchaNonce.value = Date.now();
+};
 
 const handleTurnstileError = () => {
   alertStore.showAlert(t("turnstileError"), "error");
@@ -312,6 +376,11 @@ const withTurnstile = async (handler, slot = "submit") => {
 
 const validateResetFields = () => {
   if (!verificationCode.value || !password.value || !confirmPassword.value) {
+    alertStore.showAlert(t("pleaseCompleteResetInfo"), "error");
+    return false;
+  }
+
+  if (requiresCaptcha.value && !captcha.value) {
     alertStore.showAlert(t("pleaseCompleteResetInfo"), "error");
     return false;
   }
@@ -417,6 +486,7 @@ const handleReset = async () => {
             password: password.value,
             code: verificationCode.value,
             turnstileToken,
+            ...(requiresCaptcha.value ? { captcha: captcha.value } : {}),
           },
         }
       )
@@ -424,6 +494,9 @@ const handleReset = async () => {
 
     if (!response.success) {
       alertStore.showAlert(response.message || t("resetFailed"), "error");
+      if (requiresCaptcha.value) {
+        refreshCaptcha();
+      }
       return;
     }
 
@@ -440,12 +513,19 @@ const handleReset = async () => {
     }
 
     alertStore.showAlert(error?.message || t("resetFailed"), "error");
+    if (requiresCaptcha.value) {
+      refreshCaptcha();
+    }
   } finally {
     isSubmitting.value = false;
   }
 };
 
 onMounted(() => {
+  if (requiresCaptcha.value) {
+    refreshCaptcha();
+  }
+
   loadAuthMethods();
 });
 
@@ -458,4 +538,21 @@ watch(
   },
   { immediate: true }
 );
+
+watch(activeMode, () => {
+  verificationCode.value = "";
+  captcha.value = "";
+
+  if (requiresCaptcha.value) {
+    refreshCaptcha();
+  }
+});
+
+watch(requiresCaptcha, (nextValue) => {
+  captcha.value = "";
+
+  if (nextValue) {
+    refreshCaptcha();
+  }
+});
 </script>

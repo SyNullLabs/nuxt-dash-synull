@@ -40,7 +40,11 @@
             <h3 class="text-sm font-medium text-white">{{ t("twoFactorAuth") }}</h3>
             <p class="mt-1 text-xs text-white/40">{{ t("twoFactorDesc") }}</p>
           </div>
-          <UToggle v-model="twoFactorEnabled" @update:model-value="toggle2FA" />
+          <UToggle
+            v-model="twoFactorEnabled"
+            :disabled="!allowSecondVerify"
+            @update:model-value="toggle2FA"
+          />
         </div>
       </div>
 
@@ -51,7 +55,11 @@
             <h3 class="text-sm font-medium text-white">{{ t("loginSmsReminder") }}</h3>
             <p class="mt-1 text-xs text-white/40">{{ t("loginSmsDesc") }}</p>
           </div>
-          <UToggle v-model="smsReminder" @update:model-value="toggleSmsReminder" />
+          <UToggle
+            v-model="smsReminder"
+            :disabled="!allowSmsReminder"
+            @update:model-value="toggleSmsReminder"
+          />
         </div>
       </div>
 
@@ -62,7 +70,11 @@
             <h3 class="text-sm font-medium text-white">{{ t("loginEmailReminder") }}</h3>
             <p class="mt-1 text-xs text-white/40">{{ t("loginEmailDesc") }}</p>
           </div>
-          <UToggle v-model="emailReminder" @update:model-value="toggleEmailReminder" />
+          <UToggle
+            v-model="emailReminder"
+            :disabled="!allowEmailReminder"
+            @update:model-value="toggleEmailReminder"
+          />
         </div>
       </div>
     </div>
@@ -146,6 +158,9 @@ const userEmail = ref("");
 const twoFactorEnabled = ref(false);
 const smsReminder = ref(false);
 const emailReminder = ref(false);
+const allowSecondVerify = ref(true);
+const allowSmsReminder = ref(true);
+const allowEmailReminder = ref(true);
 
 const showPhoneModal = ref(false);
 const showEmailModal = ref(false);
@@ -157,15 +172,58 @@ const bindingEmail = ref(false);
 const phoneForm = reactive({ phone: "", code: "" });
 const emailForm = reactive({ email: "", code: "" });
 
+const normalizeBooleanFlag = (value, fallback = false) => {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return value === 1;
+  }
+
+  if (typeof value === "string") {
+    const normalizedValue = value.trim().toLowerCase();
+    return normalizedValue === "1" || normalizedValue === "true" || normalizedValue === "yes";
+  }
+
+  return fallback;
+};
+
 onMounted(async () => {
   try {
     const res = await api("/dash/user-info");
     if (res?.success && res.data?.client) {
       userPhone.value = res.data.client.phonenumber || "";
       userEmail.value = res.data.client.email || "";
+      twoFactorEnabled.value = normalizeBooleanFlag(
+        res.data.second_verify ?? res.data.client.second_verify
+      );
+      smsReminder.value = normalizeBooleanFlag(
+        res.data.is_login_sms_reminder ?? res.data.client.is_login_sms_reminder
+      );
+      emailReminder.value = normalizeBooleanFlag(
+        res.data.email_remind ?? res.data.client.email_remind,
+        true
+      );
+      allowSecondVerify.value = normalizeBooleanFlag(
+        res.data.allow_second_verify ?? res.data.client.allow_second_verify,
+        true
+      );
+      allowSmsReminder.value = normalizeBooleanFlag(res.data.shd_allow_sms_send, true);
+      allowEmailReminder.value = normalizeBooleanFlag(res.data.shd_allow_email_send, true);
+      return;
     }
-  } catch {
-    // silent
+
+    toast.add({ title: res?.message || t("operationFailed"), color: "error" });
+  } catch (error) {
+    toast.add({
+      title: error?.data?.message || error?.message || t("operationFailed"),
+      color: "error",
+    });
   }
 });
 
@@ -282,17 +340,23 @@ const bindEmail = async () => {
 };
 
 const toggle2FA = async (val) => {
-  const ok = await securityAction("toggle_2fa");
+  const ok = await securityAction("toggle_2fa", {
+    second_verify: val ? 1 : 0,
+  });
   if (!ok) twoFactorEnabled.value = !val;
 };
 
 const toggleSmsReminder = async (val) => {
-  const ok = await securityAction("login_sms_reminder");
+  const ok = await securityAction("login_sms_reminder", {
+    status: val ? 1 : 0,
+  });
   if (!ok) smsReminder.value = !val;
 };
 
 const toggleEmailReminder = async (val) => {
-  const ok = await securityAction("login_email_reminder");
+  const ok = await securityAction("login_email_reminder", {
+    status: val ? 1 : 0,
+  });
   if (!ok) emailReminder.value = !val;
 };
 </script>

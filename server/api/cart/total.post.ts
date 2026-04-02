@@ -1,5 +1,5 @@
 import {
-  requestBackend,
+  requestBackendForScope,
 } from "../../utils/mf-api";
 
 export default defineEventHandler(async (event) => {
@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (authorization) headers.authorization = authorization;
 
-  const response = (await requestBackend("/cart/get_total", {
+  const response = (await requestBackendForScope("cart", "/cart/get_total", {
     method: "POST",
     headers,
     body,

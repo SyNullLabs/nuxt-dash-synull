@@ -1,5 +1,5 @@
 import {
-  requestBackend,
+  requestBackendForScope,
   requireBackendAuthorization,
 } from "../../utils/mf-api";
 
@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 
   if (method === "GET") {
     const query = getQuery(event);
-    const response = (await requestBackend("/host/cancel", {
+    const response = (await requestBackendForScope("products", "/host/cancel", {
       method: "GET",
       headers: { "Content-Type": "application/json", authorization },
       query,
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
 
   if (method === "POST") {
     const body = await readBody(event);
-    const response = (await requestBackend("/host/cancel", {
+    const response = (await requestBackendForScope("products", "/host/cancel", {
       method: "POST",
       headers: { "Content-Type": "application/json", authorization },
       body,
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
 
   if (method === "DELETE") {
     const query = getQuery(event);
-    const response = (await requestBackend("/host/cancel", {
+    const response = (await requestBackendForScope("products", "/host/cancel", {
       method: "DELETE",
       headers: { "Content-Type": "application/json", authorization },
       query,

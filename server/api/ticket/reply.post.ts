@@ -6,11 +6,17 @@ import {
 export default defineEventHandler(async (event) => {
   const authorization = requireBackendAuthorization(event);
   const body = await readBody(event);
+  const normalizedBody = {
+    ...body,
+    tid: body.tid || body.id,
+    content: body.content || "",
+    attachment: body.attachment || "",
+  };
 
   const response = (await requestBackend("/ticket/reply", {
     method: "POST",
     headers: { "Content-Type": "application/json", authorization },
-    body,
+    body: normalizedBody,
   })) as Record<string, any>;
 
   if (typeof response !== "object" || response === null) {

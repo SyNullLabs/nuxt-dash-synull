@@ -2,7 +2,7 @@
   <div>
     <div class="mb-5 flex items-center justify-between">
       <h1 class="text-xl font-semibold text-white">{{ t("subAccounts") }}</h1>
-      <UButton icon="i-solar-user-plus-bold-duotone" @click="showAddModal = true">
+      <UButton icon="i-solar-user-plus-bold-duotone" @click="openCreateModal">
         {{ t("addSubAccount") }}
       </UButton>
     </div>
@@ -59,6 +59,7 @@
 </template>
 
 <script setup>
+import { useToast } from "#imports";
 import { ref, reactive, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -73,14 +74,36 @@ const showAddModal = ref(false);
 const editingId = ref(null);
 const contactForm = reactive({ name: "", email: "", phonenumber: "" });
 
+const resetContactForm = () => {
+  editingId.value = null;
+  contactForm.name = "";
+  contactForm.email = "";
+  contactForm.phonenumber = "";
+};
+
+const openCreateModal = () => {
+  resetContactForm();
+  showAddModal.value = true;
+};
+
 const loadContacts = async () => {
   loading.value = true;
   try {
     const res = await api("/user/contacts");
     if (res?.success && res.data) {
       contacts.value = Array.isArray(res.data) ? res.data : res.data.list || [];
+      return;
     }
-  } catch {} finally { loading.value = false; }
+
+    toast.add({ title: res?.message || t("operationFailed"), color: "error" });
+  } catch (error) {
+    toast.add({
+      title: error?.data?.message || error?.message || t("operationFailed"),
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 
 const editContact = (c) => {
@@ -116,8 +139,11 @@ const deleteContact = async (id) => {
     if (res?.success) {
       toast.add({ title: t("deleted"), color: "success" });
       await loadContacts();
+    } else {
+      toast.add({ title: res?.message || t("deleteFailed"), color: "error" });
     }
-  } catch {
+  } catch (error) {
+    console.error("[user/contacts] delete failed", error);
     toast.add({ title: t("deleteFailed"), color: "error" });
   }
 };

@@ -123,6 +123,7 @@
 </template>
 
 <script setup>
+import { useToast } from "#imports";
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -144,9 +145,15 @@ const loadCart = async () => {
     if (res?.success && res.data) {
       cartData.value = res.data;
       cartItems.value = res.data.items || res.data.products || [];
+      return;
     }
-  } catch {
-    // silent
+
+    toast.add({ title: res?.message || t("operationFailed"), color: "error" });
+  } catch (error) {
+    toast.add({
+      title: error?.data?.message || error?.message || t("operationFailed"),
+      color: "error",
+    });
   } finally {
     loading.value = false;
   }
