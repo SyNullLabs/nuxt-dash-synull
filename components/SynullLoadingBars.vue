@@ -1,6 +1,6 @@
 <template>
-  <div class="flex items-center gap-3 text-[var(--ui-text-muted)]">
-    <div class="flex gap-[3px]" aria-hidden="true">
+  <div class="flex items-center gap-3 text-muted">
+    <div class="flex gap-0.75" aria-hidden="true">
       <span
         :class="[
           barClass,
