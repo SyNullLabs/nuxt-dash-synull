@@ -107,13 +107,9 @@
             :content="false"
             color="neutral"
             variant="pill"
-            size="md"
+            size="xl"
             class="w-auto max-w-full"
             :ui="{
-              list: 'inline-flex w-auto max-w-full justify-start flex-wrap gap-px rounded-[0.4rem] bg-[var(--ui-border)] p-px',
-              indicator: 'rounded-[0.32rem] bg-[var(--ui-bg-soft)] shadow-none',
-              trigger:
-                'min-w-fit rounded-[0.32rem] px-4 py-3 text-[0.84rem] font-semibold transition-colors duration-200 data-[state=inactive]:bg-[var(--ui-bg)] data-[state=inactive]:text-[var(--ui-text-muted)] data-[state=inactive]:hover:text-[var(--ui-text)] data-[state=active]:text-[var(--ui-text)] motion-reduce:transform-none motion-safe:active:scale-[0.98]',
               leadingIcon: 'text-sm',
             }"
           />
@@ -168,9 +164,7 @@
                   :name="group.icon"
                   class="shrink-0 text-base text-[var(--ui-text-dimmed)]"
                 />
-                <span class="text-[0.98rem] font-semibold">{{
-                  group.name
-                }}</span>
+                <span class="text-[0.98rem] font-semibold">{{ group.name }}</span>
               </div>
             </button>
           </div>
@@ -193,9 +187,7 @@
           leave-to-class="motion-reduce:transform-none opacity-0 -translate-y-2"
           mode="out-in"
         >
-          <div
-            :key="`${activeFirstGroupId}-${activeGroupId}-${visibleProducts.length}`"
-          >
+          <div :key="`${activeFirstGroupId}-${activeGroupId}-${visibleProducts.length}`">
             <div v-if="visibleProducts.length" class="flex flex-wrap gap-5">
               <article
                 v-for="(product, index) in visibleProducts"
@@ -209,8 +201,8 @@
                       index % 3 === 0
                         ? 'bg-[#ef476f]'
                         : index % 3 === 1
-                        ? 'bg-[#ff8a5b]'
-                        : 'bg-[#ffc07f]'
+                          ? 'bg-[#ff8a5b]'
+                          : 'bg-[#ffc07f]'
                     "
                   ></div>
 
@@ -218,9 +210,7 @@
                     {{ activeSecondaryLabel || activePrimaryLabel || "SYNULL" }}
                   </p>
 
-                  <h2
-                    class="mt-2 text-[1.05rem] font-semibold text-[var(--ui-text)]"
-                  >
+                  <h2 class="mt-2 text-[1.05rem] font-semibold text-[var(--ui-text)]">
                     {{ product.name }}
                   </h2>
 
@@ -266,8 +256,8 @@
                       index % 3 === 0
                         ? 'bg-[#ef476f]'
                         : index % 3 === 1
-                        ? 'bg-[#ff8a5b]'
-                        : 'bg-[#ffc07f] text-[var(--ui-bg)]'
+                          ? 'bg-[#ff8a5b]'
+                          : 'bg-[#ffc07f] text-[var(--ui-bg)]'
                     "
                     :disabled="useMockCatalog"
                     @click="openProduct(product.id)"
@@ -286,9 +276,7 @@
                 name="solar:box-bold-duotone"
                 class="text-[2.2rem] text-[var(--ui-text-dimmed)]"
               />
-              <p class="m-0 text-[var(--ui-text-muted)]">
-                {{ t("noProducts") }}
-              </p>
+              <p class="m-0 text-[var(--ui-text-muted)]">{{ t("noProducts") }}</p>
             </div>
           </div>
         </Transition>
@@ -679,11 +667,7 @@ const loadProducts = async (query = {}) => {
         return;
       }
 
-      if (
-        !nextProducts.length &&
-        nextProductGroups.length &&
-        query.gid === undefined
-      ) {
+      if (!nextProducts.length && nextProductGroups.length && query.gid === undefined) {
         await loadProducts({
           first_gid: resolvedFirstGroupId,
           gid: nextProductGroups[0].id,
