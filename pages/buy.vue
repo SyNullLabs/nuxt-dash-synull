@@ -33,6 +33,15 @@
         </div>
 
         <UButton
+          v-if="canUseMockCatalog"
+          color="neutral"
+          variant="soft"
+          icon="i-solar-test-tube-bold-duotone"
+          :label="useMockCatalog ? 'Mock 已开启' : '切换 Mock'"
+          @click="toggleMockCatalog"
+        />
+
+        <UButton
           to="/cart"
           variant="soft"
           color="neutral"
@@ -254,9 +263,10 @@
                     ? 'bg-[#ff8a5b]'
                     : 'bg-[#ffc07f] text-[var(--ui-bg)]'
                 "
+                :disabled="useMockCatalog"
                 @click="openProduct(product.id)"
               >
-                {{ t("buyNow") }}
+                {{ useMockCatalog ? "Mock 预览" : t("buyNow") }}
               </button>
             </div>
           </article>
@@ -292,6 +302,158 @@ const activeFirstGroupId = ref(null);
 const allGroups = ref([]);
 const activeGroupId = ref(null);
 const defaultCurrency = ref(null);
+const canUseMockCatalog = import.meta.dev;
+const useMockCatalog = ref(false);
+
+const mockCatalog = {
+  default_currency: {
+    code: "CNY",
+  },
+  first_groups: [
+    { id: 101, name: "标准算力" },
+    { id: 102, name: "内存优化" },
+    { id: 103, name: "计算优化" },
+  ],
+  product_groups: {
+    101: [
+      { id: 1001, name: "东京 JP / 42ms" },
+      { id: 1002, name: "新加坡 SG / 68ms" },
+      { id: 1003, name: "洛杉矶 US / 112ms" },
+    ],
+    102: [
+      { id: 2001, name: "东京 JP / 44ms" },
+      { id: 2002, name: "法兰克福 DE / 184ms" },
+      { id: 2003, name: "香港 CN / 12ms" },
+    ],
+    103: [
+      { id: 3001, name: "新加坡 SG / 65ms" },
+      { id: 3002, name: "东京 JP / 39ms" },
+      { id: 3003, name: "伦敦 UK / 210ms" },
+    ],
+  },
+  products: {
+    1001: [
+      {
+        id: "mock-standard-tokyo-entry",
+        name: "Entry Tier",
+        description: "1 vCPU\n2 GB 内存\n50 GB NVMe\n1 TB 月流量",
+        price_text: "¥36 / 月",
+      },
+      {
+        id: "mock-standard-tokyo-pro",
+        name: "Pro Tier",
+        description: "2 vCPU\n4 GB 内存\n100 GB NVMe\n2 TB 月流量",
+        price_text: "¥88 / 月",
+      },
+      {
+        id: "mock-standard-tokyo-elite",
+        name: "Enterprise Tier",
+        description: "4 vCPU\n8 GB 内存\n200 GB NVMe\n5 TB 月流量",
+        price_text: "¥168 / 月",
+      },
+    ],
+    1002: [
+      {
+        id: "mock-standard-singapore-entry",
+        name: "Edge Lite",
+        description: "1 vCPU\n2 GB 内存\n40 GB NVMe\n1 TB 月流量",
+        price_text: "¥42 / 月",
+      },
+      {
+        id: "mock-standard-singapore-pro",
+        name: "Edge Pro",
+        description: "2 vCPU\n6 GB 内存\n120 GB NVMe\n2 TB 月流量",
+        price_text: "¥96 / 月",
+      },
+    ],
+    1003: [
+      {
+        id: "mock-standard-la-entry",
+        name: "West Starter",
+        description: "2 vCPU\n4 GB 内存\n80 GB NVMe\n2 TB 月流量",
+        price_text: "¥79 / 月",
+      },
+      {
+        id: "mock-standard-la-pro",
+        name: "West Business",
+        description: "4 vCPU\n8 GB 内存\n160 GB NVMe\n4 TB 月流量",
+        price_text: "¥149 / 月",
+      },
+    ],
+    2001: [
+      {
+        id: "mock-memory-tokyo-memory",
+        name: "Memory M4",
+        description: "2 vCPU\n8 GB 内存\n120 GB NVMe\n2 TB 月流量",
+        price_text: "¥109 / 月",
+      },
+      {
+        id: "mock-memory-tokyo-memory-plus",
+        name: "Memory M8",
+        description: "4 vCPU\n16 GB 内存\n240 GB NVMe\n4 TB 月流量",
+        price_text: "¥199 / 月",
+      },
+    ],
+    2002: [
+      {
+        id: "mock-memory-frankfurt-cache",
+        name: "Cache Heavy",
+        description: "4 vCPU\n24 GB 内存\n240 GB NVMe\n5 TB 月流量",
+        price_text: "¥229 / 月",
+      },
+      {
+        id: "mock-memory-frankfurt-db",
+        name: "DB Prime",
+        description: "8 vCPU\n32 GB 内存\n400 GB NVMe\n8 TB 月流量",
+        price_text: "¥389 / 月",
+      },
+    ],
+    2003: [
+      {
+        id: "mock-memory-hk-fast",
+        name: "HK Low Latency",
+        description: "2 vCPU\n8 GB 内存\n100 GB NVMe\n2 TB 月流量",
+        price_text: "¥126 / 月",
+      },
+    ],
+    3001: [
+      {
+        id: "mock-cpu-singapore-c2",
+        name: "CPU C2",
+        description: "4 vCPU\n4 GB 内存\n120 GB NVMe\n3 TB 月流量",
+        price_text: "¥119 / 月",
+      },
+      {
+        id: "mock-cpu-singapore-c4",
+        name: "CPU C4",
+        description: "8 vCPU\n8 GB 内存\n200 GB NVMe\n5 TB 月流量",
+        price_text: "¥218 / 月",
+      },
+    ],
+    3002: [
+      {
+        id: "mock-cpu-tokyo-render",
+        name: "Render Sprint",
+        description: "6 vCPU\n8 GB 内存\n160 GB NVMe\n4 TB 月流量",
+        price_text: "¥178 / 月",
+      },
+      {
+        id: "mock-cpu-tokyo-burst",
+        name: "Burst Peak",
+        description: "10 vCPU\n12 GB 内存\n240 GB NVMe\n6 TB 月流量",
+        price_text: "¥269 / 月",
+      },
+    ],
+    3003: [
+      {
+        id: "mock-cpu-london-compile",
+        name: "Compile XL",
+        description: "8 vCPU\n16 GB 内存\n240 GB NVMe\n6 TB 月流量",
+        price_text: "¥288 / 月",
+      },
+    ],
+  },
+};
 
 const hasCategoryGroups = computed(() =>
   allGroups.value.some((group) => Boolean(group.name))
@@ -361,7 +523,35 @@ const setGroups = (groups, products = [], selectedGroupId = null) => {
   }));
 };
 
+const createMockCatalogResponse = (query = {}) => {
+  const firstGroups = mockCatalog.first_groups;
+  const resolvedFirstGroupId = Number(
+    query.first_gid ?? firstGroups[0]?.id ?? null
+  );
+  const productGroups = mockCatalog.product_groups[resolvedFirstGroupId] || [];
+  const resolvedGroupId = Number(query.gid ?? productGroups[0]?.id ?? null);
+
+  return {
+    success: true,
+    data: {
+      first_groups: firstGroups,
+      product_groups: productGroups,
+      products: mockCatalog.products[resolvedGroupId] || [],
+      default_currency: mockCatalog.default_currency,
+    },
+  };
+};
+
+const toggleMockCatalog = async () => {
+  useMockCatalog.value = !useMockCatalog.value;
+  await loadProducts();
+};
+
 const openProduct = (productId) => {
+  if (useMockCatalog.value) {
+    return;
+  }
+
   navigateTo(`/buy/${productId}`);
 };
 
@@ -431,7 +621,9 @@ const loadProducts = async (query = {}) => {
   error.value = false;
 
   try {
-    const res = await api("/cart/home", { query });
+    const res = useMockCatalog.value
+      ? createMockCatalogResponse(query)
+      : await api("/cart/home", { query });
 
     if (res?.success && res.data) {
       const nextFirstGroups = normalizeFirstGroups(res.data.first_groups);
