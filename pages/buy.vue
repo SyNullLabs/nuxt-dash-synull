@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto grid w-full max-w-[68rem] gap-6 md:gap-10">
+  <div class="mx-auto grid w-full max-w-272 gap-6 md:gap-10">
     <div class="flex flex-wrap items-center justify-end gap-3">
       <UBadge v-if="defaultCurrencyLabel" color="neutral" variant="subtle"
         class="rounded-[0.45rem] px-4 py-2 text-[0.82rem] font-semibold tracking-[0.08em]">
@@ -40,10 +40,10 @@
       </section>
     </div>
 
-    <UCard v-else-if="error" class="min-h-[14rem]"
+    <UCard v-else-if="error" class="min-h-56"
       :ui="{ root: 'rounded-[0.55rem]', body: 'grid place-items-center gap-3 p-8 text-center' }">
       <Icon name="solar:danger-triangle-bold-duotone" class="text-[2.2rem] text-synull" />
-      <p class="m-0 text-[var(--ui-text-muted)]">
+      <p class="m-0 text-muted
         {{ t("loadProductsFailed") }}
       </p>
       <UButton @click="loadProducts" variant="soft" :label="t('retry')" />
@@ -51,7 +51,7 @@
 
     <div v-else class="grid gap-10">
       <section class="grid gap-4" :class="getSectionMotionClass(0)">
-        <span class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[var(--ui-text-dimmed)]">
+        <span class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-dimmed">
           01 PRODUCT LINE
         </span>
 
@@ -69,7 +69,7 @@
       </section>
 
       <section v-if="hasCategoryGroups" class="grid gap-4" :class="getSectionMotionClass(1)">
-        <span class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[var(--ui-text-dimmed)]">
+        <span class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-dimmed">
           02 PRODUCT GROUP
         </span>
 
@@ -83,17 +83,17 @@
           <div :key="String(activeFirstGroupId)" class="flex flex-wrap gap-3">
             <UCard v-for="group in allGroups" :key="group.id" as="button" type="button"
               variant="outline"
-              class="relative w-full max-w-[20rem] overflow-hidden text-left motion-reduce:transform-none motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
+              class="relative w-full max-w-56 overflow-hidden text-left motion-reduce:transform-none motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
               :class="String(activeGroupId) === String(group.id) ? 'ring-1 ring-inset ring-violet-500/20' : ''"
               :ui="{ root: 'rounded-[0.45rem] cursor-pointer', body: 'p-4 min-h-[5.1rem] flex flex-col justify-center gap-3' }"
               @click="selectProductGroup(group.id)">
-              <span class="absolute inset-y-0 left-0 w-[3px]" :class="String(activeGroupId) === String(group.id)
-                  ? 'bg-gradient-to-b from-synull-400 to-violet-600'
+              <span class="absolute inset-y-0 left-0 w-0.75" :class="String(activeGroupId) === String(group.id)
+                  ? 'bg-linear-to-b from-synull-400 to-violet-600'
                   : 'bg-transparent'
                 "></span>
 
-              <div class="flex items-center gap-3 text-[var(--ui-text)]">
-                <Icon v-if="group.icon" :name="group.icon" class="shrink-0 text-base text-[var(--ui-text-dimmed)]" />
+              <div class="flex items-center gap-3 text-default">
+                <Icon v-if="group.icon" :name="group.icon" class="shrink-0 text-base text-dimmed" />
                 <span class="text-[0.98rem] font-semibold">{{
                   group.name
                   }}</span>
@@ -104,7 +104,7 @@
       </section>
 
       <section class="grid gap-4" :class="getSectionMotionClass(2)">
-        <span class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[var(--ui-text-dimmed)]">
+        <span class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-dimmed">
           03 AVAILABLE PLANS
         </span>
 
@@ -127,37 +127,37 @@
                   footer: 'bg-[var(--ui-bg)]/50 p-5',
                 }">
                 <template #header>
-                  <div class="mb-3 h-[3px] w-[14px] rounded-full" :class="index % 3 === 0
+                  <div class="mb-3 h-0.75 w-3.5 rounded-full" :class="index % 3 === 0
                       ? 'bg-synull'
                       : index % 3 === 1
                         ? 'bg-violet-500'
                         : 'bg-violet-500'
                     "></div>
 
-                  <p class="m-0 text-[0.82rem] text-[var(--ui-text-muted)]">
+                  <p class="m-0 text-[0.82rem] text-muted">
                     {{ activeSecondaryLabel || activePrimaryLabel || "SYNULL" }}
                   </p>
 
-                  <h2 class="mt-2 text-[1.05rem] font-semibold text-[var(--ui-text)]">
+                  <h2 class="mt-2 text-[1.05rem] font-semibold text-default">
                     {{ product.name }}
                   </h2>
 
                   <p v-if="product.price_text"
-                    class="mt-2 text-[clamp(1.55rem,2vw,2rem)] font-semibold tracking-[-0.04em] text-[var(--ui-text)]">
+                    class="mt-2 text-[clamp(1.55rem,2vw,2rem)] font-semibold tracking-[-0.04em] text-default">
                     {{ product.price_text }}
                   </p>
 
-                  <p v-else class="mt-2 text-[0.88rem] font-semibold text-[var(--ui-text-muted)]">
+                  <p v-else class="mt-2 text-[0.88rem] font-semibold text-muted">
                     {{ t("configureProduct") }}
                   </p>
                 </template>
 
                 <div v-for="(spec, specIndex) in getProductSpecs(product)" :key="`${product.id}-${spec}-${specIndex}`"
                   class="flex items-center justify-between gap-4">
-                  <span class="text-[0.78rem] font-semibold text-[var(--ui-text-dimmed)]">
+                  <span class="text-[0.78rem] font-semibold text-dimmed">
                     {{ formatSpecLabel(specIndex) }}
                   </span>
-                  <span class="text-right font-mono text-[0.84rem] font-semibold text-[var(--ui-text)]">
+                  <span class="text-right font-mono text-[0.84rem] font-semibold text-default">
                     {{ spec }}
                   </span>
                 </div>
@@ -165,7 +165,7 @@
                 <template #footer>
                   <UButton block type="button" size="md"
                     :class="[
-                      'rounded-[0.25rem] py-3 text-[0.85rem] font-bold text-white motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:scale-[0.98]',
+                      'rounded-[0.25rem] py-3 text-[0.85rem] font-bold motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:scale-[0.98]',
                       index % 3 === 0 ? 'bg-synull' : index % 3 === 1 ? 'bg-violet-600' : 'bg-violet-500',
                     ]"
                     color="primary" variant="solid"
