@@ -92,12 +92,25 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const { methods, loadAuthMethods } = useAuthMethods();
 
-const createLinkItem = (item) => ({
-  label: t(item.label),
-  icon: item.icon,
-  to: item.href,
-  exact: item.href === "/",
-});
+const normalizePath = (path) => path.replace(/\/+$/, "") || "/";
+
+const createLinkItem = (item) => {
+  const currentPath = normalizePath(route.path);
+  const itemPath = normalizePath(item.href);
+  const isActive = item.activeMatch
+    ? item.activeMatch(currentPath)
+    : itemPath === "/"
+      ? currentPath === "/"
+      : currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
+
+  return {
+    label: t(item.label),
+    icon: item.icon,
+    to: item.href,
+    exact: item.href === "/",
+    active: isActive,
+  };
+};
 
 const isLoggedIn = computed(() => Boolean(authStore.token || getAuthToken()));
 const brandHref = computed(() => (isLoggedIn.value ? "/" : "/buy"));
@@ -118,6 +131,7 @@ const memberNavigationItems = computed(() => [
       href: "/cart",
       icon: "solar:cart-large-bold-duotone",
       label: "shoppingCart",
+      activeMatch: (path) => path === "/cart" || path === "/checkout",
     }),
   ],
   [

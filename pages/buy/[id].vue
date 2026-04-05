@@ -12,6 +12,48 @@
       <h1 class="text-xl font-semibold text-white">{{ t("configureProduct") }}</h1>
     </div>
 
+    <nav
+      v-if="!loading && !catalogLoading && hasCatalogGroups"
+      class="mb-5 flex gap-1 overflow-x-auto border-b border-white/8 pb-px"
+    >
+      <button
+        v-for="group in catalogGroups"
+        :key="group.id"
+        type="button"
+        :class="[
+          'flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+          String(resolvedCatalogGroupId) === String(group.id)
+            ? 'border-synull text-synull'
+            : 'border-transparent text-white/45 hover:text-white/70',
+        ]"
+        @click="activeCatalogGroupId = group.id"
+      >
+        <Icon v-if="group.icon" :name="group.icon" class="text-sm" />
+        {{ group.name }}
+        <span class="text-xs opacity-60">({{ group.items.length }})</span>
+      </button>
+    </nav>
+
+    <div
+      v-if="!loading && !catalogLoading && visibleCatalogProducts.length > 1"
+      class="mb-5 flex flex-wrap gap-2"
+    >
+      <button
+        v-for="product in visibleCatalogProducts"
+        :key="product.id"
+        type="button"
+        :class="[
+          'rounded-full border px-3 py-1.5 text-sm transition-colors',
+          String(product.id || '') === productId
+            ? 'border-synull/40 bg-synull/10 text-synull'
+            : 'border-white/10 bg-white/5 text-white/55 hover:border-white/20 hover:text-white/78',
+        ]"
+        @click="navigateTo(`/buy/${product.id}`)"
+      >
+        {{ product.name || product.id }}
+      </button>
+    </div>
+
     <div v-if="loading" class="space-y-4">
       <div class="dashboard-panel rounded-2xl p-5">
         <USkeleton class="mb-3 h-6 w-48 rounded-lg" />
@@ -158,16 +200,20 @@ import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { buildLoginRedirectLocation } from "~/composables/useSession";
 import { useAuthStore } from "~/stores/auth";
+import { normalizeBuyCatalogGroups } from "~/utils/buy-catalog";
 
 const { t } = useI18n();
 const route = useRoute();
 const api = useApiClient();
 const toast = useToast();
 
-const productId = route.params.id;
+const productId = computed(() => String(route.params.id || ""));
 const loading = ref(true);
 const error = ref(false);
+const catalogLoading = ref(true);
 const config = ref({});
+const catalogGroups = ref([]);
+const activeCatalogGroupId = ref(null);
 const selectedCycle = ref("");
 const selectedOptions = reactive({});
 const customFields = reactive({});
@@ -185,15 +231,86 @@ const canSubmitOrder = computed(
   () => !priceLoading.value && !priceError.value && hasResolvedPrice.value
 );
 
+const hasCatalogGroups = computed(() =>
+  catalogGroups.value.some((group) => Boolean(group.name))
+);
+
+const currentCatalogGroup = computed(
+  () =>
+    catalogGroups.value.find((group) =>
+      group.items.some(
+        (product) => String(product.id || "") === productId.value
+      )
+    ) || null
+);
+
+const resolvedCatalogGroupId = computed(() => {
+  const activeId = activeCatalogGroupId.value;
+
+  if (
+    activeId !== null &&
+    catalogGroups.value.some((group) => String(group.id) === String(activeId))
+  ) {
+    return activeId;
+  }
+
+  return currentCatalogGroup.value?.id ?? null;
+});
+
+const visibleCatalogProducts = computed(() => {
+  const group = catalogGroups.value.find(
+    (candidate) =>
+      String(candidate.id) === String(resolvedCatalogGroupId.value)
+  );
+
+  return group?.items || [];
+});
+
+const resetProductConfigState = () => {
+  config.value = {};
+  selectedCycle.value = "";
+  priceInfo.value = {};
+  priceError.value = "";
+
+  for (const key of Object.keys(selectedOptions)) {
+    delete selectedOptions[key];
+  }
+
+  for (const key of Object.keys(customFields)) {
+    delete customFields[key];
+  }
+};
+
+const syncActiveCatalogGroup = () => {
+  activeCatalogGroupId.value = currentCatalogGroup.value?.id ?? null;
+};
+
 const selectOption = (key, value) => {
   selectedOptions[key] = value;
+};
+
+const loadCatalogGroups = async () => {
+  catalogLoading.value = true;
+
+  try {
+    const res = await api("/cart/products");
+    catalogGroups.value =
+      res?.success && res.data ? normalizeBuyCatalogGroups(res.data) : [];
+  } catch {
+    catalogGroups.value = [];
+  } finally {
+    catalogLoading.value = false;
+    syncActiveCatalogGroup();
+  }
 };
 
 const loadConfig = async () => {
   loading.value = true;
   error.value = false;
+  resetProductConfigState();
+
   try {
-    const res = await api("/cart/config", { query: { pid: productId } });
+    const res = await api("/cart/config", { query: { pid: productId.value } });
     if (res?.success && res.data) {
       config.value = res.data;
       // Set defaults
@@ -226,7 +343,7 @@ const calcPrice = async () => {
     const res = await api("/cart/total", {
       method: "POST",
       body: {
-        pid: productId,
+        pid: productId.value,
         billingcycle: selectedCycle.value,
         configoption: selectedOptions,
         customfield: customFields,
@@ -265,7 +382,7 @@ const addToCart = async (checkout = false) => {
     const res = await api("/cart/add", {
       method: "POST",
       body: {
-        pid: productId,
+        pid: productId.value,
         billingcycle: selectedCycle.value,
         configoption: selectedOptions,
         customfield: customFields,
@@ -297,7 +414,20 @@ watch([selectedCycle, selectedOptions, customFields], () => {
 }, { deep: true });
 
 onMounted(async () => {
-  await loadConfig();
+  await Promise.all([loadCatalogGroups(), loadConfig()]);
   if (!error.value) calcPrice();
 });
+
+watch(
+  productId,
+  async (nextId, previousId) => {
+    if (nextId === previousId) {
+      return;
+    }
+
+    syncActiveCatalogGroup();
+    await loadConfig();
+    if (!error.value) calcPrice();
+  }
+);
 </script>
