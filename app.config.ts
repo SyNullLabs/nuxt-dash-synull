@@ -4,5 +4,8 @@ export default defineAppConfig({
       primary: "purple",
       neutral: "neutral",
     },
+    skeleton: {
+      base: "animate-pulse rounded-md bg-accented",
+    },
   },
 });
