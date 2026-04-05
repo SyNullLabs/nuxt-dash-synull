@@ -1,7 +1,9 @@
 import {
   buildBackendActionResponse,
+  clearAffSession,
   clearCaptchaSession,
   fetchAuthMethodConfig,
+  readAffSession,
   readCaptchaSession,
 } from "../../../utils/mf-auth";
 import { requestBackendResult } from "../../../utils/mf-api";
@@ -14,6 +16,8 @@ export default defineEventHandler(async (event) => {
   const password = body.password;
   const code = body.code?.toString().trim();
   const captcha = body.captcha?.toString().trim();
+  // sale_id is only forwarded when the register page is opened with ?sale_id=
+  // and the frontend submits the linked sales employee ID.
   const saleId = body.saleId?.toString().trim();
   const turnstileToken = body.turnstileToken;
   const authMethodConfig = await fetchAuthMethodConfig();
@@ -43,9 +47,16 @@ export default defineEventHandler(async (event) => {
     };
   }
 
+  const affSession = readAffSession(event);
+
+  const cookieHeader = [captchaSession, affSession]
+    .filter(Boolean)
+    .join("; ")
+    .trim();
+
   const { payload } = await requestBackendResult("/register_phone", {
     method: "POST",
-    headers: captchaSession ? { cookie: captchaSession } : undefined,
+    headers: cookieHeader ? { cookie: cookieHeader } : undefined,
     body: {
       phone_code: phoneCode,
       phone,
@@ -56,8 +67,9 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  if (requiresCaptcha && Number(payload?.status) === 200) {
-    clearCaptchaSession(event);
+  if (Number(payload?.status) === 200) {
+    if (requiresCaptcha) clearCaptchaSession(event);
+    clearAffSession(event);
   }
 
   return buildBackendActionResponse(payload, "手机注册失败");

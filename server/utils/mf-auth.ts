@@ -2,6 +2,7 @@ import type { H3Event } from "h3";
 import { requestBackendResult } from "./mf-api";
 
 const CAPTCHA_SESSION_COOKIE = "mf_captcha_session";
+const AFF_SESSION_COOKIE = "mf_aff_session";
 const ENABLED_VALUES = new Set(["1", "true", "yes", "on"]);
 
 const normalizeStatus = (payload?: Record<string, any>) => {
@@ -180,6 +181,35 @@ export const clearCaptchaSession = (event: H3Event) => {
   });
 };
 
+export const rememberAffSession = (
+  event: H3Event,
+  setCookies: string[],
+  maxAge = 60 * 60 * 24 * 30
+) => {
+  const serializedCookies = serializeBackendCookies(setCookies);
+
+  if (!serializedCookies) {
+    return;
+  }
+
+  setCookie(event, AFF_SESSION_COOKIE, encodeURIComponent(serializedCookies), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge,
+  });
+};
+
+export const readAffSession = (event: H3Event) => {
+  const sessionCookie = getCookie(event, AFF_SESSION_COOKIE);
+  return sessionCookie ? decodeURIComponent(sessionCookie) : "";
+};
+
+export const clearAffSession = (event: H3Event) => {
+  deleteCookie(event, AFF_SESSION_COOKIE, { path: "/" });
+};
+
 const readOptionalBooleanFlag = (data: Record<string, any>, keys: string[]) => {
   for (const key of keys) {
     const value = data?.[key];
@@ -268,6 +298,11 @@ export const extractAuthMethodConfig = (data: Record<string, any> = {}) => {
         ]),
       },
     },
+    // Raw sales-assignment config returned by login_register_index.
+    setsaler: readBooleanFlag(data, ["setsaler"]),
+    saler: Array.isArray(data?.saler) ? (data.saler as Array<Record<string, any>>) : [],
+    // is_aff: whether the affiliate program is enabled
+    isAff: readBooleanFlag(data, ["is_aff"]),
   };
 };
 

@@ -33,6 +33,7 @@
   "confirmPassword": "确认密码",
   "enterConfirmPassword": "请再次输入密码",
   "captcha": "图形验证码",
+  "salesEmployee": "所属销售员",
   "enterCaptcha": "请输入图形验证码",
   "refreshCaptcha": "换一张",
   "sendCode": "发送验证码",

@@ -13,8 +13,15 @@ export default defineEventHandler(async () => {
     });
   }
 
+  const config = extractAuthMethodConfig(payload?.data || {});
+
   return {
     success: true,
-    methods: extractAuthMethodConfig(payload?.data || {}),
+    methods: config,
+    // Raw sales/affiliate config from login_register_index.
+    // The register page decides whether to expose sale_id based on the URL query.
+    setsaler: config.setsaler,
+    saler: config.saler,
+    isAff: config.isAff,
   };
 });

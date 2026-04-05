@@ -135,6 +135,9 @@ export default defineNuxtConfig({
     middlewareServiceUrl: process.env.MIDDLEWARE_SERVICE_URL || "",
     middlewareServiceScopes: process.env.MIDDLEWARE_SERVICE_SCOPES || "",
     middlewareServiceHeaders: process.env.MIDDLEWARE_SERVICE_HEADERS || "",
+    // Number of days affiliate referral attribution is tracked.
+    // Backend doesn't expose this via API — configure via env var (default: 30).
+    affiliateDays: process.env.AFFILIATE_DAYS || "30",
     turnstile: {
       secretKey: process.env.TURNSTILE_SECRET_KEY,
     },

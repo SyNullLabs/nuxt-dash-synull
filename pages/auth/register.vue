@@ -209,6 +209,18 @@
             </div>
           </div>
 
+          <div v-if="shouldShowSaleBinding" class="space-y-2.5">
+            <label class="block text-sm font-medium text-[color:var(--ui-text-muted)]">
+              {{ $t("salesEmployee") }}
+            </label>
+            <input
+              :value="resolvedSaleLabel"
+              type="text"
+              readonly
+              class="h-11 w-full appearance-none rounded-[0.7rem] border border-[color:var(--ui-border)] bg-[color:var(--ui-bg-soft)] px-3.5 text-sm text-[color:var(--ui-text-muted)] focus:outline-none"
+            />
+          </div>
+
           <TurnstileInlinePanel
             v-model="registerTurnstileToken"
             :open="isRegisterTurnstileOpen"
@@ -259,7 +271,6 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
-import { useAffiliateReferral } from "~/composables/useAffiliateReferral";
 import { useAuthMethods } from "~/composables/useAuthMethods";
 import { useTurnstileChallenge } from "~/composables/useTurnstileChallenge";
 import { useVerificationCode } from "~/composables/useVerificationCode";
@@ -270,8 +281,7 @@ const route = useRoute();
 const router = useRouter();
 const alertStore = useAlertStore();
 const api = useApiClient();
-const { affiliateRef, readAffiliateQuery } = useAffiliateReferral();
-const { methods, loadAuthMethods } = useAuthMethods();
+const { methods, saler, loadAuthMethods } = useAuthMethods();
 const registerTurnstile = useTurnstileChallenge();
 const {
   token: registerTurnstileToken,
@@ -298,9 +308,42 @@ definePageMeta({
   layout: "auth",
 });
 
-const saleId = computed(() => {
-  return readAffiliateQuery(route.query) || affiliateRef.value || "";
+const saleIdFromQuery = computed(() => {
+  const rawValue = Array.isArray(route.query.sale_id)
+    ? route.query.sale_id[0]
+    : route.query.sale_id;
+
+  return typeof rawValue === "string" ? rawValue.trim() : "";
 });
+
+const shouldShowSaleBinding = computed(() => Boolean(saleIdFromQuery.value));
+
+const resolvedSaleId = computed(() => {
+  if (!shouldShowSaleBinding.value) {
+    return "";
+  }
+
+  return saleIdFromQuery.value;
+});
+
+const resolvedSaleLabel = computed(() => {
+  if (!shouldShowSaleBinding.value) {
+    return "";
+  }
+
+  const matchedSalesEmployee = Array.isArray(saler.value)
+    ? saler.value.find(
+        (candidate) => String(candidate?.id || "") === saleIdFromQuery.value
+      )
+    : null;
+
+  return (
+    matchedSalesEmployee?.username ||
+    matchedSalesEmployee?.name ||
+    resolvedSaleId.value
+  );
+});
+
 
 const registerModes = computed(() => {
   if (!methods.value) {
@@ -493,9 +536,9 @@ const handleRegister = async () => {
             phone: phone.value,
             password: password.value,
             code: verificationCode.value,
-            saleId: saleId.value,
             turnstileToken,
             ...(requiresCaptcha.value ? { captcha: captcha.value } : {}),
+            ...(resolvedSaleId.value ? { saleId: resolvedSaleId.value } : {}),
           },
         }
       )

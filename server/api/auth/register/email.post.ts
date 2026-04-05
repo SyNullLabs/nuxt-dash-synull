@@ -1,7 +1,9 @@
 import {
   buildBackendActionResponse,
+  clearAffSession,
   clearCaptchaSession,
   fetchAuthMethodConfig,
+  readAffSession,
   readCaptchaSession,
 } from "../../../utils/mf-auth";
 import { requestBackendResult } from "../../../utils/mf-api";
@@ -13,6 +15,8 @@ export default defineEventHandler(async (event) => {
   const password = body.password;
   const code = body.code?.trim();
   const captcha = body.captcha?.trim();
+  // sale_id is only forwarded when the register page is opened with ?sale_id=
+  // and the frontend submits the linked sales employee ID.
   const saleId = body.saleId?.toString().trim();
   const turnstileToken = body.turnstileToken;
   const authMethodConfig = await fetchAuthMethodConfig();
@@ -42,9 +46,19 @@ export default defineEventHandler(async (event) => {
     };
   }
 
+  // Forward the affiliate backend session (set via /api/affiliate/capture)
+  // so the backend can link the new account to the referrer.
+  // Never send the aff code as sale_id — that field is for sales employees only.
+  const affSession = readAffSession(event);
+
+  const cookieHeader = [captchaSession, affSession]
+    .filter(Boolean)
+    .join("; ")
+    .trim();
+
   const { payload } = await requestBackendResult("/register_email", {
     method: "POST",
-    headers: captchaSession ? { cookie: captchaSession } : undefined,
+    headers: cookieHeader ? { cookie: cookieHeader } : undefined,
     body: {
       email,
       password,
@@ -54,8 +68,9 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  if (requiresCaptcha && Number(payload?.status) === 200) {
-    clearCaptchaSession(event);
+  if (Number(payload?.status) === 200) {
+    if (requiresCaptcha) clearCaptchaSession(event);
+    clearAffSession(event);
   }
 
   return buildBackendActionResponse(payload, "邮箱注册失败");

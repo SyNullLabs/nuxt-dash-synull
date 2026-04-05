@@ -33,6 +33,7 @@
   "confirmPassword": "確認密碼",
   "enterConfirmPassword": "請再次輸入密碼",
   "captcha": "圖形驗證碼",
+  "salesEmployee": "所屬銷售員",
   "enterCaptcha": "請輸入圖形驗證碼",
   "refreshCaptcha": "換一張",
   "sendCode": "發送驗證碼",
