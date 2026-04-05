@@ -1,61 +1,32 @@
 <template>
   <div class="mx-auto grid w-full max-w-[68rem] gap-6 md:gap-10">
-    <header
-      class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between"
-    >
-      <div class="flex items-start gap-3">
-        <div class="flex gap-[3px] pt-1" aria-hidden="true">
-          <span class="h-[18px] w-[5px] rounded-full bg-[#ef476f]"></span>
-          <span class="h-[18px] w-[5px] rounded-full bg-[#ff8a5b]"></span>
-          <span class="h-[18px] w-[5px] rounded-full bg-[#ffc07f]"></span>
-        </div>
-
-        <div>
-          <p
-            class="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[var(--ui-text-dimmed)]"
-          >
-            SYNULL ORDER FLOW
-          </p>
-          <h1
-            class="mt-1 text-[clamp(2rem,3vw,3rem)] font-semibold leading-none tracking-[-0.05em] text-[var(--ui-text)]"
-          >
-            {{ t("buy") }}
-          </h1>
-        </div>
+    <div class="flex flex-wrap items-center justify-end gap-3">
+      <div
+        v-if="defaultCurrencyLabel"
+        class="rounded-[0.45rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-2 text-[0.82rem] font-semibold tracking-[0.08em] text-[var(--ui-text-muted)] motion-reduce:transform-none motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:-translate-y-0.5"
+      >
+        {{ defaultCurrencyLabel }}
       </div>
 
-      <div class="flex flex-wrap items-center gap-3 md:justify-end">
-        <div
-          v-if="defaultCurrencyLabel"
-          class="rounded-[0.45rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-2 text-[0.82rem] font-semibold tracking-[0.08em] text-[var(--ui-text-muted)]"
-        >
-          {{ defaultCurrencyLabel }}
-        </div>
+      <UButton
+        v-if="canUseMockCatalog"
+        color="neutral"
+        variant="soft"
+        icon="i-solar-test-tube-bold-duotone"
+        :label="useMockCatalog ? 'Mock 已开启' : '切换 Mock'"
+        class="motion-reduce:transform-none motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.98]"
+        @click="toggleMockCatalog"
+      />
 
-        <UButton
-          v-if="canUseMockCatalog"
-          color="neutral"
-          variant="soft"
-          icon="i-solar-test-tube-bold-duotone"
-          :label="useMockCatalog ? 'Mock 已开启' : '切换 Mock'"
-          @click="toggleMockCatalog"
-        />
-
-        <UButton
-          to="/cart"
-          variant="soft"
-          color="neutral"
-          icon="i-solar-cart-large-bold-duotone"
-          :label="t('viewCart')"
-        />
-      </div>
-    </header>
-
-    <p
-      class="max-w-[46rem] text-[0.98rem] leading-7 text-[var(--ui-text-muted)]"
-    >
-      {{ pageSummary }}
-    </p>
+      <UButton
+        to="/cart"
+        variant="soft"
+        color="neutral"
+        icon="i-solar-cart-large-bold-duotone"
+        :label="t('viewCart')"
+        class="motion-reduce:transform-none motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.98]"
+      />
+    </div>
 
     <div v-if="loading" class="grid gap-10">
       <section class="grid gap-4">
@@ -107,35 +78,36 @@
     </div>
 
     <div v-else class="grid gap-10">
-      <section class="grid gap-4">
+      <section class="grid gap-4" :class="getSectionMotionClass(0)">
         <span
           class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[var(--ui-text-dimmed)]"
         >
           01 PRODUCT LINE
         </span>
 
-        <div
-          class="inline-flex max-w-full flex-wrap gap-px rounded-[0.4rem] bg-[var(--ui-border)] p-px"
-        >
-          <button
-            v-for="group in firstGroups"
-            :key="group.id"
-            type="button"
-            class="inline-flex items-center gap-2 rounded-[0.32rem] px-4 py-3 text-[0.84rem] font-semibold transition-colors duration-200"
-            :class="
-              String(activeFirstGroupId) === String(group.id)
-                ? 'bg-[var(--ui-bg-soft)] text-[var(--ui-text)]'
-                : 'bg-[var(--ui-bg)] text-[var(--ui-text-muted)] hover:text-[var(--ui-text)]'
-            "
-            @click="selectFirstGroup(group.id)"
-          >
-            <Icon v-if="group.icon" :name="group.icon" class="text-sm" />
-            <span>{{ group.name }}</span>
-          </button>
-        </div>
+        <UTabs
+          v-model="activeFirstTab"
+          :items="firstGroupTabItems"
+          :content="false"
+          color="neutral"
+          variant="pill"
+          size="md"
+          class="w-full"
+          :ui="{
+            list: 'inline-flex w-auto max-w-full flex-wrap gap-px rounded-[0.4rem] bg-[var(--ui-border)] p-px',
+            indicator: 'rounded-[0.32rem] bg-[var(--ui-bg-soft)] shadow-none',
+            trigger:
+              'min-w-fit rounded-[0.32rem] px-4 py-3 text-[0.84rem] font-semibold transition-colors duration-200 data-[state=inactive]:bg-[var(--ui-bg)] data-[state=inactive]:text-[var(--ui-text-muted)] data-[state=inactive]:hover:text-[var(--ui-text)] data-[state=active]:text-[var(--ui-text)] motion-reduce:transform-none motion-safe:active:scale-[0.98]',
+            leadingIcon: 'text-sm',
+          }"
+        />
       </section>
 
-      <section v-if="hasCategoryGroups" class="grid gap-4">
+      <section
+        v-if="hasCategoryGroups"
+        class="grid gap-4"
+        :class="getSectionMotionClass(1)"
+      >
         <span
           class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[var(--ui-text-dimmed)]"
         >
@@ -147,7 +119,7 @@
             v-for="group in allGroups"
             :key="group.id"
             type="button"
-            class="relative grid min-h-[5.1rem] w-full max-w-[20rem] gap-3 overflow-hidden rounded-[0.45rem] border px-4 py-4 text-left transition-transform duration-200"
+            class="relative grid min-h-[5.1rem] w-full max-w-[20rem] gap-3 overflow-hidden rounded-[0.45rem] border px-4 py-4 text-left motion-reduce:transform-none motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
             :class="
               String(activeGroupId) === String(group.id)
                 ? 'border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] ring-1 ring-inset ring-[#ef476f]/30'
@@ -168,12 +140,6 @@
               class="flex items-center justify-between text-[var(--ui-text-dimmed)]"
             >
               <Icon v-if="group.icon" :name="group.icon" class="text-base" />
-              <span
-                v-if="String(activeGroupId) === String(group.id)"
-                class="text-[0.7rem] font-bold tracking-[0.12em]"
-              >
-                ACTIVE
-              </span>
             </div>
 
             <span class="text-[0.98rem] font-semibold text-[var(--ui-text)]">
@@ -183,7 +149,7 @@
         </div>
       </section>
 
-      <section class="grid gap-4">
+      <section class="grid gap-4" :class="getSectionMotionClass(2)">
         <span
           class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[var(--ui-text-dimmed)]"
         >
@@ -194,7 +160,7 @@
           <article
             v-for="(product, index) in visibleProducts"
             :key="product.id"
-            class="flex min-h-full w-full max-w-[20rem] flex-col overflow-hidden rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]"
+            class="flex min-h-full w-full max-w-[20rem] flex-col overflow-hidden rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] motion-reduce:transform-none motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:-translate-y-1"
           >
             <div class="border-b border-[var(--ui-border)] p-6">
               <div
@@ -255,7 +221,7 @@
             <div class="bg-[var(--ui-bg)]/50 p-5">
               <button
                 type="button"
-                class="w-full rounded-[0.25rem] px-4 py-3 text-[0.85rem] font-bold text-white transition-opacity duration-200 hover:opacity-95"
+                class="w-full rounded-[0.25rem] px-4 py-3 text-[0.85rem] font-bold text-white motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:-translate-y-0.5 motion-safe:hover:opacity-95 motion-safe:active:scale-[0.98]"
                 :class="
                   index % 3 === 0
                     ? 'bg-[#ef476f]'
@@ -304,6 +270,7 @@ const activeGroupId = ref(null);
 const defaultCurrency = ref(null);
 const canUseMockCatalog = import.meta.dev;
 const useMockCatalog = ref(false);
+const pageReady = ref(false);
 
 const mockCatalog = {
   default_currency: {
@@ -501,15 +468,21 @@ const defaultCurrencyLabel = computed(() => {
   );
 });
 
-const pageSummary = computed(() => {
-  const activeSelection = [activePrimaryLabel.value, activeSecondaryLabel.value]
-    .filter(Boolean)
-    .join(" / ");
-  const firstProductName = visibleProducts.value[0]?.name || "";
+const firstGroupTabItems = computed(() =>
+  firstGroups.value.map((group) => ({
+    label: group.name,
+    icon: group.icon,
+    value: String(group.id),
+  }))
+);
 
-  return (
-    [activeSelection, firstProductName].filter(Boolean).join(" · ") || t("buy")
-  );
+const activeFirstTab = computed({
+  get: () => String(activeFirstGroupId.value ?? ""),
+  set: (value) => {
+    if (value) {
+      selectFirstGroup(value);
+    }
+  },
 });
 
 const setGroups = (groups, products = [], selectedGroupId = null) => {
@@ -540,6 +513,26 @@ const createMockCatalogResponse = (query = {}) => {
       default_currency: mockCatalog.default_currency,
     },
   };
+};
+
+const revealContent = () => {
+  requestAnimationFrame(() => {
+    pageReady.value = true;
+  });
+};
+
+const getSectionMotionClass = (index = 0) => {
+  const delays = [
+    "motion-safe:delay-75",
+    "motion-safe:delay-150",
+    "motion-safe:delay-200",
+  ];
+
+  return [
+    "motion-reduce:transform-none motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]",
+    pageReady.value ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
+    delays[index] || delays[0],
+  ];
 };
 
 const toggleMockCatalog = async () => {
@@ -617,6 +610,7 @@ const selectProductGroup = async (groupId) => {
 };
 
 const loadProducts = async (query = {}) => {
+  pageReady.value = false;
   loading.value = true;
   error.value = false;
 
@@ -676,6 +670,7 @@ const loadProducts = async (query = {}) => {
     error.value = true;
   } finally {
     loading.value = false;
+    revealContent();
   }
 };
 

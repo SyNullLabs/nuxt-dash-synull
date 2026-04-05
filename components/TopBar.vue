@@ -1,6 +1,6 @@
 <template>
   <UDashboardNavbar
-    :title="$t('dashboard')"
+    :title="navbarTitle"
     :toggle="{ color: 'neutral', variant: 'ghost' }"
   >
     <template #leading>
@@ -73,6 +73,15 @@ const userInfoStore = useUserInfoStore();
 const { userInfo } = storeToRefs(userInfoStore);
 const router = useRouter();
 const { locale, t } = useI18n();
+const navbarTitle = computed(() => {
+  const path = router.currentRoute.value.path.replace(/\/+$/, "") || "/";
+
+  if (path === "/buy" || path.startsWith("/buy/")) {
+    return t("buy");
+  }
+
+  return t("dashboard");
+});
 
 const isLoggedIn = computed(() => !!getAuthToken());
 const avatarSrc = computed(() =>
@@ -93,7 +102,9 @@ const changeLanguage = (langCode) => {
 
 const languageItems = computed(() => [
   availableLanguages.map((lang) => ({
-    label: `${normalizeLocaleCode(locale.value) === lang.code ? "✓ " : ""}${lang.flag} ${lang.name}`,
+    label: `${normalizeLocaleCode(locale.value) === lang.code ? "✓ " : ""}${
+      lang.flag
+    } ${lang.name}`,
     onSelect: () => changeLanguage(lang.code),
   })),
 ]);
@@ -140,8 +151,9 @@ const logout = () => {
   clearAuthToken();
   userInfoStore.clearUserInfo();
   window.location.assign(
-    router.resolve(buildLoginRedirectLocation(router.currentRoute.value.fullPath))
-      .href
+    router.resolve(
+      buildLoginRedirectLocation(router.currentRoute.value.fullPath)
+    ).href
   );
 };
 </script>
