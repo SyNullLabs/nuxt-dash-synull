@@ -1,10 +1,10 @@
 <template>
   <div class="mx-auto grid w-full max-w-[68rem] gap-6 md:gap-10">
     <div class="flex flex-wrap items-center justify-end gap-3">
-      <div v-if="defaultCurrencyLabel"
-        class="rounded-[0.45rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-2 text-[0.82rem] font-semibold tracking-[0.08em] text-[var(--ui-text-muted)]">
+      <UBadge v-if="defaultCurrencyLabel" color="neutral" variant="subtle"
+        class="rounded-[0.45rem] px-4 py-2 text-[0.82rem] font-semibold tracking-[0.08em]">
         {{ defaultCurrencyLabel }}
-      </div>
+      </UBadge>
 
       <UButton v-if="canUseMockCatalog" color="neutral" variant="soft" icon="i-solar-test-tube-bold-duotone"
         :label="useMockCatalog ? 'Mock 已开启' : '切换 Mock'"
@@ -40,14 +40,14 @@
       </section>
     </div>
 
-    <div v-else-if="error"
-      class="grid min-h-[14rem] place-items-center gap-3 rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-8 text-center">
+    <UCard v-else-if="error" class="min-h-[14rem]"
+      :ui="{ root: 'rounded-[0.55rem]', body: 'grid place-items-center gap-3 p-8 text-center' }">
       <Icon name="solar:danger-triangle-bold-duotone" class="text-[2.2rem] text-synull" />
       <p class="m-0 text-[var(--ui-text-muted)]">
         {{ t("loadProductsFailed") }}
       </p>
       <UButton @click="loadProducts" variant="soft" :label="t('retry')" />
-    </div>
+    </UCard>
 
     <div v-else class="grid gap-10">
       <section class="grid gap-4" :class="getSectionMotionClass(0)">
@@ -81,12 +81,12 @@
           leave-from-class="opacity-100 translate-y-0"
           leave-to-class="motion-reduce:transform-none opacity-0 -translate-y-2" mode="out-in">
           <div :key="String(activeFirstGroupId)" class="flex flex-wrap gap-3">
-            <button v-for="group in allGroups" :key="group.id" type="button"
-              class="relative grid min-h-[5.1rem] w-full max-w-[20rem] gap-3 overflow-hidden rounded-[0.45rem] border px-4 py-4 text-left motion-reduce:transform-none motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
-              :class="String(activeGroupId) === String(group.id)
-                  ? 'border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] ring-1 ring-inset ring-violet-500/20'
-                  : 'border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]'
-                " @click="selectProductGroup(group.id)">
+            <UCard v-for="group in allGroups" :key="group.id" as="button" type="button"
+              variant="outline"
+              class="relative w-full max-w-[20rem] overflow-hidden text-left motion-reduce:transform-none motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
+              :class="String(activeGroupId) === String(group.id) ? 'ring-1 ring-inset ring-violet-500/20' : ''"
+              :ui="{ root: 'rounded-[0.45rem] cursor-pointer', body: 'p-4 min-h-[5.1rem] flex flex-col justify-center gap-3' }"
+              @click="selectProductGroup(group.id)">
               <span class="absolute inset-y-0 left-0 w-[3px]" :class="String(activeGroupId) === String(group.id)
                   ? 'bg-gradient-to-b from-synull-400 to-violet-600'
                   : 'bg-transparent'
@@ -98,7 +98,7 @@
                   group.name
                   }}</span>
               </div>
-            </button>
+            </UCard>
           </div>
         </Transition>
       </section>
@@ -117,9 +117,16 @@
           leave-to-class="motion-reduce:transform-none opacity-0 -translate-y-2" mode="out-in">
           <div :key="`${activeFirstGroupId}-${activeGroupId}-${visibleProducts.length}`">
             <div v-if="visibleProducts.length" class="flex flex-wrap gap-5">
-              <article v-for="(product, index) in visibleProducts" :key="product.id"
-                class="flex min-h-full w-full max-w-[20rem] flex-col overflow-hidden rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]">
-                <div class="border-b border-[var(--ui-border)] p-6">
+              <UCard v-for="(product, index) in visibleProducts" :key="product.id"
+                variant="outline"
+                class="flex min-h-full w-full max-w-[20rem] flex-col"
+                :ui="{
+                  root: 'rounded-[0.55rem]',
+                  header: 'p-6',
+                  body: 'flex-1 grid gap-3 p-6',
+                  footer: 'bg-[var(--ui-bg)]/50 p-5',
+                }">
+                <template #header>
                   <div class="mb-3 h-[3px] w-[14px] rounded-full" :class="index % 3 === 0
                       ? 'bg-synull'
                       : index % 3 === 1
@@ -143,42 +150,37 @@
                   <p v-else class="mt-2 text-[0.88rem] font-semibold text-[var(--ui-text-muted)]">
                     {{ t("configureProduct") }}
                   </p>
+                </template>
+
+                <div v-for="(spec, specIndex) in getProductSpecs(product)" :key="`${product.id}-${spec}-${specIndex}`"
+                  class="flex items-center justify-between gap-4">
+                  <span class="text-[0.78rem] font-semibold text-[var(--ui-text-dimmed)]">
+                    {{ formatSpecLabel(specIndex) }}
+                  </span>
+                  <span class="text-right font-mono text-[0.84rem] font-semibold text-[var(--ui-text)]">
+                    {{ spec }}
+                  </span>
                 </div>
 
-                <div class="grid flex-1 gap-3 p-6">
-                  <div v-for="(spec, specIndex) in getProductSpecs(product)" :key="`${product.id}-${spec}-${specIndex}`"
-                    class="flex items-center justify-between gap-4">
-                    <span class="text-[0.78rem] font-semibold text-[var(--ui-text-dimmed)]">
-                      {{ formatSpecLabel(specIndex) }}
-                    </span>
-                    <span class="text-right font-mono text-[0.84rem] font-semibold text-[var(--ui-text)]">
-                      {{ spec }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="bg-[var(--ui-bg)]/50 p-5">
-                  <button type="button"
-                    class="w-full rounded-[0.25rem] px-4 py-3 text-[0.85rem] font-bold text-white motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:scale-[0.98]"
-                    :class="index % 3 === 0
-                        ? 'bg-synull text-white'
-                        : index % 3 === 1
-                          ? 'bg-violet-600 text-white'
-                          : 'bg-violet-500 text-white'
-                      " :disabled="useMockCatalog" @click="openProduct(product.id)">
+                <template #footer>
+                  <UButton block type="button" size="md"
+                    :class="[
+                      'rounded-[0.25rem] py-3 text-[0.85rem] font-bold text-white motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:scale-[0.98]',
+                      index % 3 === 0 ? 'bg-synull' : index % 3 === 1 ? 'bg-violet-600' : 'bg-violet-500',
+                    ]"
+                    color="primary" variant="solid"
+                    :disabled="useMockCatalog" @click="openProduct(product.id)">
                     {{ useMockCatalog ? "Mock 预览" : t("buyNow") }}
-                  </button>
-                </div>
-              </article>
+                  </UButton>
+                </template>
+              </UCard>
             </div>
 
-            <div v-else
-              class="grid min-h-[14rem] place-items-center gap-3 rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-8 text-center">
-              <Icon name="solar:box-bold-duotone" class="text-[2.2rem] text-[var(--ui-text-dimmed)]" />
-              <p class="m-0 text-[var(--ui-text-muted)]">
-                {{ t("noProducts") }}
-              </p>
-            </div>
+            <UEmpty v-else
+              icon="solar:box-bold-duotone"
+              :description="t('noProducts')"
+              :ui="{ root: 'min-h-[14rem] rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]' }"
+            />
           </div>
         </Transition>
       </section>
