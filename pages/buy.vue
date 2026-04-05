@@ -163,7 +163,7 @@
                     :class="index % 3 === 0
                         ? 'bg-synull text-white'
                         : index % 3 === 1
-                          ? 'bg-violet-500 text-white'
+                          ? 'bg-violet-600 text-white'
                           : 'bg-violet-500 text-white'
                       " :disabled="useMockCatalog" @click="openProduct(product.id)">
                     {{ useMockCatalog ? "Mock 预览" : t("buyNow") }}
