@@ -10,13 +10,13 @@
       <span
         :class="[
           barClass,
-          'bg-synull [animation-delay:120ms] motion-safe:animate-[pulse_1.2s_ease-in-out_infinite]',
+          'bg-emerald-500 [animation-delay:120ms] motion-safe:animate-[pulse_1.2s_ease-in-out_infinite]',
         ]"
       ></span>
       <span
         :class="[
           barClass,
-          'bg-synull-700 [animation-delay:240ms] motion-safe:animate-[pulse_1.2s_ease-in-out_infinite]',
+          'bg-violet-500 [animation-delay:240ms] motion-safe:animate-[pulse_1.2s_ease-in-out_infinite]',
         ]"
       ></span>
     </div>
