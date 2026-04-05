@@ -43,9 +43,7 @@
     <UCard v-else-if="error" class="min-h-56"
       :ui="{ root: 'rounded-[0.55rem]', body: 'grid place-items-center gap-3 p-8 text-center' }">
       <Icon name="solar:danger-triangle-bold-duotone" class="text-[2.2rem] text-synull" />
-      <p class="m-0 text-muted
-        {{ t("loadProductsFailed") }}
-      </p>
+      <p class="m-0 text-muted">{{ t("loadProductsFailed") }}</p>
       <UButton @click="loadProducts" variant="soft" :label="t('retry')" />
     </UCard>
 
@@ -81,22 +79,21 @@
           leave-from-class="opacity-100 translate-y-0"
           leave-to-class="motion-reduce:transform-none opacity-0 -translate-y-2" mode="out-in">
           <div :key="String(activeFirstGroupId)" class="flex flex-wrap gap-3">
-            <UCard v-for="group in allGroups" :key="group.id" as="button" type="button"
-              variant="outline"
+            <UCard v-for="group in allGroups" :key="group.id" as="button" type="button" variant="outline"
               class="relative w-full max-w-56 overflow-hidden text-left motion-reduce:transform-none motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
               :class="String(activeGroupId) === String(group.id) ? 'ring-1 ring-inset ring-violet-500/20' : ''"
               :ui="{ root: 'rounded-[0.45rem] cursor-pointer', body: 'p-4 min-h-[5.1rem] flex flex-col justify-center gap-3' }"
               @click="selectProductGroup(group.id)">
               <span class="absolute inset-y-0 left-0 w-0.75" :class="String(activeGroupId) === String(group.id)
-                  ? 'bg-linear-to-b from-synull-400 to-violet-600'
-                  : 'bg-transparent'
+                ? 'bg-linear-to-b from-synull-400 to-violet-600'
+                : 'bg-transparent'
                 "></span>
 
               <div class="flex items-center gap-3 text-default">
                 <Icon v-if="group.icon" :name="group.icon" class="shrink-0 text-base text-dimmed" />
                 <span class="text-[0.98rem] font-semibold">{{
                   group.name
-                  }}</span>
+                }}</span>
               </div>
             </UCard>
           </div>
@@ -117,21 +114,19 @@
           leave-to-class="motion-reduce:transform-none opacity-0 -translate-y-2" mode="out-in">
           <div :key="`${activeFirstGroupId}-${activeGroupId}-${visibleProducts.length}`">
             <div v-if="visibleProducts.length" class="flex flex-wrap gap-5">
-              <UCard v-for="(product, index) in visibleProducts" :key="product.id"
-                variant="outline"
-                class="flex min-h-full w-full max-w-[20rem] flex-col"
-                :ui="{
+              <UCard v-for="(product, index) in visibleProducts" :key="product.id" variant="outline"
+                class="flex min-h-full w-full max-w-[20rem] flex-col" :ui="{
                   root: 'rounded-[0.55rem]',
                   header: 'p-6',
                   body: 'flex-1 grid gap-3 p-6',
-                  footer: 'bg-[var(--ui-bg)]/50 p-5',
+                  footer: 'bg-[var(--ui-bg)]/50 p-0 sm:p-0',
                 }">
                 <template #header>
                   <div class="mb-3 h-0.75 w-3.5 rounded-full" :class="index % 3 === 0
-                      ? 'bg-synull'
-                      : index % 3 === 1
-                        ? 'bg-violet-500'
-                        : 'bg-violet-500'
+                    ? 'bg-synull'
+                    : index % 3 === 1
+                      ? 'bg-violet-500'
+                      : 'bg-violet-500'
                     "></div>
 
                   <p class="m-0 text-[0.82rem] text-muted">
@@ -163,24 +158,22 @@
                 </div>
 
                 <template #footer>
-                  <UButton block type="button" size="md"
-                    :class="[
-                      'rounded-[0.25rem] py-3 text-[0.85rem] font-bold motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:scale-[0.98]',
-                      index % 3 === 0 ? 'bg-synull' : index % 3 === 1 ? 'bg-violet-600' : 'bg-violet-500',
-                    ]"
-                    color="primary" variant="solid"
-                    :disabled="useMockCatalog" @click="openProduct(product.id)">
+                  <UButton block type="button" size="md" :class="[
+                    'rounded-none py-3 text-[0.85rem] font-bold motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:opacity-80',
+                    index % 3 === 0
+                      ? 'bg-violet-600'
+                      : index % 3 === 1
+                        ? 'bg-synull-600'
+                        : 'bg-purple-700'
+                  ]" color="neutral" variant="solid" :disabled="useMockCatalog" @click="openProduct(product.id)">
                     {{ useMockCatalog ? "Mock 预览" : t("buyNow") }}
                   </UButton>
                 </template>
               </UCard>
             </div>
 
-            <UEmpty v-else
-              icon="solar:box-bold-duotone"
-              :description="t('noProducts')"
-              :ui="{ root: 'min-h-[14rem] rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]' }"
-            />
+            <UEmpty v-else icon="solar:box-bold-duotone" :description="t('noProducts')"
+              :ui="{ root: 'min-h-[14rem] rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]' }" />
           </div>
         </Transition>
       </section>
