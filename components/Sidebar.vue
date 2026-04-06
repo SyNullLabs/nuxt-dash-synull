@@ -1,25 +1,26 @@
 <template>
-  <UDashboardSidebar
-    collapsible
+  <USidebar
+    v-model:open="sidebarOpen"
+    collapsible="icon"
+    rail
     :ui="{ body: 'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3' }"
   >
-    <template #header="{ collapsed }">
+    <template #header="{ state }">
       <UButton
         :to="brandHref"
         color="neutral"
         variant="ghost"
-        :label="!collapsed ? 'SYNULL' : undefined"
+        :label="state !== 'collapsed' ? 'SYNULL' : undefined"
         icon="solar:home-2-bold-duotone"
-        :square="collapsed"
-        :class="!collapsed ? 'w-full justify-start' : ''"
+        class="w-full justify-start"
       />
     </template>
 
-    <template #default="{ collapsed }">
+    <template #default="{ state }">
       <UNavigationMenu
         :items="navigationItems"
         orientation="vertical"
-        :collapsed="collapsed"
+        :collapsed="state === 'collapsed'"
         highlight
         highlight-color="primary"
         type="multiple"
@@ -34,25 +35,25 @@
           icon="solar:logout-2-bold-duotone"
           color="error"
           variant="ghost"
-          :label="!collapsed ? $t('logout') : undefined"
-          :square="collapsed"
+          :label="state !== 'collapsed' ? $t('logout') : undefined"
+          :title="state === 'collapsed' ? $t('logout') : undefined"
           :aria-label="$t('logout')"
-          :class="!collapsed ? 'w-full justify-start' : ''"
+          class="w-full justify-start"
           @click="handleLogout"
         />
       </template>
 
       <template v-else>
-        <div :class="!collapsed ? 'grid gap-2' : 'flex flex-col items-center gap-2'">
+        <div class="grid gap-2">
           <UButton
             v-if="showGuestLogin"
             icon="solar:user-circle-bold-duotone"
             color="primary"
             variant="soft"
-            :label="!collapsed ? $t('loginButton') : undefined"
-            :square="collapsed"
+            :label="state !== 'collapsed' ? $t('loginButton') : undefined"
+            :title="state === 'collapsed' ? $t('loginButton') : undefined"
             :aria-label="$t('loginButton')"
-            :class="!collapsed ? 'w-full justify-start' : ''"
+            class="w-full justify-start"
             @click="goToLogin"
           />
 
@@ -61,20 +62,20 @@
             icon="solar:user-id-bold-duotone"
             color="neutral"
             variant="ghost"
-            :label="!collapsed ? $t('register') : undefined"
-            :square="collapsed"
+            :label="state !== 'collapsed' ? $t('register') : undefined"
+            :title="state === 'collapsed' ? $t('register') : undefined"
             :aria-label="$t('register')"
-            :class="!collapsed ? 'w-full justify-start' : ''"
+            class="w-full justify-start"
             @click="goToRegister"
           />
         </div>
       </template>
     </template>
-  </UDashboardSidebar>
+  </USidebar>
 </template>
 
 <script setup>
-import { computed, onMounted } from "vue";
+import { computed, inject, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthMethods } from "~/composables/useAuthMethods";
@@ -86,6 +87,8 @@ const router = useRouter();
 const { t } = useI18n();
 const authStore = useAuthStore();
 const { methods, loadAuthMethods } = useAuthMethods();
+
+const sidebarOpen = inject("sidebarOpen", ref(true));
 
 const normalizePath = (path) => path.replace(/\/+$/, "") || "/";
 

@@ -1,22 +1,22 @@
 <template>
-  <UDashboardGroup class="dashboard-shell">
+  <div class="dashboard-shell flex min-h-screen text-[color:var(--ui-text)]">
     <Sidebar />
 
-    <UDashboardPanel>
-      <template #header>
-        <TopBar />
-      </template>
-
-      <template #body>
+    <div class="flex min-w-0 flex-1 flex-col">
+      <TopBar />
+      <main class="overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
         <div class="mx-auto w-full max-w-[1800px]">
           <slot />
         </div>
-      </template>
-    </UDashboardPanel>
-  </UDashboardGroup>
+      </main>
+    </div>
+  </div>
 </template>
 <script setup>
- import { onMounted } from "vue";
+ import { onMounted, provide, ref } from "vue";
+
+ const sidebarOpen = ref(true);
+ provide("sidebarOpen", sidebarOpen);
  import { useI18n } from "vue-i18n";
  import { useRouter } from "vue-router";
  import Sidebar from "~/components/Sidebar.vue";
