@@ -1,10 +1,10 @@
 <template>
-  <div class="dashboard-shell flex min-h-screen text-[color:var(--ui-text)]">
-    <Sidebar />
+  <div class="dashboard-shell flex min-h-screen flex-col text-[color:var(--ui-text)]">
+    <TopBar />
 
-    <div class="flex min-w-0 flex-1 flex-col">
-      <TopBar />
-      <main class="overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
+    <div class="relative flex min-h-0 flex-1">
+      <Sidebar />
+      <main class="min-w-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
         <div class="mx-auto w-full max-w-[1800px]">
           <slot />
         </div>

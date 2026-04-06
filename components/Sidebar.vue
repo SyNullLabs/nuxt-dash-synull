@@ -3,7 +3,11 @@
     v-model:open="sidebarOpen"
     collapsible="icon"
     rail
-    :ui="{ body: 'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3' }"
+    :ui="{
+      gap: 'h-[calc(100%-var(--ui-header-height))]',
+      container: 'absolute top-(--ui-header-height) bottom-0 h-[calc(100%-var(--ui-header-height))]',
+      body: 'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3',
+    }"
   >
     <template #header="{ state }">
       <UButton

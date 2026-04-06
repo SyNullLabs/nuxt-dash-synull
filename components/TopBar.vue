@@ -1,23 +1,22 @@
 <template>
   <UHeader
-    :title="navbarTitle"
-    :toggle="false"
+    toggle-side="left"
     :ui="{
-      root: 'bg-[--ui-bg]/80 backdrop-blur border-b border-default h-[--ui-header-height] sticky top-0 z-50',
-      container: 'flex items-center justify-between gap-1.5 h-full w-full max-w-none px-4 sm:px-6 lg:px-6',
+      root: 'bg-[--ui-bg]/80 backdrop-blur border-b border-default h-(--ui-header-height) sticky top-0 z-50',
+      container: 'px-4! sm:px-6!',
     }"
   >
-    <template #left>
-      <!-- Mobile sidebar toggle -->
+    <template #toggle>
       <UButton
-        class="lg:hidden"
+        icon="i-lucide-panel-left"
         color="neutral"
         variant="ghost"
-        icon="i-lucide-menu"
-        aria-label="Open navigation"
-        square
-        @click="sidebarOpen = true"
+        aria-label="Toggle sidebar"
+        @click="sidebarOpen = !sidebarOpen"
       />
+    </template>
+
+    <template #title>
       <span class="text-sm font-semibold text-highlighted">{{ navbarTitle }}</span>
     </template>
 
