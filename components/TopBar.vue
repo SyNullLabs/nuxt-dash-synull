@@ -4,6 +4,16 @@
   >
     <div class="min-w-0 flex items-center gap-3">
       <UButton
+        class="lg:hidden"
+        icon="i-lucide-menu"
+        color="neutral"
+        variant="ghost"
+        aria-label="Toggle sidebar"
+        @click="sidebarOpen = !sidebarOpen"
+      />
+
+      <UButton
+        class="hidden lg:inline-flex"
         icon="i-lucide-panel-left"
         color="neutral"
         variant="ghost"

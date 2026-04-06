@@ -2,6 +2,7 @@
   <USidebar
     v-model:open="sidebarOpen"
     collapsible="icon"
+    :close="{ class: 'lg:hidden', size: 'lg', color: 'neutral', variant: 'ghost' }"
     rail
     variant="inset"
     style="--sidebar-width: 22rem; --sidebar-width-icon: 5rem"
