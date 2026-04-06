@@ -160,13 +160,15 @@
                 <template #footer>
                   <UButton block type="button" size="md" :class="[
                     'rounded-none py-3 text-[0.85rem] font-bold motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:opacity-80',
-                    index % 3 === 0
-                      ? 'bg-violet-600'
-                      : index % 3 === 1
-                        ? 'bg-synull-600'
-                        : 'bg-purple-700'
-                  ]" color="neutral" variant="solid" :disabled="useMockCatalog" @click="openProduct(product.id)">
-                    {{ useMockCatalog ? "Mock 预览" : t("buyNow") }}
+                    isOutOfStock(product)
+                      ? 'opacity-50 cursor-not-allowed'
+                      : index % 3 === 0
+                        ? 'bg-violet-600'
+                        : index % 3 === 1
+                          ? 'bg-synull-600'
+                          : 'bg-purple-700'
+                  ]" color="primary" variant="solid" :disabled="isOutOfStock(product)" @click="openProduct(product.id)">
+                    {{ isOutOfStock(product) ? t("outOfStock") : useMockCatalog ? "Mock 预览" : t("buyNow") }}
                   </UButton>
                 </template>
               </UCard>
@@ -245,6 +247,7 @@ const mockCatalog = {
         name: "Enterprise Tier",
         description: "4 vCPU\n8 GB 内存\n200 GB NVMe\n5 TB 月流量",
         price_text: "¥168 / 月",
+        allow_order: 0,
       },
     ],
     1002: [
@@ -475,6 +478,10 @@ const openProduct = (productId) => {
 
   navigateTo(`/buy/${productId}`);
 };
+
+const isOutOfStock = (product) =>
+  product?.allow_order === 0 || product?.allow_order === false ||
+  product?.stock === 0 || product?.is_available === false;
 
 const getProductSpecs = (product) => {
   const specs = (product?.description || "")

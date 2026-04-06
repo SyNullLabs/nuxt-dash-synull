@@ -67,6 +67,7 @@
   "allProducts": "All Products",
   "loadProductsFailed": "Failed to load products",
   "noProducts": "No products available",
+  "outOfStock": "Out of Stock",
   "users": "Users",
   "productManagement": "Product Management",
   "cloudServers": "Cloud Servers",

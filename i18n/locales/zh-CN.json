@@ -67,6 +67,7 @@
   "allProducts": "全部产品",
   "loadProductsFailed": "加载产品失败",
   "noProducts": "暂无可购买产品",
+  "outOfStock": "无库存",
   "users": "用户",
   "productManagement": "产品管理",
   "cloudServers": "云服务器",
