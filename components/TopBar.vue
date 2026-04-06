@@ -1,12 +1,8 @@
 <template>
-  <UHeader
-    toggle-side="left"
-    :ui="{
-      root: 'bg-[--ui-bg]/80 backdrop-blur border-b border-default h-(--ui-header-height) sticky top-0 z-50',
-      container: 'px-4! sm:px-6!',
-    }"
+  <div
+    class="flex h-(--ui-header-height) shrink-0 items-center justify-between gap-3 border-b border-default bg-[--ui-bg]/80 px-4 backdrop-blur sm:px-6"
   >
-    <template #toggle>
+    <div class="min-w-0 flex items-center gap-3">
       <UButton
         icon="i-lucide-panel-left"
         color="neutral"
@@ -14,13 +10,13 @@
         aria-label="Toggle sidebar"
         @click="sidebarOpen = !sidebarOpen"
       />
-    </template>
 
-    <template #title>
-      <span class="text-sm font-semibold text-highlighted">{{ navbarTitle }}</span>
-    </template>
+      <span class="truncate text-sm font-semibold text-highlighted">
+        {{ navbarTitle }}
+      </span>
+    </div>
 
-    <template #right>
+    <div class="flex items-center gap-1.5 sm:gap-2">
       <UColorModeButton />
 
       <UDropdownMenu
@@ -53,15 +49,15 @@
         />
       </UDropdownMenu>
 
-      <UButton
-        v-else
-        to="/auth/login"
-        color="neutral"
-        variant="soft"
-        :label="$t('loginButton')"
-      />
-    </template>
-  </UHeader>
+        <UButton
+          v-else
+          to="/auth/login"
+          color="neutral"
+          variant="soft"
+          :label="$t('loginButton')"
+        />
+    </div>
+  </div>
 </template>
 
 <script setup>

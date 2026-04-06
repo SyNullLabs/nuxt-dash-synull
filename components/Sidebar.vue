@@ -3,10 +3,12 @@
     v-model:open="sidebarOpen"
     collapsible="icon"
     rail
+    variant="inset"
+    style="--sidebar-width: 20rem"
     :ui="{
-      gap: 'h-[calc(100%-var(--ui-header-height))]',
-      container: 'absolute top-(--ui-header-height) bottom-0 h-[calc(100%-var(--ui-header-height))]',
+      container: 'h-full',
       body: 'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3',
+      footer: 'w-full border-t border-default p-3',
     }"
   >
     <template #header="{ state }">
@@ -14,9 +16,10 @@
         :to="brandHref"
         color="neutral"
         variant="ghost"
+        square
         :label="state !== 'collapsed' ? 'SYNULL' : undefined"
         icon="solar:home-2-bold-duotone"
-        class="w-full justify-start"
+        class="w-full overflow-hidden"
       />
     </template>
 
@@ -31,33 +34,34 @@
         collapsible
         class="min-h-0 flex-1 overflow-y-auto"
       />
+    </template>
 
-      <USeparator v-if="showFooterActions" />
-
-      <template v-if="isLoggedIn">
+    <template #footer="{ state }">
+      <div v-if="showFooterActions" class="w-full">
         <UButton
+          v-if="isLoggedIn"
           icon="solar:logout-2-bold-duotone"
           color="error"
           variant="ghost"
+          square
           :label="state !== 'collapsed' ? $t('logout') : undefined"
           :title="state === 'collapsed' ? $t('logout') : undefined"
           :aria-label="$t('logout')"
-          class="w-full justify-start"
+          class="w-full overflow-hidden"
           @click="handleLogout"
         />
-      </template>
 
-      <template v-else>
-        <div class="grid gap-2">
+        <div v-else class="grid w-full gap-2">
           <UButton
             v-if="showGuestLogin"
             icon="solar:user-circle-bold-duotone"
             color="primary"
             variant="soft"
+            square
             :label="state !== 'collapsed' ? $t('loginButton') : undefined"
             :title="state === 'collapsed' ? $t('loginButton') : undefined"
             :aria-label="$t('loginButton')"
-            class="w-full justify-start"
+            class="w-full overflow-hidden"
             @click="goToLogin"
           />
 
@@ -66,14 +70,15 @@
             icon="solar:user-id-bold-duotone"
             color="neutral"
             variant="ghost"
+            square
             :label="state !== 'collapsed' ? $t('register') : undefined"
             :title="state === 'collapsed' ? $t('register') : undefined"
             :aria-label="$t('register')"
-            class="w-full justify-start"
+            class="w-full overflow-hidden"
             @click="goToRegister"
           />
         </div>
-      </template>
+      </div>
     </template>
   </USidebar>
 </template>

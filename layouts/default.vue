@@ -1,10 +1,13 @@
 <template>
-  <div class="dashboard-shell flex min-h-screen flex-col text-[color:var(--ui-text)]">
-    <TopBar />
+  <div class="dashboard-shell flex min-h-screen text-[color:var(--ui-text)]">
+    <Sidebar />
 
-    <div class="relative flex min-h-0 flex-1">
-      <Sidebar />
-      <main class="min-w-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
+    <div
+      class="flex min-w-0 flex-1 flex-col overflow-hidden bg-default lg:peer-data-[variant=floating]:my-4 peer-data-[variant=inset]:m-4 lg:peer-data-[variant=inset]:not-peer-data-[collapsible=offcanvas]:ms-0 peer-data-[variant=inset]:rounded-xl peer-data-[variant=inset]:shadow-sm peer-data-[variant=inset]:ring peer-data-[variant=inset]:ring-default"
+    >
+      <TopBar />
+
+      <main class="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
         <div class="mx-auto w-full max-w-[1800px]">
           <slot />
         </div>
