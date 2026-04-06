@@ -5,19 +5,15 @@
     rail
     variant="inset"
     style="--sidebar-width: 20rem"
-    :ui="{
-      container: 'h-full',
-      body: 'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3',
-      footer: 'w-full border-t border-default p-3',
-    }"
   >
     <template #header="{ state }">
       <UButton
         :to="brandHref"
+        size="lg"
         color="neutral"
         variant="ghost"
         square
-        :label="state !== 'collapsed' ? 'SYNULL' : undefined"
+        label="SYNULL"
         icon="solar:home-2-bold-duotone"
         class="w-full overflow-hidden"
       />
@@ -25,14 +21,11 @@
 
     <template #default="{ state }">
       <UNavigationMenu
+        size="lg"
+        vertical="soft"
         :items="navigationItems"
         orientation="vertical"
-        :collapsed="state === 'collapsed'"
-        highlight
-        highlight-color="primary"
-        type="multiple"
-        collapsible
-        class="min-h-0 flex-1 overflow-y-auto"
+        :ui="{ link: 'p-1.5 overflow-hidden' }"
       />
     </template>
 
@@ -41,11 +34,12 @@
         <UButton
           v-if="isLoggedIn"
           icon="solar:logout-2-bold-duotone"
+          size="lg"
           color="error"
           variant="ghost"
           square
-          :label="state !== 'collapsed' ? $t('logout') : undefined"
-          :title="state === 'collapsed' ? $t('logout') : undefined"
+          :label="$t('logout')"
+          :title="$t('logout')"
           :aria-label="$t('logout')"
           class="w-full overflow-hidden"
           @click="handleLogout"
@@ -58,10 +52,10 @@
             color="primary"
             variant="soft"
             square
-            :label="state !== 'collapsed' ? $t('loginButton') : undefined"
-            :title="state === 'collapsed' ? $t('loginButton') : undefined"
+            :label="$t('loginButton')"
+            :title="$t('loginButton')"
             :aria-label="$t('loginButton')"
-            class="w-full overflow-hidden"
+            class=" overflow-hidden"
             @click="goToLogin"
           />
 
@@ -71,10 +65,10 @@
             color="neutral"
             variant="ghost"
             square
-            :label="state !== 'collapsed' ? $t('register') : undefined"
-            :title="state === 'collapsed' ? $t('register') : undefined"
+            :label="$t('register')"
+            :title="$t('register')"
             :aria-label="$t('register')"
-            class="w-full overflow-hidden"
+            class="overflow-hidden"
             @click="goToRegister"
           />
         </div>
