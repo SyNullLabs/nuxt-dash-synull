@@ -1,24 +1,7 @@
 <template>
-  <UHeader
-    :title="navbarTitle"
-    :toggle="false"
-    :ui="{
-      root: 'bg-[--ui-bg]/80 backdrop-blur border-b border-default h-[--ui-header-height] sticky top-0 z-50',
-      container: 'flex items-center justify-between gap-1.5 h-full w-full max-w-none px-4 sm:px-6 lg:px-6',
-    }"
-  >
-    <template #left>
-      <!-- Mobile sidebar toggle -->
-      <UButton
-        class="lg:hidden"
-        color="neutral"
-        variant="ghost"
-        icon="i-lucide-menu"
-        aria-label="Open navigation"
-        square
-        @click="sidebarOpen = true"
-      />
-      <span class="text-sm font-semibold text-highlighted">{{ navbarTitle }}</span>
+  <UDashboardNavbar :title="navbarTitle">
+    <template #leading>
+      <UDashboardSidebarCollapse class="hidden lg:flex" />
     </template>
 
     <template #right>
@@ -62,11 +45,11 @@
         :label="$t('loginButton')"
       />
     </template>
-  </UHeader>
+  </UDashboardNavbar>
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref, watch } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
@@ -81,8 +64,6 @@ const userInfoStore = useUserInfoStore();
 const { userInfo } = storeToRefs(userInfoStore);
 const router = useRouter();
 const { locale, t } = useI18n();
-
-const sidebarOpen = inject("sidebarOpen", ref(true));
 
 const navbarTitle = computed(() => {
   const path = router.currentRoute.value.path.replace(/\/+$/, "") || "/";
