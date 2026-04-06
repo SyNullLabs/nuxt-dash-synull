@@ -1,26 +1,22 @@
 <template>
-  <div class="dashboard-shell min-h-screen text-[color:var(--ui-text)]">
-    <UDashboardGroup storage="local" storage-key="synull-dashboard">
-      <Sidebar />
+  <div class="dashboard-shell flex min-h-screen text-[color:var(--ui-text)]">
+    <Sidebar />
 
-      <UDashboardPanel id="synull-main-panel">
-        <template #header>
-          <TopBar />
-        </template>
-
-        <template #body>
-          <main class="px-4 pb-6 pt-4 sm:px-6">
-            <div class="mx-auto w-full max-w-[1800px]">
-              <slot />
-            </div>
-          </main>
-        </template>
-      </UDashboardPanel>
-    </UDashboardGroup>
+    <div class="flex min-w-0 flex-1 flex-col">
+      <TopBar />
+      <main class="overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
+        <div class="mx-auto w-full max-w-[1800px]">
+          <slot />
+        </div>
+      </main>
+    </div>
   </div>
 </template>
 <script setup>
- import { onMounted } from "vue";
+ import { onMounted, provide, ref } from "vue";
+
+ const sidebarOpen = ref(true);
+ provide("sidebarOpen", sidebarOpen);
  import { useI18n } from "vue-i18n";
  import { useRouter } from "vue-router";
  import Sidebar from "~/components/Sidebar.vue";

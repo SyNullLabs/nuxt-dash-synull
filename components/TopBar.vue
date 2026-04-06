@@ -1,64 +1,72 @@
 <template>
-  <UDashboardNavbar
+  <UHeader
     :title="navbarTitle"
-    :toggle="{ color: 'neutral', variant: 'ghost' }"
+    :toggle="false"
+    :ui="{
+      root: 'bg-[--ui-bg]/80 backdrop-blur border-b border-default h-[--ui-header-height] sticky top-0 z-50',
+      container: 'flex items-center justify-between gap-1.5 h-full w-full max-w-none px-4 sm:px-6 lg:px-6',
+    }"
   >
-    <template #leading>
-      <UDashboardSidebarCollapse
+    <template #left>
+      <!-- Mobile sidebar toggle -->
+      <UButton
+        class="lg:hidden"
         color="neutral"
         variant="ghost"
-        class="hidden lg:inline-flex"
+        icon="i-lucide-menu"
+        aria-label="Open navigation"
+        square
+        @click="sidebarOpen = true"
       />
+      <span class="text-sm font-semibold text-highlighted">{{ navbarTitle }}</span>
     </template>
 
     <template #right>
-      <div class="flex items-center gap-1.5 sm:gap-2">
-        <UColorModeButton />
+      <UColorModeButton />
 
-        <UDropdownMenu
-          :items="languageItems"
-          :content="{ align: 'end', side: 'bottom' }"
-        >
-          <UButton
-            color="neutral"
-            variant="ghost"
-            icon="tabler:language"
-            aria-label="Switch language"
-            square
-          />
-        </UDropdownMenu>
-
-        <span v-if="isLoggedIn" class="hidden text-sm text-muted xl:inline">
-          {{ $t("welcome") }} {{ userInfo?.user?.username || "" }}
-        </span>
-
-        <UDropdownMenu
-          v-if="isLoggedIn"
-          :items="profileMenuItems"
-          :content="{ align: 'end', side: 'bottom' }"
-        >
-          <UAvatar
-            :src="avatarSrc"
-            alt="用户头像"
-            size="sm"
-            class="cursor-pointer"
-          />
-        </UDropdownMenu>
-
+      <UDropdownMenu
+        :items="languageItems"
+        :content="{ align: 'end', side: 'bottom' }"
+      >
         <UButton
-          v-else
-          to="/auth/login"
           color="neutral"
-          variant="soft"
-          :label="$t('loginButton')"
+          variant="ghost"
+          icon="tabler:language"
+          aria-label="Switch language"
+          square
         />
-      </div>
+      </UDropdownMenu>
+
+      <span v-if="isLoggedIn" class="hidden text-sm text-muted xl:inline">
+        {{ $t("welcome") }} {{ userInfo?.user?.username || "" }}
+      </span>
+
+      <UDropdownMenu
+        v-if="isLoggedIn"
+        :items="profileMenuItems"
+        :content="{ align: 'end', side: 'bottom' }"
+      >
+        <UAvatar
+          :src="avatarSrc"
+          alt="用户头像"
+          size="sm"
+          class="cursor-pointer"
+        />
+      </UDropdownMenu>
+
+      <UButton
+        v-else
+        to="/auth/login"
+        color="neutral"
+        variant="soft"
+        :label="$t('loginButton')"
+      />
     </template>
-  </UDashboardNavbar>
+  </UHeader>
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
@@ -73,6 +81,9 @@ const userInfoStore = useUserInfoStore();
 const { userInfo } = storeToRefs(userInfoStore);
 const router = useRouter();
 const { locale, t } = useI18n();
+
+const sidebarOpen = inject("sidebarOpen", ref(true));
+
 const navbarTitle = computed(() => {
   const path = router.currentRoute.value.path.replace(/\/+$/, "") || "/";
 

@@ -1,85 +1,81 @@
 <template>
-  <UDashboardSidebar
-    id="synull-sidebar"
-    collapsible
-    resizable
-    :default-size="18"
-    :min-size="14"
-    :max-size="24"
+  <USidebar
+    v-model:open="sidebarOpen"
+    collapsible="icon"
+    rail
+    :ui="{ body: 'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3' }"
   >
-    <template #header="{ collapsed }">
+    <template #header="{ state }">
       <UButton
         :to="brandHref"
         color="neutral"
         variant="ghost"
-        :label="collapsed ? undefined : 'SYNULL'"
+        :label="state !== 'collapsed' ? 'SYNULL' : undefined"
         icon="solar:home-2-bold-duotone"
         class="w-full justify-start"
       />
     </template>
 
-    <template #default="{ collapsed }">
-      <div class="flex h-full flex-col gap-3 p-3">
-        <UNavigationMenu
-          :items="navigationItems"
-          orientation="vertical"
-          :collapsed="collapsed"
-          highlight
-          highlight-color="primary"
-          type="multiple"
-          collapsible
-          class="min-h-0 flex-1 overflow-y-auto"
+    <template #default="{ state }">
+      <UNavigationMenu
+        :items="navigationItems"
+        orientation="vertical"
+        :collapsed="state === 'collapsed'"
+        highlight
+        highlight-color="primary"
+        type="multiple"
+        collapsible
+        class="min-h-0 flex-1 overflow-y-auto"
+      />
+
+      <USeparator v-if="showFooterActions" />
+
+      <template v-if="isLoggedIn">
+        <UButton
+          icon="solar:logout-2-bold-duotone"
+          color="error"
+          variant="ghost"
+          :label="state !== 'collapsed' ? $t('logout') : undefined"
+          :title="state === 'collapsed' ? $t('logout') : undefined"
+          :aria-label="$t('logout')"
+          class="w-full justify-start"
+          @click="handleLogout"
         />
+      </template>
 
-        <USeparator v-if="showFooterActions" />
-
-        <template v-if="isLoggedIn">
+      <template v-else>
+        <div class="grid gap-2">
           <UButton
-            icon="solar:logout-2-bold-duotone"
-            color="error"
-            variant="ghost"
-            :label="collapsed ? undefined : $t('logout')"
-            :title="collapsed ? $t('logout') : undefined"
-            :aria-label="$t('logout')"
+            v-if="showGuestLogin"
+            icon="solar:user-circle-bold-duotone"
+            color="primary"
+            variant="soft"
+            :label="state !== 'collapsed' ? $t('loginButton') : undefined"
+            :title="state === 'collapsed' ? $t('loginButton') : undefined"
+            :aria-label="$t('loginButton')"
             class="w-full justify-start"
-            @click="handleLogout"
+            @click="goToLogin"
           />
-        </template>
 
-        <template v-else>
-          <div class="grid gap-2">
-            <UButton
-              v-if="showGuestLogin"
-              icon="solar:user-circle-bold-duotone"
-              color="primary"
-              variant="soft"
-              :label="collapsed ? undefined : $t('loginButton')"
-              :title="collapsed ? $t('loginButton') : undefined"
-              :aria-label="$t('loginButton')"
-              class="w-full justify-start"
-              @click="goToLogin"
-            />
-
-            <UButton
-              v-if="showGuestRegister"
-              icon="solar:user-id-bold-duotone"
-              color="neutral"
-              variant="ghost"
-              :label="collapsed ? undefined : $t('register')"
-              :title="collapsed ? $t('register') : undefined"
-              :aria-label="$t('register')"
-              class="w-full justify-start"
-              @click="goToRegister"
-            />
-          </div>
-        </template>
-      </div>
+          <UButton
+            v-if="showGuestRegister"
+            icon="solar:user-id-bold-duotone"
+            color="neutral"
+            variant="ghost"
+            :label="state !== 'collapsed' ? $t('register') : undefined"
+            :title="state === 'collapsed' ? $t('register') : undefined"
+            :aria-label="$t('register')"
+            class="w-full justify-start"
+            @click="goToRegister"
+          />
+        </div>
+      </template>
     </template>
-  </UDashboardSidebar>
+  </USidebar>
 </template>
 
 <script setup>
-import { computed, onMounted } from "vue";
+import { computed, inject, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthMethods } from "~/composables/useAuthMethods";
@@ -91,6 +87,8 @@ const router = useRouter();
 const { t } = useI18n();
 const authStore = useAuthStore();
 const { methods, loadAuthMethods } = useAuthMethods();
+
+const sidebarOpen = inject("sidebarOpen", ref(true));
 
 const normalizePath = (path) => path.replace(/\/+$/, "") || "/";
 
