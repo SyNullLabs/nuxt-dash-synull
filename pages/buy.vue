@@ -1,11 +1,6 @@
 <template>
   <div class="mx-auto grid w-full max-w-272 gap-6 md:gap-10">
     <div class="flex flex-wrap items-center justify-end gap-3">
-      <UBadge v-if="defaultCurrencyLabel" color="neutral" variant="subtle"
-        class="rounded-[0.45rem] px-4 py-2 text-[0.82rem] font-semibold tracking-[0.08em]">
-        {{ defaultCurrencyLabel }}
-      </UBadge>
-
       <UButton v-if="canUseMockCatalog" color="neutral" variant="soft" icon="i-solar-test-tube-bold-duotone"
         :label="useMockCatalog ? 'Mock 已开启' : '切换 Mock'"
         class="motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:active:scale-[0.98]"
@@ -93,7 +88,7 @@
                 <Icon v-if="group.icon" :name="group.icon" class="shrink-0 text-base text-dimmed" />
                 <span class="text-[0.98rem] font-semibold">{{
                   group.name
-                }}</span>
+                  }}</span>
               </div>
             </UCard>
           </div>
@@ -167,7 +162,8 @@
                         : index % 3 === 1
                           ? 'bg-synull-600'
                           : 'bg-purple-700'
-                  ]" color="primary" variant="solid" :disabled="isOutOfStock(product)" @click="openProduct(product.id)">
+                  ]" color="primary" variant="solid" :disabled="isOutOfStock(product)"
+                    @click="openProduct(product.id)">
                     {{ isOutOfStock(product) ? t("outOfStock") : useMockCatalog ? "Mock 预览" : t("buyNow") }}
                   </UButton>
                 </template>
