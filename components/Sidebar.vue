@@ -2,25 +2,35 @@
   <USidebar
     v-model:open="sidebarOpen"
     collapsible="icon"
-    :close="{ class: 'lg:hidden', size: 'lg', color: 'neutral', variant: 'ghost' }"
-    rail
     variant="inset"
     style="--sidebar-width: 22rem; --sidebar-width-icon: 5rem"
     :ui="sidebarUi"
   >
-    <template #header>
-      <UButton
-        :to="brandHref"
-        size="xl"
-        color="neutral"
-        variant="ghost"
-        square
-        label="SYNULL"
-        title="SYNULL"
-        aria-label="SYNULL"
-        icon="solar:home-2-bold-duotone"
-        class="w-full overflow-hidden"
-      />
+    <template #header="{ close }">
+      <div class="flex w-full items-center gap-2">
+        <UButton
+          :to="brandHref"
+          size="xl"
+          color="neutral"
+          variant="ghost"
+          square
+          label="SYNULL"
+          title="SYNULL"
+          aria-label="SYNULL"
+          icon="solar:home-2-bold-duotone"
+          class="min-w-0 flex-1 overflow-hidden"
+        />
+
+        <UButton
+          icon="i-lucide-x"
+          color="neutral"
+          variant="ghost"
+          square
+          aria-label="Close sidebar"
+          class="shrink-0 lg:hidden"
+          @click="close"
+        />
+      </div>
     </template>
 
     <template #default>
