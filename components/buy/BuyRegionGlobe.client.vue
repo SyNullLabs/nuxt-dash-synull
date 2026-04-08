@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="#dashboard-floating-overlays">
+  <Teleport to="#dashboard-main">
     <Transition
       enter-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
       enter-from-class="motion-reduce:transform-none motion-reduce:opacity-100 opacity-0 translate-y-5 scale-[0.96]"
