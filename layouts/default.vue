@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-shell flex min-h-screen text-[color:var(--ui-text)]">
+  <div class="dashboard-shell flex h-screen text-[color:var(--ui-text)]">
     <Sidebar />
 
     <div
