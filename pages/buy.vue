@@ -81,15 +81,15 @@
               <UCard v-for="group in allGroups" :key="group.id" as="button" type="button" variant="outline"
                 class="relative w-full max-w-56 overflow-hidden text-left motion-reduce:transform-none motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
                 :class="String(activeGroupId) === String(group.id)
-                    ? 'ring-1 ring-inset ring-violet-500/20'
-                    : ''
+                  ? 'ring-1 ring-inset ring-violet-500/20'
+                  : ''
                   " :ui="{
-                  root: 'rounded-[0.45rem] cursor-pointer',
-                  body: 'p-4 min-h-[5.1rem] flex flex-col justify-center gap-3',
-                }" @click="selectProductGroup(group.id)">
+                    root: 'rounded-[0.45rem] cursor-pointer',
+                    body: 'p-4 min-h-[5.1rem] flex flex-col justify-center gap-3',
+                  }" @click="selectProductGroup(group.id)">
                 <span class="absolute inset-y-0 left-0 w-0.75" :class="String(activeGroupId) === String(group.id)
-                    ? 'bg-linear-to-b from-synull-400 to-violet-600'
-                    : 'bg-transparent'
+                  ? 'bg-linear-to-b from-synull-400 to-violet-600'
+                  : 'bg-transparent'
                   "></span>
 
                 <div class="flex items-center gap-3 text-default">
@@ -124,10 +124,10 @@
                     <template #header>
                       <div data-product-card-header :style="getProductCardContentStyle(product.id, 'header')">
                         <div class="mb-3 h-0.75 w-3.5 rounded-full" :class="index % 3 === 0
-                            ? 'bg-synull'
-                            : index % 3 === 1
-                              ? 'bg-violet-500'
-                              : 'bg-violet-500'
+                          ? 'bg-synull'
+                          : index % 3 === 1
+                            ? 'bg-violet-500'
+                            : 'bg-violet-500'
                           "></div>
 
                         <p data-product-card-text class="m-0 text-[0.82rem] text-muted">
@@ -167,8 +167,7 @@
                     </div>
 
                     <template #footer>
-                      <div data-product-card-footer class="flex items-center bg-violet-600"
-                        :class="isOutOfStock(product) ? 'opacity-50 cursor-not-allowed' : ''">
+                      <div data-product-card-footer class="flex items-center" :class="isOutOfStock(product) ? 'bg-[var(--ui-bg)]' : 'bg-violet-600'">
                         <UButton data-product-card-box block type="button" size="md" :class="[
                           'rounded-none py-3 text-[0.85rem] font-bold motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:opacity-80',
                           index % 3 === 0
