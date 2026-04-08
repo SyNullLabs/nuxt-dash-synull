@@ -92,8 +92,7 @@
                 <div class="relative w-1/2 sm:w-1/4">
                   <client-only>
                     <LineChart
-                      :chart-data="chartDataFor(item.id, 'cpu')"
-                      :options="chartOptions"
+                      :option="chartDataFor(item.id, 'cpu')"
                       class="h-14 w-full"
                     />
                   </client-only>
@@ -106,8 +105,7 @@
                 <div class="relative w-1/2 sm:w-1/4">
                   <client-only>
                     <LineChart
-                      :chart-data="chartDataFor(item.id, 'memory')"
-                      :options="chartOptions"
+                      :option="chartDataFor(item.id, 'memory')"
                       class="h-14 w-full"
                     />
                   </client-only>
@@ -120,8 +118,7 @@
                 <div class="relative w-1/2 sm:w-1/4">
                   <client-only>
                     <LineChart
-                      :chart-data="chartDataFor(item.id, 'disk')"
-                      :options="chartOptions"
+                      :option="chartDataFor(item.id, 'disk')"
                       class="h-14 w-full"
                     />
                   </client-only>
@@ -134,8 +131,7 @@
                 <div class="relative w-1/2 sm:w-1/4">
                   <client-only>
                     <LineChart
-                      :chart-data="chartDataFor(item.id, 'network')"
-                      :options="chartOptions"
+                      :option="chartDataFor(item.id, 'network')"
                       class="h-14 w-full"
                     />
                   </client-only>
@@ -257,19 +253,33 @@ const chartMetricDefinitions = {
 };
 
 const buildChartDataset = (definition, labels = [], values = [], unit = "") => ({
-  labels,
-  datasets: [
+  animation: false,
+  grid: { top: 5, right: 5, bottom: 5, left: 5 },
+  xAxis: { type: "category", data: labels, show: false, boundaryGap: false },
+  yAxis: { type: "value", show: false, min: 0 },
+  series: [
     {
-      label: unit ? `${t(definition.labelKey)} (${unit})` : t(definition.labelKey),
+      name: unit
+        ? `${t(definition.labelKey)} (${unit})`
+        : t(definition.labelKey),
+      type: "line",
       data: values,
-      fill: true,
-      borderColor: definition.color,
-      borderWidth: 2,
-      tension: 0.4,
-      backgroundColor: `${definition.color}20`,
-      pointStyle: false,
+      smooth: true,
+      lineStyle: { color: definition.color, width: 2 },
+      areaStyle: { color: definition.color, opacity: 0.12 },
+      symbol: "none",
     },
   ],
+  tooltip: {
+    trigger: "axis",
+    axisPointer: {
+      type: "line",
+      lineStyle: { color: "rgba(255,255,255,0.2)" },
+    },
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderColor: "#eee",
+    textStyle: { color: "#333", fontSize: 12 },
+  },
 });
 
 const createEmptyChartSet = () =>
@@ -452,52 +462,6 @@ const buildChartQuery = (product) =>
 const chartDataFor = (productId, metricKey) =>
   chartDataByProduct.value[productId]?.[metricKey] ||
   emptyCharts.value[metricKey];
-
-const chartOptions = ref({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: false,
-    },
-  },
-  scales: {
-    x: {
-      display: false,
-      grid: {
-        display: false,
-      },
-    },
-    y: {
-      display: false,
-      beginAtZero: true,
-    },
-  },
-  elements: {
-    line: {
-      tension: 0.4,
-    },
-    point: {
-      radius: 0,
-    },
-  },
-  interaction: {
-    intersect: false,
-    mode: "index",
-  },
-  hover: {
-    mode: "index",
-    intersect: false,
-  },
-  layout: {
-    padding: {
-      left: 5,
-      right: 5,
-      top: 5,
-      bottom: 5,
-    },
-  },
-});
 
 const loadChartsForProducts = async (items = []) => {
   const pendingProducts = items.filter(

@@ -31,8 +31,6 @@ export default defineNuxtConfig({
 
   // 插件在渲染页面之前运行
   plugins: [
-    // 将 chart.js 改为 chart.client.ts
-    "@/plugins/chart.client.ts",
     ...(process.env.NODE_ENV !== "production"
       ? ["@/utils/agentation.client.ts"]
       : []),
@@ -47,29 +45,14 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@pinia/nuxt",
     "@nuxtjs/i18n",
-    "@formkit/auto-animate",
+    "motion-v/nuxt",
     "@vite-pwa/nuxt",
     [
-      "@nuxtjs/google-fonts",
+      "nuxt-echarts",
       {
-        families: {
-          Roboto: true,
-          "Josefin+Sans": true,
-          Lato: [100, 300],
-          Raleway: {
-            wght: [100, 400],
-            ital: [100],
-          },
-          Inter: "200..700",
-          "Crimson Pro": {
-            wght: "200..900",
-            ital: "200..700",
-          },
-          // 添加中文字体
-          "Noto+Sans+SC": true,
-          "Noto+Serif+SC": true,
-          "ZCOOL+KuaiLe": true,
-        },
+        charts: ["LineChart"],
+        components: ["GridComponent", "TooltipComponent"],
+        renderer: "canvas",
       },
     ],
     "@nuxthub/core",
