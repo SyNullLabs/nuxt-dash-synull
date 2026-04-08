@@ -30,7 +30,7 @@
               : 'bg-white/90 shadow-[0_0_0_6px_rgba(255,255,255,0.12),0_0_18px_rgba(255,255,255,0.18)]'
           "
           :style="regionMarkerStyle"
-        />
+        ></div>
 
         <div
           v-if="regionTagStyle"
