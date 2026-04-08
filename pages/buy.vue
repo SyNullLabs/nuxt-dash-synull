@@ -1,294 +1,298 @@
 <template>
-  <div class="mx-auto grid w-full max-w-272 gap-6 md:gap-10">
-    <div class="flex flex-wrap items-center justify-end gap-3">
-      <UButton
-        v-if="canUseMockCatalog"
-        color="neutral"
-        variant="soft"
-        icon="i-solar-test-tube-bold-duotone"
-        :label="useMockCatalog ? 'Mock 已开启' : '切换 Mock'"
-        class="motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:active:scale-[0.98]"
-        @click="toggleMockCatalog"
-      />
+  <div class="mx-auto w-full max-w-272">
+    <div class="grid gap-6 md:gap-10">
+      <div class="flex flex-wrap items-center justify-end gap-3">
+        <UButton
+          v-if="canUseMockCatalog"
+          color="neutral"
+          variant="soft"
+          icon="i-solar-test-tube-bold-duotone"
+          :label="useMockCatalog ? 'Mock 已开启' : '切换 Mock'"
+          class="motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:active:scale-[0.98]"
+          @click="toggleMockCatalog"
+        />
 
-      <UButton
-        to="/cart"
-        variant="soft"
-        color="neutral"
-        icon="i-solar-cart-large-bold-duotone"
-        :label="t('viewCart')"
-        class="motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:active:scale-[0.98]"
-      />
-    </div>
+        <UButton
+          to="/cart"
+          variant="soft"
+          color="neutral"
+          icon="i-solar-cart-large-bold-duotone"
+          :label="t('viewCart')"
+          class="motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:active:scale-[0.98]"
+        />
+      </div>
 
-    <div v-if="loading" class="grid gap-10">
-      <SynullLoadingBars label="Loading catalog" />
+      <div v-if="loading" class="grid gap-10">
+        <SynullLoadingBars label="Loading catalog" />
 
-      <section class="grid gap-4">
-        <USkeleton class="h-3 w-28 rounded-full" />
-        <div class="flex flex-wrap gap-2">
-          <USkeleton
-            v-for="item in 3"
-            :key="`type-${item}`"
-            class="h-11 w-36 rounded-md"
-          />
-        </div>
-      </section>
-
-      <section class="grid gap-4">
-        <USkeleton class="h-3 w-32 rounded-full" />
-        <div class="flex flex-wrap gap-3">
-          <USkeleton
-            v-for="item in 4"
-            :key="`group-${item}`"
-            class="h-24 w-full max-w-[20rem] rounded-lg"
-          />
-        </div>
-      </section>
-
-      <section class="grid gap-4">
-        <USkeleton class="h-3 w-36 rounded-full" />
-        <div class="flex flex-wrap gap-5">
-          <USkeleton
-            v-for="item in 3"
-            :key="`plan-${item}`"
-            class="h-72 w-full max-w-[20rem] rounded-lg"
-          />
-        </div>
-      </section>
-    </div>
-
-    <UCard
-      v-else-if="error"
-      class="min-h-56"
-      :ui="{
-        root: 'rounded-[0.55rem]',
-        body: 'grid place-items-center gap-3 p-8 text-center',
-      }"
-    >
-      <Icon
-        name="solar:danger-triangle-bold-duotone"
-        class="text-[2.2rem] text-synull"
-      />
-      <p class="m-0 text-muted">{{ t("loadProductsFailed") }}</p>
-      <UButton @click="loadProducts" variant="soft" :label="t('retry')" />
-    </UCard>
-
-    <div v-else class="grid gap-10">
-      <section class="grid gap-4" :class="getSectionMotionClass(0)">
-        <span
-          class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-dimmed"
-        >
-          01 PRODUCT LINE
-        </span>
-
-        <div class="flex justify-start">
-          <UTabs
-            v-model="activeFirstTab"
-            :items="firstGroupTabItems"
-            :content="false"
-            size="xl"
-            class="w-auto max-w-full"
-            :ui="{
-              list: 'relative inline-flex w-auto max-w-full items-center gap-5 bg-0',
-              indicator:
-                'shadow-[0_0_0_1px_rgba(124,58,237,0.3)] shadow-violet-500/30 bg-inherit',
-              trigger:
-                'min-w-fitfont-semibold transition-colors duration-200 data-[state=inactive]:text-[var(--ui-text-muted)] data-[state=inactive]:hover:text-[var(--ui-text)] data-[state=active]:text-[var(--ui-text)]',
-              leadingIcon: 'text-sm',
-            }"
-          />
-        </div>
-      </section>
-
-      <section
-        v-if="hasCategoryGroups"
-        class="grid gap-4"
-        :class="getSectionMotionClass(1)"
-      >
-        <span
-          class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-dimmed"
-        >
-          02 PRODUCT GROUP
-        </span>
-
-        <Transition
-          enter-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
-          enter-from-class="motion-reduce:transform-none opacity-0 translate-y-2"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.4,0,1,1)]"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="motion-reduce:transform-none opacity-0 -translate-y-2"
-          mode="out-in"
-        >
-          <div :key="String(activeFirstGroupId)" class="flex flex-wrap gap-3">
-            <UCard
-              v-for="group in allGroups"
-              :key="group.id"
-              as="button"
-              type="button"
-              variant="outline"
-              class="relative w-full max-w-56 overflow-hidden text-left motion-reduce:transform-none motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
-              :class="
-                String(activeGroupId) === String(group.id)
-                  ? 'ring-1 ring-inset ring-violet-500/20'
-                  : ''
-              "
-              :ui="{
-                root: 'rounded-[0.45rem] cursor-pointer',
-                body: 'p-4 min-h-[5.1rem] flex flex-col justify-center gap-3',
-              }"
-              @click="selectProductGroup(group.id)"
-            >
-              <span
-                class="absolute inset-y-0 left-0 w-0.75"
-                :class="
-                  String(activeGroupId) === String(group.id)
-                    ? 'bg-linear-to-b from-synull-400 to-violet-600'
-                    : 'bg-transparent'
-                "
-              ></span>
-
-              <div class="flex items-center gap-3 text-default">
-                <Icon
-                  v-if="group.icon"
-                  :name="group.icon"
-                  class="shrink-0 text-base text-dimmed"
-                />
-                <span class="text-[0.98rem] font-semibold">{{
-                  group.name
-                }}</span>
-              </div>
-            </UCard>
+        <section class="grid gap-4">
+          <USkeleton class="h-3 w-28 rounded-full" />
+          <div class="flex flex-wrap gap-2">
+            <USkeleton
+              v-for="item in 3"
+              :key="`type-${item}`"
+              class="h-11 w-36 rounded-md"
+            />
           </div>
-        </Transition>
-      </section>
+        </section>
 
-      <section class="grid gap-4" :class="getSectionMotionClass(2)">
-        <span
-          class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-dimmed"
-        >
-          03 AVAILABLE PLANS
-        </span>
+        <section class="grid gap-4">
+          <USkeleton class="h-3 w-32 rounded-full" />
+          <div class="flex flex-wrap gap-3">
+            <USkeleton
+              v-for="item in 4"
+              :key="`group-${item}`"
+              class="h-24 w-full max-w-[20rem] rounded-lg"
+            />
+          </div>
+        </section>
 
-        <Transition
-          enter-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
-          enter-from-class="motion-reduce:transform-none opacity-0 translate-y-3"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.4,0,1,1)]"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="motion-reduce:transform-none opacity-0 -translate-y-2"
-          mode="out-in"
-        >
-          <div
-            :key="`${activeFirstGroupId}-${activeGroupId}-${visibleProducts.length}`"
+        <section class="grid gap-4">
+          <USkeleton class="h-3 w-36 rounded-full" />
+          <div class="flex flex-wrap gap-5">
+            <USkeleton
+              v-for="item in 3"
+              :key="`plan-${item}`"
+              class="h-72 w-full max-w-[20rem] rounded-lg"
+            />
+          </div>
+        </section>
+      </div>
+
+      <UCard
+        v-else-if="error"
+        class="min-h-56"
+        :ui="{
+          root: 'rounded-[0.55rem]',
+          body: 'grid place-items-center gap-3 p-8 text-center',
+        }"
+      >
+        <Icon
+          name="solar:danger-triangle-bold-duotone"
+          class="text-[2.2rem] text-synull"
+        />
+        <p class="m-0 text-muted">{{ t("loadProductsFailed") }}</p>
+        <UButton @click="loadProducts" variant="soft" :label="t('retry')" />
+      </UCard>
+
+      <div v-else class="grid gap-10">
+        <section class="grid gap-4" :class="getSectionMotionClass(0)">
+          <span
+            class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-dimmed"
           >
-            <div v-if="visibleProducts.length" class="flex flex-wrap gap-5">
-              <UCard
-                v-for="(product, index) in visibleProducts"
-                :key="product.id"
-                variant="outline"
-                class="flex min-h-full w-full max-w-[20rem] flex-col"
-                :ui="{
-                  root: 'rounded-[0.55rem]',
-                  header: 'p-6',
-                  body: 'flex-1 grid gap-3 p-6',
-                  footer: 'bg-[var(--ui-bg)]/50 p-0 sm:p-0',
-                }"
-              >
-                <template #header>
-                  <div
-                    class="mb-3 h-0.75 w-3.5 rounded-full"
-                    :class="
-                      index % 3 === 0
-                        ? 'bg-synull'
-                        : index % 3 === 1
-                        ? 'bg-violet-500'
-                        : 'bg-violet-500'
-                    "
-                  ></div>
+            01 PRODUCT LINE
+          </span>
 
-                  <p class="m-0 text-[0.82rem] text-muted">
-                    {{ activeSecondaryLabel || activePrimaryLabel || "SYNULL" }}
-                  </p>
-
-                  <h2 class="mt-2 text-[1.05rem] font-semibold text-default">
-                    {{ product.name }}
-                  </h2>
-
-                  <p
-                    v-if="product.price_text"
-                    class="mt-2 text-[clamp(1.55rem,2vw,2rem)] font-semibold tracking-[-0.04em] text-default"
-                  >
-                    {{ product.price_text }}
-                  </p>
-
-                  <p
-                    v-else
-                    class="mt-2 text-[0.88rem] font-semibold text-muted"
-                  >
-                    {{ t("configureProduct") }}
-                  </p>
-                </template>
-
-                <div
-                  v-for="(spec, specIndex) in getProductSpecs(product)"
-                  :key="`${product.id}-${spec}-${specIndex}`"
-                  class="flex items-center justify-between gap-4"
-                >
-                  <span class="text-[0.78rem] font-semibold text-dimmed">
-                    {{ formatSpecLabel(specIndex) }}
-                  </span>
-                  <span
-                    class="text-right font-mono text-[0.84rem] font-semibold text-default"
-                  >
-                    {{ spec }}
-                  </span>
-                </div>
-
-                <template #footer>
-                  <UButton
-                    block
-                    type="button"
-                    size="md"
-                    :class="[
-                      'rounded-none py-3 text-[0.85rem] font-bold motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:opacity-80',
-                      isOutOfStock(product)
-                        ? 'opacity-50 cursor-not-allowed'
-                        : index % 3 === 0
-                        ? 'bg-violet-600'
-                        : index % 3 === 1
-                        ? 'bg-synull-600'
-                        : 'bg-purple-700',
-                    ]"
-                    color="primary"
-                    variant="solid"
-                    :disabled="isOutOfStock(product)"
-                    @click="openProduct(product.id)"
-                  >
-                    {{
-                      isOutOfStock(product)
-                        ? t("outOfStock")
-                        : useMockCatalog
-                        ? "Mock 预览"
-                        : t("buyNow")
-                    }}
-                  </UButton>
-                </template>
-              </UCard>
-            </div>
-
-            <UEmpty
-              v-else
-              icon="solar:box-bold-duotone"
-              :description="t('noProducts')"
+          <div class="flex justify-start">
+            <UTabs
+              v-model="activeFirstTab"
+              :items="firstGroupTabItems"
+              :content="false"
+              size="xl"
+              class="w-auto max-w-full"
               :ui="{
-                root: 'min-h-[14rem] rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]',
+                list: 'relative inline-flex w-auto max-w-full items-center gap-5 bg-0',
+                indicator:
+                  'shadow-[0_0_0_1px_rgba(124,58,237,0.3)] shadow-violet-500/30 bg-inherit',
+                trigger:
+                  'min-w-fitfont-semibold transition-colors duration-200 data-[state=inactive]:text-[var(--ui-text-muted)] data-[state=inactive]:hover:text-[var(--ui-text)] data-[state=active]:text-[var(--ui-text)]',
+                leadingIcon: 'text-sm',
               }"
             />
           </div>
-        </Transition>
-      </section>
+        </section>
+
+        <section
+          v-if="hasCategoryGroups"
+          class="grid gap-4"
+          :class="getSectionMotionClass(1)"
+        >
+          <span
+            class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-dimmed"
+          >
+            02 PRODUCT GROUP
+          </span>
+
+          <Transition
+            enter-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
+            enter-from-class="motion-reduce:transform-none opacity-0 translate-y-2"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.4,0,1,1)]"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="motion-reduce:transform-none opacity-0 -translate-y-2"
+            mode="out-in"
+          >
+            <div :key="String(activeFirstGroupId)" class="flex flex-wrap gap-3">
+              <UCard
+                v-for="group in allGroups"
+                :key="group.id"
+                as="button"
+                type="button"
+                variant="outline"
+                class="relative w-full max-w-56 overflow-hidden text-left motion-reduce:transform-none motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
+                :class="
+                  String(activeGroupId) === String(group.id)
+                    ? 'ring-1 ring-inset ring-violet-500/20'
+                    : ''
+                "
+                :ui="{
+                  root: 'rounded-[0.45rem] cursor-pointer',
+                  body: 'p-4 min-h-[5.1rem] flex flex-col justify-center gap-3',
+                }"
+                @click="selectProductGroup(group.id)"
+              >
+                <span
+                  class="absolute inset-y-0 left-0 w-0.75"
+                  :class="
+                    String(activeGroupId) === String(group.id)
+                      ? 'bg-linear-to-b from-synull-400 to-violet-600'
+                      : 'bg-transparent'
+                  "
+                ></span>
+
+                <div class="flex items-center gap-3 text-default">
+                  <Icon
+                    v-if="group.icon"
+                    :name="group.icon"
+                    class="shrink-0 text-base text-dimmed"
+                  />
+                  <span class="text-[0.98rem] font-semibold">{{
+                    group.name
+                  }}</span>
+                </div>
+              </UCard>
+            </div>
+          </Transition>
+        </section>
+
+        <section class="grid gap-4" :class="getSectionMotionClass(2)">
+          <span
+            class="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-dimmed"
+          >
+            03 AVAILABLE PLANS
+          </span>
+
+          <Transition
+            enter-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
+            enter-from-class="motion-reduce:transform-none opacity-0 translate-y-3"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.4,0,1,1)]"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="motion-reduce:transform-none opacity-0 -translate-y-2"
+            mode="out-in"
+          >
+            <div
+              :key="`${activeFirstGroupId}-${activeGroupId}-${visibleProducts.length}`"
+            >
+              <div v-if="visibleProducts.length" class="flex flex-wrap gap-5">
+                <UCard
+                  v-for="(product, index) in visibleProducts"
+                  :key="product.id"
+                  variant="outline"
+                  class="flex min-h-full w-full max-w-[20rem] flex-col"
+                  :ui="{
+                    root: 'rounded-[0.55rem]',
+                    header: 'p-6',
+                    body: 'flex-1 grid gap-3 p-6',
+                    footer: 'bg-[var(--ui-bg)]/50 p-0 sm:p-0',
+                  }"
+                >
+                  <template #header>
+                    <div
+                      class="mb-3 h-0.75 w-3.5 rounded-full"
+                      :class="
+                        index % 3 === 0
+                          ? 'bg-synull'
+                          : index % 3 === 1
+                          ? 'bg-violet-500'
+                          : 'bg-violet-500'
+                      "
+                    ></div>
+
+                    <p class="m-0 text-[0.82rem] text-muted">
+                      {{
+                        activeSecondaryLabel || activePrimaryLabel || "SYNULL"
+                      }}
+                    </p>
+
+                    <h2 class="mt-2 text-[1.05rem] font-semibold text-default">
+                      {{ product.name }}
+                    </h2>
+
+                    <p
+                      v-if="product.price_text"
+                      class="mt-2 text-[clamp(1.55rem,2vw,2rem)] font-semibold tracking-[-0.04em] text-default"
+                    >
+                      {{ product.price_text }}
+                    </p>
+
+                    <p
+                      v-else
+                      class="mt-2 text-[0.88rem] font-semibold text-muted"
+                    >
+                      {{ t("configureProduct") }}
+                    </p>
+                  </template>
+
+                  <div
+                    v-for="(spec, specIndex) in getProductSpecs(product)"
+                    :key="`${product.id}-${spec}-${specIndex}`"
+                    class="flex items-center justify-between gap-4"
+                  >
+                    <span class="text-[0.78rem] font-semibold text-dimmed">
+                      {{ formatSpecLabel(specIndex) }}
+                    </span>
+                    <span
+                      class="text-right font-mono text-[0.84rem] font-semibold text-default"
+                    >
+                      {{ spec }}
+                    </span>
+                  </div>
+
+                  <template #footer>
+                    <UButton
+                      block
+                      type="button"
+                      size="md"
+                      :class="[
+                        'rounded-none py-3 text-[0.85rem] font-bold motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:opacity-80',
+                        isOutOfStock(product)
+                          ? 'opacity-50 cursor-not-allowed'
+                          : index % 3 === 0
+                          ? 'bg-violet-600'
+                          : index % 3 === 1
+                          ? 'bg-synull-600'
+                          : 'bg-purple-700',
+                      ]"
+                      color="primary"
+                      variant="solid"
+                      :disabled="isOutOfStock(product)"
+                      @click="openProduct(product.id)"
+                    >
+                      {{
+                        isOutOfStock(product)
+                          ? t("outOfStock")
+                          : useMockCatalog
+                          ? "Mock 预览"
+                          : t("buyNow")
+                      }}
+                    </UButton>
+                  </template>
+                </UCard>
+              </div>
+
+              <UEmpty
+                v-else
+                icon="solar:box-bold-duotone"
+                :description="t('noProducts')"
+                :ui="{
+                  root: 'min-h-[14rem] rounded-[0.55rem] border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]',
+                }"
+              />
+            </div>
+          </Transition>
+        </section>
+      </div>
     </div>
 
     <BuyRegionGlobe :region="activeRegion" />

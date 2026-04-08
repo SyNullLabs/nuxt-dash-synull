@@ -1,52 +1,56 @@
 <template>
-  <Transition
-    enter-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
-    enter-from-class="motion-reduce:transform-none motion-reduce:opacity-100 opacity-0 translate-y-5 scale-[0.96]"
-    enter-to-class="opacity-100 translate-y-0 scale-100"
-    leave-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.4,0,1,1)]"
-    leave-from-class="opacity-100 translate-y-0 scale-100"
-    leave-to-class="motion-reduce:transform-none motion-reduce:opacity-0 opacity-0 translate-y-3 scale-[0.98]"
-  >
-    <aside
-      v-if="region"
-      aria-hidden="true"
-      class="pointer-events-none fixed bottom-0 right-0 z-20 hidden 2xl:flex"
+  <Teleport to="#dashboard-floating-overlays">
+    <Transition
+      enter-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
+      enter-from-class="motion-reduce:transform-none motion-reduce:opacity-100 opacity-0 translate-y-5 scale-[0.96]"
+      enter-to-class="opacity-100 translate-y-0 scale-100"
+      leave-active-class="motion-reduce:transition-none motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.4,0,1,1)]"
+      leave-from-class="opacity-100 translate-y-0 scale-100"
+      leave-to-class="motion-reduce:transform-none motion-reduce:opacity-0 opacity-0 translate-y-3 scale-[0.98]"
     >
-      <div class="relative size-[21rem]">
-        <div
-          class="size-full pointer-events-auto touch-none"
-          :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
-          @pointerdown="handlePointerDown"
-        >
-          <canvas ref="canvasRef" class="size-full" />
-        </div>
+      <aside
+        v-if="region"
+        aria-hidden="true"
+        class="pointer-events-none absolute bottom-0 right-0 z-20 hidden 2xl:flex"
+      >
+        <div class="relative size-[21rem]">
+          <div
+            class="size-full pointer-events-auto touch-none"
+            :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
+            @pointerdown="handlePointerDown"
+          >
+            <canvas ref="canvasRef" class="size-full" />
+          </div>
 
-        <div
-          v-if="regionMarkerStyle"
-          class="pointer-events-none absolute z-10 size-2.5 rounded-full motion-reduce:transition-none motion-safe:transition-[opacity,filter,transform] motion-safe:duration-300"
-          :class="
-            isLightMode
-              ? 'bg-slate-900/72 shadow-[0_0_0_6px_rgba(15,23,42,0.08)]'
-              : 'bg-white/90 shadow-[0_0_0_6px_rgba(255,255,255,0.12),0_0_18px_rgba(255,255,255,0.18)]'
-          "
-          :style="regionMarkerStyle"
-        ></div>
+          <div
+            v-for="overlayRegion in overlayRegions"
+            :key="`marker-${overlayRegion.key}`"
+            class="pointer-events-none absolute z-10 size-2.5 rounded-full motion-reduce:transition-none motion-safe:transition-[opacity,filter,transform] motion-safe:duration-300"
+            :class="
+              isLightMode
+                ? 'bg-slate-900/72 shadow-[0_0_0_6px_rgba(15,23,42,0.08)]'
+                : 'bg-white/90 shadow-[0_0_0_6px_rgba(255,255,255,0.12),0_0_18px_rgba(255,255,255,0.18)]'
+            "
+            :style="getRegionMarkerStyle(overlayRegion)"
+          ></div>
 
-        <div
-          v-if="regionTagStyle"
-          class="pointer-events-none absolute z-20 whitespace-nowrap rounded-full border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] shadow-lg backdrop-blur-md motion-reduce:transition-none motion-safe:transition-[opacity,filter] motion-safe:duration-300"
-          :class="
-            isLightMode
-              ? 'border-black/10 bg-white/78 text-slate-800 shadow-black/10'
-              : 'border-white/12 bg-slate-950/72 text-white/90 shadow-black/30'
-          "
-          :style="regionTagStyle"
-        >
-          {{ region.name }}
+          <div
+            v-for="overlayRegion in overlayRegions"
+            :key="`tag-${overlayRegion.key}`"
+            class="pointer-events-none absolute z-20 whitespace-nowrap rounded-full border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] shadow-lg backdrop-blur-md motion-reduce:transition-none motion-safe:transition-[opacity,filter] motion-safe:duration-300"
+            :class="
+              isLightMode
+                ? 'border-black/10 bg-white/78 text-slate-800 shadow-black/10'
+                : 'border-white/12 bg-slate-950/72 text-white/90 shadow-black/30'
+            "
+            :style="getRegionTagStyle(overlayRegion)"
+          >
+            {{ overlayRegion.name }}
+          </div>
         </div>
-      </div>
-    </aside>
-  </Transition>
+      </aside>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -75,6 +79,7 @@ const canvasRef = ref<HTMLCanvasElement | null>(null);
 const isLargeScreen = ref(false);
 const prefersReducedMotion = ref(false);
 const isDragging = ref(false);
+const overlayRegions = ref<BuyRegionDescriptor[]>([]);
 
 let globe: GlobeController | null = null;
 let frameId: number | null = null;
@@ -104,16 +109,11 @@ let lastDragPhi = 0;
 let lastDragTheta = 0;
 let isMomentumActive = false;
 let lastRegionKey: string | null = null;
+let overlayCleanupTimer: ReturnType<typeof setTimeout> | null = null;
 
 const activeRegion = computed(() => props.region);
 const isLightMode = computed(() => colorMode.value === "light");
-const regionMarkerStyle = computed(() => {
-  const region = activeRegion.value;
-
-  if (!region) {
-    return null;
-  }
-
+const getRegionMarkerStyle = (region: BuyRegionDescriptor) => {
   const visibility = `var(--cobe-visible-${region.key}, 0)`;
 
   return {
@@ -124,14 +124,8 @@ const regionMarkerStyle = computed(() => {
     transform: `translate(-50%, -50%) scale(calc(0.78 + ${visibility} * 0.22))`,
     filter: `blur(calc((1 - ${visibility}) * 4px))`,
   };
-});
-const regionTagStyle = computed(() => {
-  const region = activeRegion.value;
-
-  if (!region) {
-    return null;
-  }
-
+};
+const getRegionTagStyle = (region: BuyRegionDescriptor) => {
   return {
     positionAnchor: `--cobe-${region.key}`,
     left: "anchor(center)",
@@ -140,7 +134,7 @@ const regionTagStyle = computed(() => {
     transform: "translate(-50%, calc(-100% - 0.8rem))",
     filter: `blur(calc((1 - var(--cobe-visible-${region.key}, 0)) * 6px))`,
   };
-});
+};
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
@@ -149,9 +143,9 @@ const lerp = (start: number, end: number, amount: number) =>
   start + (end - start) * amount;
 
 const TAU = Math.PI * 2;
-const REGION_ANCHOR_PHI_OFFSET = -0.12;
-const REGION_ANCHOR_THETA_OFFSET = -0.08;
-const REGION_SWITCH_DURATION_MS = 1600;
+const REGION_ANCHOR_PHI_OFFSET = -0.5;
+const REGION_ANCHOR_THETA_OFFSET = -0.5;
+const REGION_SWITCH_DURATION_MS = 1800;
 const GLOBE_DRAG_ROTATION_SENSITIVITY = 0.006;
 const GLOBE_MAX_DRAG_VELOCITY = 0.0028;
 const GLOBE_MOMENTUM_DAMPING = 0.012;
@@ -219,6 +213,9 @@ const createGlobeOptions = ({
   const devicePixelRatio = getDevicePixelRatio();
   const isLight = isLightMode.value;
   const lightMarkerBase: [number, number, number] = [0.24, 0.28, 0.38];
+  const activeOverlayRegions = overlayRegions.value.length
+    ? overlayRegions.value
+    : [region];
 
   return {
     width: size * devicePixelRatio,
@@ -241,14 +238,12 @@ const createGlobeOptions = ({
     scale: 1.75,
     offset: [300, 300],
     opacity: 1,
-    markers: [
-      {
-        location: region.location,
-        size: 0.0001,
-        id: region.key,
-        color: region.markerColor,
-      },
-    ],
+    markers: activeOverlayRegions.map((overlayRegion) => ({
+      location: overlayRegion.location,
+      size: 0.0001,
+      id: overlayRegion.key,
+      color: overlayRegion.markerColor,
+    })),
   };
 };
 
@@ -266,6 +261,41 @@ const updateGlobeFrame = () => {
       theta: currentTheta,
     })
   );
+};
+
+const clearOverlayCleanupTimer = () => {
+  if (overlayCleanupTimer !== null) {
+    clearTimeout(overlayCleanupTimer);
+    overlayCleanupTimer = null;
+  }
+};
+
+const syncOverlayRegions = (
+  region: BuyRegionDescriptor | null,
+  previousRegion: BuyRegionDescriptor | null,
+  largeScreen: boolean
+) => {
+  clearOverlayCleanupTimer();
+
+  if (!region || !largeScreen) {
+    overlayRegions.value = [];
+    return;
+  }
+
+  if (
+    prefersReducedMotion.value ||
+    !previousRegion ||
+    previousRegion.key === region.key
+  ) {
+    overlayRegions.value = [region];
+    return;
+  }
+
+  overlayRegions.value = [previousRegion, region];
+  overlayCleanupTimer = setTimeout(() => {
+    overlayRegions.value = [region];
+    overlayCleanupTimer = null;
+  }, 320);
 };
 
 const stopAnimation = () => {
@@ -436,11 +466,12 @@ const renderFrame = (now = performance.now()) => {
       basePhi,
       normalizeAngle(basePhi + userPhiOffset + dragVelocityPhi * deltaMs)
     );
-    userThetaOffset = clamp(
-      baseTheta + userThetaOffset + dragVelocityTheta * deltaMs,
-      -0.62,
-      0.62
-    ) - baseTheta;
+    userThetaOffset =
+      clamp(
+        baseTheta + userThetaOffset + dragVelocityTheta * deltaMs,
+        -0.62,
+        0.62
+      ) - baseTheta;
     currentPhi = normalizeAngle(basePhi + userPhiOffset);
     currentTheta = clamp(baseTheta + userThetaOffset, -0.62, 0.62);
 
@@ -558,7 +589,9 @@ const syncMotionState = () => {
 
 watch(
   [activeRegion, isLargeScreen],
-  async ([region, largeScreen]) => {
+  async ([region, largeScreen], [previousRegion]) => {
+    syncOverlayRegions(region, previousRegion, largeScreen);
+
     if (!region || !largeScreen) {
       destroyGlobe();
       return;
@@ -587,6 +620,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  clearOverlayCleanupTimer();
   viewportQuery?.removeEventListener("change", syncViewportState);
   motionQuery?.removeEventListener("change", syncMotionState);
   window.removeEventListener("pointermove", handlePointerMove);
