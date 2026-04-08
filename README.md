@@ -35,6 +35,7 @@ cp .env.example .env
 - `MIDDLEWARE_BACKEND_HEADERS`：BFF 转发到后端时附带的额外请求头配置，要求是 JSON 数组。
 - `BACKEND_URL`：默认魔方财务后端地址。代码同时兼容 `BACK_URL`、`NUXT_BACK_URL`，三选一即可。
 - `NUXT_PUBLIC_BASE_URL`：当前站点对外访问地址。代码同时兼容 `BASE_URL`。
+- `NUXT_PUBLIC_AGENTATION_SERVER_URL`：开发期 Agentation MCP/HTTP 服务地址，默认 `http://localhost:4747`。
 - `TURNSTILE_SITE_KEY`：Cloudflare Turnstile 的站点密钥。
 - `TURNSTILE_SECRET_KEY`：Cloudflare Turnstile 的私密密钥。
 - `NUXT_SESSION_PASSWORD`：Nuxt 会话密钥，必须配置，建议使用 32 位以上随机字符串。
@@ -89,6 +90,30 @@ cp .env.example .env
    ```bash
    pnpm start
    ```
+
+## Agentation 开发标注
+
+- 项目现在会在 **开发环境** 自动挂载 Agentation 工具条，**生产构建不会注入**。
+- 默认会连接 `http://localhost:4747`，也可以通过 `NUXT_PUBLIC_AGENTATION_SERVER_URL` 改成别的地址。
+- 建议先检查本地 Agentation MCP 状态：
+
+  ```bash
+  pnpm agentation:doctor
+  ```
+
+- 启动 Agentation MCP 服务：
+
+  ```bash
+  pnpm agentation:mcp
+  ```
+
+- 然后再启动 Nuxt 开发服务：
+
+  ```bash
+  pnpm dev
+  ```
+
+- Copilot CLI 的 MCP 配置保存在 `~/.copilot/mcp-config.json`。服务启动后，Copilot 就可以直接读取和处理页面标注。
 
 ## 贡献
 

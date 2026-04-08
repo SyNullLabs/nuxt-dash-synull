@@ -33,6 +33,9 @@ export default defineNuxtConfig({
   plugins: [
     // 将 chart.js 改为 chart.client.ts
     "@/plugins/chart.client.ts",
+    ...(process.env.NODE_ENV !== "production"
+      ? ["@/utils/agentation.client.ts"]
+      : []),
   ],
 
   // 自动导入组件
@@ -146,6 +149,9 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_BASE_URL ||
         process.env.BASE_URL ||
         "http://localhost:3000",
+      agentationServerUrl:
+        process.env.NUXT_PUBLIC_AGENTATION_SERVER_URL ||
+        "http://localhost:4747",
       officialSiteUrl:
         process.env.NUXT_PUBLIC_OFFICIAL_SITE_URL ||
         process.env.OFFICIAL_SITE_URL ||
