@@ -10,7 +10,7 @@
     <aside
       v-if="region"
       aria-hidden="true"
-      class="pointer-events-none fixed bottom-6 right-6 z-20 hidden 2xl:flex"
+      class="pointer-events-none fixed bottom-0 right-0 z-20 hidden 2xl:flex"
     >
       <div class="relative size-[21rem]">
         <div
@@ -238,8 +238,8 @@ const createGlobeOptions = ({
     glowColor: isLight ? [1, 1, 1] : region.baseColor,
     markerSize: 2,
     markerElevation: 0.04,
-    scale: 1,
-    offset: [0, 4],
+    scale: 1.75,
+    offset: [300, 300],
     opacity: 1,
     markers: [
       {
