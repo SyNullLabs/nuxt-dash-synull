@@ -172,10 +172,10 @@
                         <UButton data-product-card-box block type="button" size="md" :class="[
                           'rounded-none py-3 text-[0.85rem] font-bold motion-reduce:transform-none motion-safe:transition-all motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:hover:opacity-95 motion-safe:active:opacity-80',
                           index % 3 === 0
-                            ? 'bg-indigo-600/50'
+                            ? 'bg-indigo-600/35'
                             : index % 3 === 1
-                              ? 'bg-violet-600/50'
-                              : 'bg-purple-600/50'
+                              ? 'bg-violet-600/35'
+                              : 'bg-purple-600/35'
                         ]" color="primary" variant="solid" :disabled="isOutOfStock(product)"
                           @click="openProduct(product.id)">
                           <span :style="getProductCardFooterTextStyle(product.id)">
