@@ -135,9 +135,9 @@ const regionTagStyle = computed(() => {
   return {
     positionAnchor: `--cobe-${region.key}`,
     left: "anchor(center)",
-    bottom: "anchor(top)",
+    top: "anchor(center)",
     opacity: `var(--cobe-visible-${region.key}, 0)`,
-    transform: "translate(-50%, calc(-100% + 0.5rem))",
+    transform: "translate(-50%, calc(-100% - 0.8rem))",
     filter: `blur(calc((1 - var(--cobe-visible-${region.key}, 0)) * 6px))`,
   };
 });
