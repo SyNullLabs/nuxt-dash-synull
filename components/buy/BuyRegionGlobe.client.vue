@@ -12,8 +12,38 @@
       aria-hidden="true"
       class="pointer-events-none fixed bottom-6 right-6 z-20 hidden 2xl:flex"
     >
-      <div class="relative size-[21rem] overflow-hidden rounded-full">
-        <canvas ref="canvasRef" class="size-full [clip-path:circle(40%)]" />
+      <div class="relative size-[21rem]">
+        <div
+          class="size-full pointer-events-auto touch-none"
+          :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
+          @pointerdown="handlePointerDown"
+        >
+          <canvas ref="canvasRef" class="size-full" />
+        </div>
+
+        <div
+          v-if="regionMarkerStyle"
+          class="pointer-events-none absolute z-10 size-2.5 rounded-full motion-reduce:transition-none motion-safe:transition-[opacity,filter,transform] motion-safe:duration-300"
+          :class="
+            isLightMode
+              ? 'bg-slate-900/72 shadow-[0_0_0_6px_rgba(15,23,42,0.08)]'
+              : 'bg-white/90 shadow-[0_0_0_6px_rgba(255,255,255,0.12),0_0_18px_rgba(255,255,255,0.18)]'
+          "
+          :style="regionMarkerStyle"
+        />
+
+        <div
+          v-if="regionTagStyle"
+          class="pointer-events-none absolute z-20 whitespace-nowrap rounded-full border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] shadow-lg backdrop-blur-md motion-reduce:transition-none motion-safe:transition-[opacity,filter] motion-safe:duration-300"
+          :class="
+            isLightMode
+              ? 'border-black/10 bg-white/78 text-slate-800 shadow-black/10'
+              : 'border-white/12 bg-slate-950/72 text-white/90 shadow-black/30'
+          "
+          :style="regionTagStyle"
+        >
+          {{ region.name }}
+        </div>
       </div>
     </aside>
   </Transition>
@@ -44,6 +74,7 @@ const colorMode = useColorMode();
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const isLargeScreen = ref(false);
 const prefersReducedMotion = ref(false);
+const isDragging = ref(false);
 
 let globe: GlobeController | null = null;
 let frameId: number | null = null;
@@ -57,9 +88,59 @@ let transitionFromPhi = 0;
 let transitionFromTheta = 0;
 let transitionStartAt = 0;
 let isTransitioning = false;
+let autoRotateOffset = 0;
+let lastFrameAt = 0;
+let userPhiOffset = 0;
+let userThetaOffset = 0;
+let activePointerId: number | null = null;
+let dragStartX = 0;
+let dragStartY = 0;
+let dragStartPhi = 0;
+let dragStartTheta = 0;
+let dragVelocityPhi = 0;
+let dragVelocityTheta = 0;
+let lastDragSampleAt = 0;
+let lastDragPhi = 0;
+let lastDragTheta = 0;
+let isMomentumActive = false;
+let lastRegionKey: string | null = null;
 
 const activeRegion = computed(() => props.region);
 const isLightMode = computed(() => colorMode.value === "light");
+const regionMarkerStyle = computed(() => {
+  const region = activeRegion.value;
+
+  if (!region) {
+    return null;
+  }
+
+  const visibility = `var(--cobe-visible-${region.key}, 0)`;
+
+  return {
+    positionAnchor: `--cobe-${region.key}`,
+    left: "anchor(center)",
+    top: "anchor(center)",
+    opacity: visibility,
+    transform: `translate(-50%, -50%) scale(calc(0.78 + ${visibility} * 0.22))`,
+    filter: `blur(calc((1 - ${visibility}) * 4px))`,
+  };
+});
+const regionTagStyle = computed(() => {
+  const region = activeRegion.value;
+
+  if (!region) {
+    return null;
+  }
+
+  return {
+    positionAnchor: `--cobe-${region.key}`,
+    left: "anchor(center)",
+    bottom: "anchor(top)",
+    opacity: `var(--cobe-visible-${region.key}, 0)`,
+    transform: "translate(-50%, calc(-100% - 0.45rem))",
+    filter: `blur(calc((1 - var(--cobe-visible-${region.key}, 0)) * 6px))`,
+  };
+});
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
@@ -71,6 +152,13 @@ const TAU = Math.PI * 2;
 const REGION_ANCHOR_PHI_OFFSET = -0.12;
 const REGION_ANCHOR_THETA_OFFSET = -0.08;
 const REGION_SWITCH_DURATION_MS = 1600;
+const GLOBE_DRAG_ROTATION_SENSITIVITY = 0.006;
+const GLOBE_MAX_DRAG_VELOCITY = 0.0028;
+const GLOBE_MOMENTUM_DAMPING = 0.012;
+const GLOBE_MOMENTUM_STOP_THRESHOLD = 0.00002;
+const GLOBE_AUTO_ROTATE_SPEED = 0.00009;
+const GLOBE_RENDER_PIXEL_RATIO = 2;
+const GLOBE_MAP_SAMPLES = 24000;
 
 const normalizeAngle = (value: number) => ((value % TAU) + TAU) % TAU;
 
@@ -98,8 +186,7 @@ const mixColor = (
 const easeInOutCubic = (value: number) =>
   value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
 
-const getDevicePixelRatio = () =>
-  Math.min(Math.max(window.devicePixelRatio || 1, 2.5), 3);
+const getDevicePixelRatio = () => GLOBE_RENDER_PIXEL_RATIO;
 
 const getCanvasSize = () =>
   canvasRef.value?.getBoundingClientRect().width || 296;
@@ -141,16 +228,14 @@ const createGlobeOptions = ({
     theta,
     dark: isLight ? 0 : 1,
     diffuse: 3,
-    mapSamples: prefersReducedMotion.value ? 14000 : 14000,
+    mapSamples: GLOBE_MAP_SAMPLES,
     mapBrightness: 12,
     mapBaseBrightness: 0,
     baseColor: isLight ? [1, 1, 1] : region.baseColor,
     markerColor: isLight
       ? mixColor(region.markerColor, lightMarkerBase, 0.12)
       : region.markerColor,
-    glowColor: isLight
-      ? mixColor(region.glowColor, [1, 1, 1], 0.68)
-      : region.glowColor,
+    glowColor: isLight ? [1, 1, 1] : region.baseColor,
     markerSize: 2,
     markerElevation: 0.04,
     scale: 1,
@@ -159,7 +244,7 @@ const createGlobeOptions = ({
     markers: [
       {
         location: region.location,
-        size: 0.1,
+        size: 0.0001,
         id: region.key,
         color: region.markerColor,
       },
@@ -167,15 +252,36 @@ const createGlobeOptions = ({
   };
 };
 
+const updateGlobeFrame = () => {
+  const region = activeRegion.value;
+
+  if (!globe || !region) {
+    return;
+  }
+
+  globe.update(
+    createGlobeOptions({
+      region,
+      phi: currentPhi,
+      theta: currentTheta,
+    })
+  );
+};
+
 const stopAnimation = () => {
   if (frameId !== null) {
     cancelAnimationFrame(frameId);
     frameId = null;
   }
+
+  lastFrameAt = 0;
 };
 
 const destroyGlobe = () => {
   stopAnimation();
+  isDragging.value = false;
+  isMomentumActive = false;
+  activePointerId = null;
   globe?.destroy();
   globe = null;
 };
@@ -192,18 +298,119 @@ const startTransition = () => {
   transitionFromTheta = currentTheta;
   transitionStartAt = performance.now();
   isTransitioning = true;
+  autoRotateOffset = 0;
+  dragVelocityPhi = 0;
+  dragVelocityTheta = 0;
+  isMomentumActive = false;
+  lastFrameAt = 0;
 };
 
 const getIdleOrientation = (now: number) => ({
-  phi: normalizeAngle(basePhi + Math.sin(now * 0.00016) * 0.028),
-  theta: clamp(baseTheta + Math.cos(now * 0.00014) * 0.016, -0.62, 0.62),
+  phi: normalizeAngle(basePhi + userPhiOffset + autoRotateOffset),
+  theta: clamp(
+    baseTheta + userThetaOffset + Math.cos(now * 0.00014) * 0.012,
+    -0.62,
+    0.62
+  ),
 });
+
+const restartAnimation = () => {
+  if (frameId === null && !prefersReducedMotion.value) {
+    frameId = requestAnimationFrame(renderFrame);
+  }
+};
+
+const handlePointerDown = (event: PointerEvent) => {
+  if (!globe || !isLargeScreen.value) {
+    return;
+  }
+
+  event.preventDefault();
+  isDragging.value = true;
+  isTransitioning = false;
+  isMomentumActive = false;
+  activePointerId = event.pointerId;
+  dragStartX = event.clientX;
+  dragStartY = event.clientY;
+  dragStartPhi = currentPhi;
+  dragStartTheta = currentTheta;
+  dragVelocityPhi = 0;
+  dragVelocityTheta = 0;
+  lastDragSampleAt = performance.now();
+  lastDragPhi = currentPhi;
+  lastDragTheta = currentTheta;
+  autoRotateOffset = 0;
+  stopAnimation();
+};
+
+const handlePointerMove = (event: PointerEvent) => {
+  if (
+    !isDragging.value ||
+    activePointerId === null ||
+    event.pointerId !== activePointerId
+  ) {
+    return;
+  }
+
+  const deltaX = event.clientX - dragStartX;
+  const deltaY = event.clientY - dragStartY;
+
+  currentPhi = normalizeAngle(
+    dragStartPhi + deltaX * GLOBE_DRAG_ROTATION_SENSITIVITY
+  );
+  currentTheta = clamp(
+    dragStartTheta + deltaY * GLOBE_DRAG_ROTATION_SENSITIVITY,
+    -0.62,
+    0.62
+  );
+  const now = performance.now();
+  const sampleDeltaMs = Math.max(now - lastDragSampleAt, 1);
+
+  dragVelocityPhi = clamp(
+    getShortestAngleDelta(lastDragPhi, currentPhi) / sampleDeltaMs,
+    -GLOBE_MAX_DRAG_VELOCITY,
+    GLOBE_MAX_DRAG_VELOCITY
+  );
+  dragVelocityTheta = clamp(
+    (currentTheta - lastDragTheta) / sampleDeltaMs,
+    -GLOBE_MAX_DRAG_VELOCITY,
+    GLOBE_MAX_DRAG_VELOCITY
+  );
+  lastDragSampleAt = now;
+  lastDragPhi = currentPhi;
+  lastDragTheta = currentTheta;
+  userPhiOffset = getShortestAngleDelta(basePhi, currentPhi);
+  userThetaOffset = currentTheta - baseTheta;
+  updateGlobeFrame();
+};
+
+const handlePointerUp = (event: PointerEvent) => {
+  if (
+    !isDragging.value ||
+    activePointerId === null ||
+    event.pointerId !== activePointerId
+  ) {
+    return;
+  }
+
+  isDragging.value = false;
+  activePointerId = null;
+  isMomentumActive =
+    Math.abs(dragVelocityPhi) > GLOBE_MOMENTUM_STOP_THRESHOLD ||
+    Math.abs(dragVelocityTheta) > GLOBE_MOMENTUM_STOP_THRESHOLD;
+  lastFrameAt = 0;
+  restartAnimation();
+};
 
 const renderFrame = (now = performance.now()) => {
   const region = activeRegion.value;
+  const deltaMs = lastFrameAt === 0 ? 0 : now - lastFrameAt;
+
+  lastFrameAt = now;
 
   if (!globe || !region || !canvasRef.value || !isLargeScreen.value) {
     frameId = null;
+    lastFrameAt = 0;
     return;
   }
 
@@ -222,23 +429,48 @@ const renderFrame = (now = performance.now()) => {
 
     if (progress >= 1) {
       isTransitioning = false;
+      lastFrameAt = now;
+    }
+  } else if (isMomentumActive) {
+    userPhiOffset = getShortestAngleDelta(
+      basePhi,
+      normalizeAngle(basePhi + userPhiOffset + dragVelocityPhi * deltaMs)
+    );
+    userThetaOffset = clamp(
+      baseTheta + userThetaOffset + dragVelocityTheta * deltaMs,
+      -0.62,
+      0.62
+    ) - baseTheta;
+    currentPhi = normalizeAngle(basePhi + userPhiOffset);
+    currentTheta = clamp(baseTheta + userThetaOffset, -0.62, 0.62);
+
+    const dampingFactor = Math.exp(-deltaMs * GLOBE_MOMENTUM_DAMPING);
+
+    dragVelocityPhi *= dampingFactor;
+    dragVelocityTheta *= dampingFactor;
+
+    if (
+      Math.abs(dragVelocityPhi) <= GLOBE_MOMENTUM_STOP_THRESHOLD &&
+      Math.abs(dragVelocityTheta) <= GLOBE_MOMENTUM_STOP_THRESHOLD
+    ) {
+      dragVelocityPhi = 0;
+      dragVelocityTheta = 0;
+      isMomentumActive = false;
     }
   } else if (!prefersReducedMotion.value) {
+    autoRotateOffset = normalizeAngle(
+      autoRotateOffset + deltaMs * GLOBE_AUTO_ROTATE_SPEED
+    );
     const idleOrientation = getIdleOrientation(now);
     currentPhi = idleOrientation.phi;
     currentTheta = idleOrientation.theta;
   } else {
+    autoRotateOffset = 0;
     currentPhi = basePhi;
     currentTheta = baseTheta;
   }
 
-  globe.update(
-    createGlobeOptions({
-      region,
-      phi: currentPhi,
-      theta: currentTheta,
-    })
-  );
+  updateGlobeFrame();
 
   if (isTransitioning || !prefersReducedMotion.value) {
     frameId = requestAnimationFrame(renderFrame);
@@ -260,6 +492,16 @@ const ensureGlobe = async () => {
 
   if (!canvasRef.value) {
     return;
+  }
+
+  if (region.key !== lastRegionKey) {
+    userPhiOffset = 0;
+    userThetaOffset = 0;
+    autoRotateOffset = 0;
+    dragVelocityPhi = 0;
+    dragVelocityTheta = 0;
+    isMomentumActive = false;
+    lastRegionKey = region.key;
   }
 
   syncBaseOrientation(region);
@@ -315,7 +557,7 @@ const syncMotionState = () => {
 };
 
 watch(
-  [activeRegion, isLargeScreen, isLightMode],
+  [activeRegion, isLargeScreen],
   async ([region, largeScreen]) => {
     if (!region || !largeScreen) {
       destroyGlobe();
@@ -327,6 +569,7 @@ watch(
   { immediate: true }
 );
 
+watch(isLightMode, updateGlobeFrame);
 watch(prefersReducedMotion, ensureGlobe);
 
 onMounted(() => {
@@ -338,11 +581,17 @@ onMounted(() => {
 
   viewportQuery.addEventListener("change", syncViewportState);
   motionQuery.addEventListener("change", syncMotionState);
+  window.addEventListener("pointermove", handlePointerMove);
+  window.addEventListener("pointerup", handlePointerUp);
+  window.addEventListener("pointercancel", handlePointerUp);
 });
 
 onBeforeUnmount(() => {
   viewportQuery?.removeEventListener("change", syncViewportState);
   motionQuery?.removeEventListener("change", syncMotionState);
+  window.removeEventListener("pointermove", handlePointerMove);
+  window.removeEventListener("pointerup", handlePointerUp);
+  window.removeEventListener("pointercancel", handlePointerUp);
   destroyGlobe();
 });
 </script>
