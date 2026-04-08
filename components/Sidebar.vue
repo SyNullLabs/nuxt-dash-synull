@@ -3,7 +3,8 @@
     v-model:open="sidebarOpen"
     collapsible="icon"
     variant="inset"
-    style="--sidebar-width: 22rem; --sidebar-width-icon: 5rem"
+    :style="sidebarStyle"
+    :menu="sidebarMenu"
     :ui="sidebarUi"
   >
     <template #header="{ close }">
@@ -84,6 +85,10 @@ const { methods, loadAuthMethods } = useAuthMethods();
 const { userInfo } = storeToRefs(userInfoStore);
 
 const sidebarOpen = inject("sidebarOpen", ref(true));
+const sidebarStyle = {
+  "--sidebar-width": "22rem",
+  "--sidebar-width-icon": "5rem",
+};
 
 const sidebarUi = {
   header: "gap-2.5 px-5 py-4",
@@ -91,11 +96,18 @@ const sidebarUi = {
   footer: "gap-2.5 px-5 py-5",
 };
 
+const sidebarMenu = {
+  ui: {
+    content: "ring ring-[color:var(--ui-border-strong)] shadow-lg",
+  },
+};
+
 const navigationUi = {
   label: "px-2 py-2 text-sm/6 font-semibold text-highlighted",
   link: "min-h-12 gap-2 overflow-hidden rounded-md p-2 text-base font-medium transition-colors",
   linkLeadingIcon: "size-6 shrink-0",
-  linkTrailing: "ms-auto inline-flex items-center gap-2 group-data-[state=collapsed]/sidebar:hidden",
+  linkTrailing:
+    "ms-auto inline-flex items-center gap-2 group-data-[state=collapsed]/sidebar:hidden",
   linkTrailingIcon: "size-5",
   linkLabel: "min-w-0 truncate",
   childList: "ms-6",
@@ -113,8 +125,8 @@ const createLinkItem = (item) => {
   const isActive = item.activeMatch
     ? item.activeMatch(currentPath)
     : itemPath === "/"
-      ? currentPath === "/"
-      : currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
+    ? currentPath === "/"
+    : currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
 
   return {
     label: t(item.label),
@@ -249,8 +261,10 @@ const navigationItems = computed(() =>
 const hasEnabledMethod = (methodGroup) =>
   !!methodGroup && Object.values(methodGroup).some(Boolean);
 
-const showGuestLogin = computed(() =>
-  !isLoggedIn.value && (!methods.value || hasEnabledMethod(methods.value.login))
+const showGuestLogin = computed(
+  () =>
+    !isLoggedIn.value &&
+    (!methods.value || hasEnabledMethod(methods.value.login))
 );
 
 const showGuestRegister = computed(
