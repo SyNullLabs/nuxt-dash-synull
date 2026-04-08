@@ -1,0 +1,50 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e6]:
+        - link "SYNULL" [ref=e9] [cursor=pointer]:
+          - /url: /buy
+        - navigation [ref=e13]
+        - button "用户中心" [ref=e20]
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]
+        - generic [ref=e30]
+      - main [ref=e37]:
+        - generic [ref=e40]
+  - generic:
+    - img
+  - generic [ref=e74]:
+    - button "Toggle Nuxt DevTools" [ref=e75] [cursor=pointer]:
+      - img [ref=e76]
+    - generic "Page load time" [ref=e94]:
+      - generic [ref=e80]: "169"
+      - generic [ref=e81]: ms
+    - button "Toggle Component Inspector" [ref=e83] [cursor=pointer]:
+      - img [ref=e84]
+  - button "MCP Connected v3.0.2 Output Detail Standard React Components Hide Until Restart Marker Color Clear on copy/send Block page interactions Manage MCP & Webhooks Manage MCP & Webhooks MCP Connection Connected MCP connection allows agents to receive and act on annotations. Learn more Webhooks Auto-Send The webhook URL will receive live annotation changes and annotation data." [ref=e89] [cursor=pointer]:
+    - img [ref=e91]
+    - generic:
+      - generic:
+        - button
+      - generic:
+        - button
+      - generic:
+        - button [disabled]
+      - generic:
+        - button [disabled]
+      - generic:
+        - button [disabled]
+      - generic:
+        - button [disabled]
+      - generic:
+        - button
+        - generic "MCP Connected"
+      - generic:
+        - button
+    - generic:
+      - generic:
+        - generic
+        - generic
+  - region "Notifications (F8)":
+    - list

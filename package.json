@@ -24,6 +24,7 @@
     "*.*": "prettier --check --ignore-path .prettierignore --ignore-unknown"
   },
   "dependencies": {
+    "@chenglou/pretext": "^0.0.4",
     "@iconify-json/solar": "^1.2.1",
     "@iconify-json/tabler": "^1.2.5",
     "@nuxt/scripts": "^0.13.2",

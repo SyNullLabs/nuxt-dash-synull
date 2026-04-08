@@ -42,7 +42,7 @@
             :style="getRegionTagStyle(overlayRegion)"
           >
             <div
-              class="whitespace-nowrap rounded-full border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] shadow-lg backdrop-blur-md motion-reduce:transition-none motion-safe:transition-[opacity,filter,transform] motion-safe:duration-300"
+              class="rounded-full border break-words px-3 py-1.5 text-center text-[0.68rem] font-semibold uppercase leading-4 tracking-[0.16em] shadow-lg backdrop-blur-md motion-reduce:transition-none motion-safe:transition-[opacity,filter,transform] motion-safe:duration-300"
               :class="
                 isLightMode
                   ? 'border-black/10 bg-white/78 text-slate-800 shadow-black/10'
@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import { layoutWithLines, prepareWithSegments } from "@chenglou/pretext";
 import { useColorMode } from "#imports";
 import {
   computed,
@@ -75,6 +76,11 @@ import type { BuyRegionDescriptor } from "~/utils/buy-region";
 type GlobeController = {
   destroy: () => void;
   update: (options: Record<string, unknown>) => void;
+};
+
+type RegionTagMetrics = {
+  minHeight: number;
+  width: number;
 };
 
 const props = defineProps<{
@@ -121,6 +127,80 @@ const exitingOverlayKeys = ref<string[]>([]);
 
 const activeRegion = computed(() => props.region);
 const isLightMode = computed(() => colorMode.value === "light");
+const GLOBE_TAG_FONT =
+  '600 11px "Alimama FangYuanTi VF", "Inter", system-ui, sans-serif';
+const GLOBE_TAG_LINE_HEIGHT = 16;
+const GLOBE_TAG_MAX_TEXT_WIDTH = 128;
+const GLOBE_TAG_HORIZONTAL_PADDING = 24;
+const GLOBE_TAG_VERTICAL_PADDING = 12;
+const GLOBE_TAG_BORDER_SIZE = 2;
+const GLOBE_TAG_MEASURE_WIDTH = 4096;
+const GLOBE_TAG_LETTER_SPACING = 11 * 0.16;
+const preparedTagTextCache = new Map<string, ReturnType<typeof prepareWithSegments>>();
+const regionTagMetricsCache = new Map<string, RegionTagMetrics>();
+
+const getTrackedLineWidth = (lineText: string, lineWidth: number) =>
+  lineWidth +
+  Math.max(Array.from(lineText).length - 1, 0) * GLOBE_TAG_LETTER_SPACING;
+
+const getPreparedTagText = (text: string) => {
+  const cachedPreparedText = preparedTagTextCache.get(text);
+
+  if (cachedPreparedText) {
+    return cachedPreparedText;
+  }
+
+  const preparedText = prepareWithSegments(text, GLOBE_TAG_FONT);
+  preparedTagTextCache.set(text, preparedText);
+
+  return preparedText;
+};
+
+const getRegionTagMetrics = (text: string) => {
+  const normalizedText = text.toUpperCase();
+  const cachedMetrics = regionTagMetricsCache.get(normalizedText);
+
+  if (cachedMetrics) {
+    return cachedMetrics;
+  }
+
+  const preparedText = getPreparedTagText(normalizedText);
+  const naturalLayout = layoutWithLines(
+    preparedText,
+    GLOBE_TAG_MEASURE_WIDTH,
+    GLOBE_TAG_LINE_HEIGHT
+  );
+  const shouldWrap = naturalLayout.lines.some(
+    (line) => getTrackedLineWidth(line.text, line.width) > GLOBE_TAG_MAX_TEXT_WIDTH
+  );
+  const wrappedLayout = shouldWrap
+    ? layoutWithLines(
+        preparedText,
+        GLOBE_TAG_MAX_TEXT_WIDTH,
+        GLOBE_TAG_LINE_HEIGHT
+      )
+    : naturalLayout;
+  const widestLine = wrappedLayout.lines.reduce(
+    (maxWidth, line) =>
+      Math.max(maxWidth, getTrackedLineWidth(line.text, line.width)),
+    0
+  );
+  const metrics = {
+    minHeight: Math.ceil(
+      wrappedLayout.lineCount * GLOBE_TAG_LINE_HEIGHT +
+        GLOBE_TAG_VERTICAL_PADDING +
+        GLOBE_TAG_BORDER_SIZE
+    ),
+    width: Math.ceil(
+      widestLine + GLOBE_TAG_HORIZONTAL_PADDING + GLOBE_TAG_BORDER_SIZE
+    ),
+  };
+
+  regionTagMetricsCache.set(normalizedText, metrics);
+
+  return metrics;
+};
+
 const getRegionMarkerStyle = (region: BuyRegionDescriptor) => {
   const visibility = `var(--cobe-visible-${region.key}, 0)`;
   const isExiting = exitingOverlayKeys.value.includes(region.key);
@@ -146,6 +226,7 @@ const getRegionTagStyle = (region: BuyRegionDescriptor) => {
 };
 const getRegionTagVisualStyle = (region: BuyRegionDescriptor) => {
   const isExiting = exitingOverlayKeys.value.includes(region.key);
+  const tagMetrics = getRegionTagMetrics(region.name);
 
   return {
     opacity: isExiting ? "0" : `var(--cobe-visible-${region.key}, 0)`,
@@ -153,6 +234,8 @@ const getRegionTagVisualStyle = (region: BuyRegionDescriptor) => {
       ? "blur(10px)"
       : `blur(calc((1 - var(--cobe-visible-${region.key}, 0)) * 6px))`,
     transform: isExiting ? "scale(0.96)" : "scale(1)",
+    minHeight: `${tagMetrics.minHeight}px`,
+    width: `${tagMetrics.width}px`,
   };
 };
 
