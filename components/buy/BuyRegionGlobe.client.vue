@@ -11,7 +11,7 @@
       <aside
         v-if="region"
         aria-hidden="true"
-        class="pointer-events-none absolute inset-0 z-20 hidden overflow-hidden 2xl:block"
+        class="pointer-events-none absolute top-0 bottom-0 left-0 right-4 z-20 hidden overflow-hidden 2xl:block"
       >
         <div class="absolute bottom-0 right-0 size-[26rem]">
           <div class="relative size-full">
