@@ -38,15 +38,20 @@
           <div
             v-for="overlayRegion in overlayRegions"
             :key="`tag-${overlayRegion.key}`"
-            class="pointer-events-none absolute z-20 whitespace-nowrap rounded-full border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] shadow-lg backdrop-blur-md motion-reduce:transition-none motion-safe:transition-[opacity,filter] motion-safe:duration-300"
-            :class="
-              isLightMode
-                ? 'border-black/10 bg-white/78 text-slate-800 shadow-black/10'
-                : 'border-white/12 bg-slate-950/72 text-white/90 shadow-black/30'
-            "
+            class="pointer-events-none absolute z-20"
             :style="getRegionTagStyle(overlayRegion)"
           >
-            {{ overlayRegion.name }}
+            <div
+              class="whitespace-nowrap rounded-full border px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] shadow-lg backdrop-blur-md motion-reduce:transition-none motion-safe:transition-[opacity,filter,transform] motion-safe:duration-300"
+              :class="
+                isLightMode
+                  ? 'border-black/10 bg-white/78 text-slate-800 shadow-black/10'
+                  : 'border-white/12 bg-slate-950/72 text-white/90 shadow-black/30'
+              "
+              :style="getRegionTagVisualStyle(overlayRegion)"
+            >
+              {{ overlayRegion.name }}
+            </div>
           </div>
         </div>
         </div>
@@ -112,19 +117,23 @@ let lastDragTheta = 0;
 let isMomentumActive = false;
 let lastRegionKey: string | null = null;
 let overlayCleanupTimer: ReturnType<typeof setTimeout> | null = null;
+const exitingOverlayKeys = ref<string[]>([]);
 
 const activeRegion = computed(() => props.region);
 const isLightMode = computed(() => colorMode.value === "light");
 const getRegionMarkerStyle = (region: BuyRegionDescriptor) => {
   const visibility = `var(--cobe-visible-${region.key}, 0)`;
+  const isExiting = exitingOverlayKeys.value.includes(region.key);
 
   return {
     positionAnchor: `--cobe-${region.key}`,
     left: "anchor(center)",
     top: "anchor(center)",
-    opacity: visibility,
-    transform: `translate(-50%, -50%) scale(calc(0.78 + ${visibility} * 0.22))`,
-    filter: `blur(calc((1 - ${visibility}) * 4px))`,
+    opacity: isExiting ? "0" : visibility,
+    transform: isExiting
+      ? "translate(-50%, -50%) scale(0.7)"
+      : `translate(-50%, -50%) scale(calc(0.78 + ${visibility} * 0.22))`,
+    filter: isExiting ? "blur(8px)" : `blur(calc((1 - ${visibility}) * 4px))`,
   };
 };
 const getRegionTagStyle = (region: BuyRegionDescriptor) => {
@@ -132,9 +141,18 @@ const getRegionTagStyle = (region: BuyRegionDescriptor) => {
     positionAnchor: `--cobe-${region.key}`,
     left: "anchor(left)",
     top: "anchor(top)",
-    opacity: `var(--cobe-visible-${region.key}, 0)`,
     transform: "translate(calc(-100% - 0.8rem), calc(-100% - 0.35rem))",
-    filter: `blur(calc((1 - var(--cobe-visible-${region.key}, 0)) * 6px))`,
+  };
+};
+const getRegionTagVisualStyle = (region: BuyRegionDescriptor) => {
+  const isExiting = exitingOverlayKeys.value.includes(region.key);
+
+  return {
+    opacity: isExiting ? "0" : `var(--cobe-visible-${region.key}, 0)`,
+    filter: isExiting
+      ? "blur(10px)"
+      : `blur(calc((1 - var(--cobe-visible-${region.key}, 0)) * 6px))`,
+    transform: isExiting ? "scale(0.96)" : "scale(1)",
   };
 };
 
@@ -281,6 +299,7 @@ const syncOverlayRegions = (
 
   if (!region || !largeScreen) {
     overlayRegions.value = [];
+    exitingOverlayKeys.value = [];
     return;
   }
 
@@ -290,12 +309,15 @@ const syncOverlayRegions = (
     previousRegion.key === region.key
   ) {
     overlayRegions.value = [region];
+    exitingOverlayKeys.value = [];
     return;
   }
 
   overlayRegions.value = [previousRegion, region];
+  exitingOverlayKeys.value = [previousRegion.key];
   overlayCleanupTimer = setTimeout(() => {
     overlayRegions.value = [region];
+    exitingOverlayKeys.value = [];
     overlayCleanupTimer = null;
   }, 320);
 };
