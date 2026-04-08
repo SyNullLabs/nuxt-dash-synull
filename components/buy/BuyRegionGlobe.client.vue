@@ -13,7 +13,7 @@
         aria-hidden="true"
         class="pointer-events-none absolute inset-0 z-20 hidden overflow-hidden 2xl:block"
       >
-        <div class="absolute bottom-0 right-0 size-[21rem]">
+        <div class="absolute bottom-0 right-0 size-[26rem]">
           <div class="relative size-full">
           <div
             class="size-full pointer-events-auto touch-none"
@@ -240,7 +240,7 @@ const createGlobeOptions = ({
   return {
     width: size * devicePixelRatio,
     height: size * devicePixelRatio,
-    devicePixelRatio,
+    devicePixelRatio: devicePixelRatio,
     phi,
     theta,
     dark: isLight ? 0 : 1,
