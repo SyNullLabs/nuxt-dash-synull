@@ -317,15 +317,6 @@ const footerMenuItems = computed(() => {
     ];
   }
 
-  const guestItems = [
-    [
-      {
-        label: footerUserLabel.value,
-        icon: "solar:user-circle-bold-duotone",
-        type: "label",
-      },
-    ],
-  ];
   const guestActions = [];
 
   if (showGuestLogin.value) {
@@ -344,11 +335,7 @@ const footerMenuItems = computed(() => {
     });
   }
 
-  if (guestActions.length) {
-    guestItems.push(guestActions);
-  }
-
-  return guestItems;
+  return guestActions.length ? [guestActions] : [];
 });
 
 const goToLogin = () => {
