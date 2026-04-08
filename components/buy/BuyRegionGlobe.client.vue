@@ -435,15 +435,19 @@ const syncBaseOrientation = (region: BuyRegionDescriptor) => {
 };
 
 const startTransition = () => {
-  transitionFromPhi = currentPhi;
-  transitionFromTheta = currentTheta;
+  // Store the steer offsets needed to correct from current position to the new base,
+  // accounting for the current autoRotateOffset. These decay to 0 over the transition
+  // while auto-rotation keeps running uninterrupted.
+  transitionFromPhi = getShortestAngleDelta(
+    normalizeAngle(basePhi + autoRotateOffset),
+    currentPhi
+  );
+  transitionFromTheta = currentTheta - baseTheta;
   transitionStartAt = performance.now();
   isTransitioning = true;
-  autoRotateOffset = 0;
   dragVelocityPhi = 0;
   dragVelocityTheta = 0;
   isMomentumActive = false;
-  lastFrameAt = 0;
 };
 
 const getIdleOrientation = (now: number) => ({
@@ -556,21 +560,30 @@ const renderFrame = (now = performance.now()) => {
   }
 
   if (isTransitioning) {
+    // Keep auto-rotating throughout the transition so the globe never stops
+    autoRotateOffset = normalizeAngle(
+      autoRotateOffset + deltaMs * GLOBE_AUTO_ROTATE_SPEED
+    );
+
     const progress = Math.min(
       (now - transitionStartAt) / REGION_SWITCH_DURATION_MS,
       1
     );
     const easedProgress = easeInOutCubic(progress);
 
-    currentPhi = normalizeAngle(
-      transitionFromPhi +
-        getShortestAngleDelta(transitionFromPhi, basePhi) * easedProgress
+    // Steer offsets decay to zero, revealing the underlying auto-rotation arc
+    const steerPhi = transitionFromPhi * (1 - easedProgress);
+    const steerTheta = transitionFromTheta * (1 - easedProgress);
+
+    currentPhi = normalizeAngle(basePhi + autoRotateOffset + steerPhi);
+    currentTheta = clamp(
+      baseTheta + steerTheta + Math.cos(now * 0.00014) * 0.012,
+      -0.62,
+      0.62
     );
-    currentTheta = lerp(transitionFromTheta, baseTheta, easedProgress);
 
     if (progress >= 1) {
       isTransitioning = false;
-      lastFrameAt = now;
     }
   } else if (isMomentumActive) {
     userPhiOffset = getShortestAngleDelta(
