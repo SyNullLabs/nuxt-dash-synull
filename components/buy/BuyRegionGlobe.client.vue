@@ -11,7 +11,8 @@
       <aside
         v-if="region"
         aria-hidden="true"
-        class="pointer-events-none absolute top-0 bottom-0 left-0 right-4 z-20 hidden overflow-hidden 2xl:block"
+        class="pointer-events-none absolute inset-0 z-20 hidden overflow-hidden 2xl:block"
+        :style="{ right: scrollbarWidth > 0 ? scrollbarWidth + 'px' : undefined }"
       >
         <div class="absolute bottom-0 right-0 size-[26rem]">
           <div class="relative size-full">
@@ -93,6 +94,9 @@ const isLargeScreen = ref(false);
 const prefersReducedMotion = ref(false);
 const isDragging = ref(false);
 const overlayRegions = ref<BuyRegionDescriptor[]>([]);
+
+const scrollbarWidth = ref(0);
+let scrollContainerObserver: ResizeObserver | null = null;
 
 let globe: GlobeController | null = null;
 let frameId: number | null = null;
@@ -724,6 +728,17 @@ onMounted(() => {
   window.addEventListener("pointermove", handlePointerMove);
   window.addEventListener("pointerup", handlePointerUp);
   window.addEventListener("pointercancel", handlePointerUp);
+
+  const updateScrollbarWidth = () => {
+    const el = document.getElementById("dashboard-main");
+    scrollbarWidth.value = el ? el.offsetWidth - el.clientWidth : 0;
+  };
+  updateScrollbarWidth();
+  const el = document.getElementById("dashboard-main");
+  if (el) {
+    scrollContainerObserver = new ResizeObserver(updateScrollbarWidth);
+    scrollContainerObserver.observe(el);
+  }
 });
 
 onBeforeUnmount(() => {
@@ -733,6 +748,7 @@ onBeforeUnmount(() => {
   window.removeEventListener("pointermove", handlePointerMove);
   window.removeEventListener("pointerup", handlePointerUp);
   window.removeEventListener("pointercancel", handlePointerUp);
+  scrollContainerObserver?.disconnect();
   destroyGlobe();
 });
 </script>
