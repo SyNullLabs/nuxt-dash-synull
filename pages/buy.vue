@@ -93,10 +93,11 @@
               :ui="{
                 list: 'relative inline-flex w-auto max-w-full items-center gap-5 bg-0',
                 indicator:
-                  'shadow-[0_0_0_1px_rgba(124,58,237,0.3)] shadow-violet-500/30 bg-inherit',
+                  'shadow-[0_0_0_1px_rgba(124,58,237,0.3)] shadow-violet-500/30 bg-inherit font-black',
                 trigger:
-                  'min-w-fitfont-semibold transition-colors duration-200 data-[state=inactive]:text-[var(--ui-text-muted)] data-[state=inactive]:hover:text-[var(--ui-text)] data-[state=active]:text-[var(--ui-text)]',
+                  'min-w-fit data-[state=active]:font-black transition-colors duration-200 data-[state=inactive]:text-[var(--ui-text-muted)] data-[state=inactive]:hover:text-[var(--ui-text)] data-[state=active]:text-[var(--ui-text)]',
                 leadingIcon: 'text-sm',
+                content: 'font-black'
               }"
             />
           </div>
