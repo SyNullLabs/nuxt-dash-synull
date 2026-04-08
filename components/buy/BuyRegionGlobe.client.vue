@@ -11,9 +11,10 @@
       <aside
         v-if="region"
         aria-hidden="true"
-        class="pointer-events-none absolute bottom-0 right-0 z-20 hidden 2xl:flex"
+        class="pointer-events-none absolute inset-0 z-20 hidden overflow-hidden 2xl:block"
       >
-        <div class="relative size-[21rem]">
+        <div class="absolute bottom-0 right-0 size-[21rem]">
+          <div class="relative size-full">
           <div
             class="size-full pointer-events-auto touch-none"
             :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
@@ -47,6 +48,7 @@
           >
             {{ overlayRegion.name }}
           </div>
+        </div>
         </div>
       </aside>
     </Transition>
@@ -128,10 +130,10 @@ const getRegionMarkerStyle = (region: BuyRegionDescriptor) => {
 const getRegionTagStyle = (region: BuyRegionDescriptor) => {
   return {
     positionAnchor: `--cobe-${region.key}`,
-    left: "anchor(center)",
-    top: "anchor(center)",
+    left: "anchor(left)",
+    top: "anchor(top)",
     opacity: `var(--cobe-visible-${region.key}, 0)`,
-    transform: "translate(-50%, calc(-100% - 0.8rem))",
+    transform: "translate(calc(-100% - 0.8rem), calc(-100% - 0.35rem))",
     filter: `blur(calc((1 - var(--cobe-visible-${region.key}, 0)) * 6px))`,
   };
 };
