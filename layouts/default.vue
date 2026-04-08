@@ -3,7 +3,7 @@
     <Sidebar />
 
     <div
-      class="relative flex min-w-0 flex-1 flex-col bg-default lg:peer-data-[variant=floating]:my-4 lg:peer-data-[variant=inset]:m-4 lg:peer-data-[variant=inset]:not-peer-data-[collapsible=offcanvas]:ms-0 lg:peer-data-[variant=inset]:rounded-xl lg:peer-data-[variant=inset]:shadow-sm lg:peer-data-[variant=inset]:ring lg:peer-data-[variant=inset]:ring-default"
+      class="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-default lg:peer-data-[variant=floating]:my-4 lg:peer-data-[variant=inset]:m-4 lg:peer-data-[variant=inset]:not-peer-data-[collapsible=offcanvas]:ms-0 lg:peer-data-[variant=inset]:rounded-xl lg:peer-data-[variant=inset]:shadow-sm lg:peer-data-[variant=inset]:ring lg:peer-data-[variant=inset]:ring-default"
     >
       <TopBar />
 
